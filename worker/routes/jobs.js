@@ -8,8 +8,10 @@ router.post('/', (req, res) => {
 
   console.log(`Start calculating result for job ${id}`);
 
+  console.time('Fibonacci');
   const result = fib(input);
-
+  console.timeEnd('Fibonacci');
+   
   console.log(`Calculated result for job ${id}: ${result}`);
 
   res.json({
