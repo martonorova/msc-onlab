@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/jobs")
 public class JobController {
