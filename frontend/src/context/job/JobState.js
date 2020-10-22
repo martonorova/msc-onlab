@@ -18,6 +18,17 @@ const JobState = (props) => {
   // Get Jobs
   const getJobs = async () => {
     setLoading();
+    
+    try {
+      const res = await axios.get(`${API_URL}/jobs`);
+
+      dispatch({
+        type: GET_JOBS,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Get Job
