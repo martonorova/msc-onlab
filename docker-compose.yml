@@ -2,12 +2,35 @@ version: '3.1'
 
 services:
 
+  backend:
+    build: ./backend
+    restart: always
+    ports: 
+      - "8000:8000"
+    environment: 
+      - BACKEND_PORT=8000
+      - MYSQL_DB_HOST=db
+      - MYSQL_DB_PORT=3306
+      - MYSQL_DB_DB_NAME=jobs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - './frontend:/code'
+    ports:
+      - 3000:3000
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+  
   worker:
     build: ./worker
     restart: always
     ports:
       - "5000:5000"
-      
+
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

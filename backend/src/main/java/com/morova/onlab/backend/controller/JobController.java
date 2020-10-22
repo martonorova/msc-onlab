@@ -25,7 +25,7 @@ public class JobController {
     private JobRepository jobRepository;
 
     private final RestTemplate restTemplate;
-    private final String workerUrl = "http://localhost:5000/api/jobs";
+    private final String workerUrl = "http://worker:5000/api/jobs";
 
     public JobController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
