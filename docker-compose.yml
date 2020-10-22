@@ -13,9 +13,14 @@ services:
       - MYSQL_DATABASE=jobs
       - MYSQL_USER=jobsuser
       - MYSQL_PASSWORD=userpass
+    volumes: 
+      - db-data:/var/lib/mysql
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+  
+volumes: 
+  db-data:
