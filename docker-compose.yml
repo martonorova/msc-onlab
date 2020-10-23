@@ -3,7 +3,10 @@ version: '3.1'
 services:
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: morova/kubedepend-backend:1.0
     restart: always
     ports: 
       - "8000:8000"
@@ -17,6 +20,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: morova/kubedepend-frontend:1.0
     volumes:
       - './frontend:/code'
     ports:
@@ -26,7 +30,10 @@ services:
     stdin_open: true
   
   worker:
-    build: ./worker
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    image: morova/kubedepend-worker:1.0
     restart: always
     ports:
       - "5000:5000"
