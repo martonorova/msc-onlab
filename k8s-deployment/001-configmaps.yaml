@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: kubedepend
+  labels:
+      app: kubedepend-db-app
+data:
+   MYSQL_ROOT_PASSWORD: rootpass
+   MYSQL_DATABASE: jobs
+   MYSQL_USER: jobsuser
+   MYSQL_PASSWORD: userpass
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: kubedepend
+data:
+  BACKEND_PORT: "8000"
+  MYSQL_DB_HOST: kubedepend-db.kubedepend.svc.cluster.local
+  MYSQL_DB_PORT: "3306"
+  MYSQL_DB_DB_NAME: jobs
+
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: kubedepend
+data:
+  CHOKIDAR_USEPOLLING: "true"

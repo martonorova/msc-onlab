@@ -1,0 +1,14 @@
+Output was:
+
+2020-10-24 12:16:45+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.22-1debian10 started.
+2020-10-24 12:16:45+00:00 [ERROR] [Entrypoint]: mysqld failed while attempting to check config
+	command was: mysqld --verbose --help
+	mysqld: Can't read dir of '/etc/mysql/conf.d/' (OS errno 13 - Permission denied)
+mysqld: [ERROR] Fatal error in defaults handling. Program aborted!
+
+
+Solution:
+    sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+    sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+
+    see: https://minikube.sigs.k8s.io/docs/drivers/docker/#deploying-mysql-on-a-linux-with-apparmor

@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-backend-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-backend-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-backend-app
+    spec:
+      containers:
+      - name: kubedepend-backend
+        image: morova/kubedepend-backend:1.0
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+            - configMapRef:
+                  name: backend-config
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+          name: backend-port
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-frontend-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-frontend-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-frontend-app
+    spec:
+      containers:
+      - name: kubedepend-frontend
+        image: morova/kubedepend-frontend:1.0
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+            - configMapRef:
+                  name: frontend-config
+        stdin: true
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+          name: frontend-port
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-worker-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-worker-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-worker-app
+    spec:
+      containers:
+      - name: kubedepend-worker
+        image: morova/kubedepend-worker:1.0
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5000
+          name: worker-port
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-db-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-db-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-db-app
+    spec:
+      containers:
+      - name: kubedepend-db
+        image: mysql:8
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+            - configMapRef:
+                  name: mysql-config
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+          name: db-port
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-adminer-depl
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-adminer-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-adminer-app
+    spec:
+      containers:
+      - name: kubedepend-adminer
+        image: adminer:4.7.7
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+          name: adminer-port
+
