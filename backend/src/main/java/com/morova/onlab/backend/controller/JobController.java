@@ -4,6 +4,7 @@ import com.morova.onlab.backend.exception.JobNotFoundException;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.List;
 
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/jobs")
 public class JobController {
@@ -25,7 +26,9 @@ public class JobController {
     private JobRepository jobRepository;
 
     private final RestTemplate restTemplate;
-    private final String workerUrl = "http://worker:5000/api/jobs";
+    @Value("http://${worker.host}:${worker.port}/api/jobs")
+    private String workerUrl;
+//    private final String workerUrl = "http://worker:5000/api/jobs";
 
     public JobController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
