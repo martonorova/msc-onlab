@@ -16,7 +16,7 @@ spec:
       containers:
       - name: kubedepend-backend
         image: morova/kubedepend-backend:1.0
-        imagePullPolicy: "IfNotPresent"
+        imagePullPolicy: Always
         envFrom:
             - configMapRef:
                   name: backend-config
@@ -48,7 +48,7 @@ spec:
       containers:
       - name: kubedepend-frontend
         image: morova/kubedepend-frontend:1.0
-        imagePullPolicy: "IfNotPresent"
+        imagePullPolicy: Always
         envFrom:
             - configMapRef:
                   name: frontend-config
@@ -82,7 +82,7 @@ spec:
       containers:
       - name: kubedepend-worker
         image: morova/kubedepend-worker:1.0
-        imagePullPolicy: "IfNotPresent"
+        imagePullPolicy: Always
         resources:
           limits:
             memory: "256Mi"
