@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import axios from 'axios';
 import JobContext from './jobContext';
 import JobReducer from './jobReducer';
-import { POST_JOB, GET_JOB, GET_JOBS, SET_LOADING } from '../types';
+import { POST_JOB, GET_JOB, GET_JOBS, DELETE_JOBS, SET_LOADING } from '../types';
 
 import { API_URL } from '../../constants/apiConstants';
 
@@ -58,6 +58,21 @@ const JobState = (props) => {
     }
   };
 
+  // Delete jobs
+  const deleteJobs = async () => {
+    setLoading();
+
+    try {
+      const res = await axios.delete(`${API_URL}/jobs`);
+
+      dispatch({
+        type: DELETE_JOBS
+      })
+    } catch (err) {
+      
+    }
+  }
+
   // Set loading
   const setLoading = () => dispatch({ type: SET_LOADING });
 
@@ -70,6 +85,7 @@ const JobState = (props) => {
         getJob,
         getJobs,
         postJob,
+        deleteJobs
       }}
     >
       {props.children}

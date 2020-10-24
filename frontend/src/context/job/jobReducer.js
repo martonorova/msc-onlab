@@ -1,4 +1,10 @@
-import { POST_JOB, GET_JOB, GET_JOBS, SET_LOADING } from '../types';
+import {
+  POST_JOB,
+  GET_JOB,
+  GET_JOBS,
+  SET_LOADING,
+  DELETE_JOBS,
+} from '../types';
 
 export default (state, action) => {
   switch (action.type) {
@@ -13,6 +19,12 @@ export default (state, action) => {
         ...state,
         jobs: [...state.jobs, action.payload],
         job: action.payload,
+        loading: false,
+      };
+    case DELETE_JOBS:
+      return {
+        ...state,
+        jobs: [],
         loading: false,
       };
     case SET_LOADING:

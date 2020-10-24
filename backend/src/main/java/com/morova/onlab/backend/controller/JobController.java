@@ -69,6 +69,14 @@ public class JobController {
         return ResponseEntity.ok().body(savedResult);
     }
 
+    @DeleteMapping
+    public ResponseEntity<String> deleteAllJobs() {
+
+        jobRepository.deleteAll();
+
+        return ResponseEntity.noContent().build();
+    }
+
     private Job sendJob(Job job) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

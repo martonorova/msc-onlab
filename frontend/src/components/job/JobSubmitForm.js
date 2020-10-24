@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Form, InputNumber, Button, Card, Space } from 'antd';
+import { Form, InputNumber, Button, Card, Space, Modal } from 'antd';
 
 import JobContext from '../../context/job/jobContext';
 
@@ -8,7 +8,7 @@ const JobSubmitForm = () => {
 
   const jobContext = useContext(JobContext);
 
-  const { postJob } = jobContext;
+  const { postJob, deleteJobs } = jobContext;
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
@@ -23,6 +23,18 @@ const JobSubmitForm = () => {
   const onReset = () => {
     form.resetFields();
   };
+
+  const { confirm } = Modal;
+  const clearAllJobs = () => {
+
+    confirm({
+      title: 'Are you sure you want to delete ALL jobs?',
+      content: 'This cannot be undone',
+      onOk() {
+        deleteJobs();
+      }
+    })
+  }
 
   return (
     <Card title='Submit new job' style={{ width: '500px' }}>
@@ -52,6 +64,7 @@ const JobSubmitForm = () => {
           </Form.Item>
         </Space>
       </Form>
+      <Button type='default' onClick={clearAllJobs}>Clear All Jobs</Button>
     </Card>
   );
 };
