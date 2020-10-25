@@ -1,6 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: kubedepend-proxy-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-proxy-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-proxy-app
+    spec:
+      containers:
+      - name: kubedepend-proxy
+        image: morova/kubedepend-proxy:1.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 80
+          name: proxy-port
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: kubedepend-backend-depl
   namespace: kubedepend
 spec:

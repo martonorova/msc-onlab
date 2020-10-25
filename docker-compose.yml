@@ -7,10 +7,16 @@ services:
       context: ./proxy
       dockerfile: Dockerfile
     image: morova/kubedepend-proxy:1.0
-    volumes: 
-      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+    # volumes: 
+    #   - ./proxy/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - 80:80
+    environment:
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+      # - BACKEND=http://backend:8000
+      - BACKEND=backend
+      # - FRONTEND=http://frontend:3000
+      - FRONTEND=frontend
     depends_on:
       - backend
       - frontend
