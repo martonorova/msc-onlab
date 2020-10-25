@@ -24,6 +24,14 @@ spec:
         ports:
         - containerPort: 80
           name: proxy-port
+        volumeMounts:
+          - name: proxy-config-volume
+            mountPath: /etc/nginx
+              
+      volumes:
+          - name: proxy-config-volume
+            configMap:
+              name: proxy-config
 
 
 ---
