@@ -6,9 +6,10 @@
 ## Start on Minikube
 
 1. Apply all k8s files in `k8s-deployment` in order.
-2. In a separate terminal, open the Minikube tunnel with `minikube tunnel`
-3. Get the external IP of the `kubedepend-proxy` service with `kubectl -n kubedepend get svc`
-4. Open the service IP in browser.
+  1. In a separate terminal, open the Minikube tunnel with `minikube tunnel`
+  1. Get the external IP of the `kubedepend-proxy` service with `kubectl -n kubedepend get svc`
+  1. Open the service IP in browser.
+1. OR IGNORE the previous steps ans use port forwarding: `sudo kubectl -n kubedepend port-forward service/kubedepend-proxy 80:80`
 
 ## Install Chaos Mesh
 
