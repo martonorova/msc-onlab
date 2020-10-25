@@ -17,10 +17,10 @@ spec:
       - name: kubedepend-proxy
         image: morova/kubedepend-proxy:1.0
         imagePullPolicy: Always
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "500m"
         ports:
         - containerPort: 80
           name: proxy-port
@@ -58,10 +58,10 @@ spec:
         envFrom:
             - configMapRef:
                   name: backend-config
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "200m"
         ports:
         - containerPort: 8000
           name: backend-port
@@ -91,10 +91,10 @@ spec:
             - configMapRef:
                   name: frontend-config
         stdin: true
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "100m"
         ports:
         - containerPort: 3000
           name: frontend-port
@@ -121,10 +121,10 @@ spec:
       - name: kubedepend-worker
         image: morova/kubedepend-worker:1.0
         imagePullPolicy: Always
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "100m"
         ports:
         - containerPort: 5000
           name: worker-port
@@ -135,6 +135,7 @@ spec:
               timeoutSeconds: 2
               periodSeconds: 5
               initialDelaySeconds: 5
+              failureThreshold: 2
 
 ---
 
@@ -160,10 +161,10 @@ spec:
         envFrom:
             - configMapRef:
                   name: mysql-config
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "100m"
         ports:
         - containerPort: 3306
           name: db-port
@@ -174,6 +175,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kubedepend-adminer-depl
+  namespace: kubedepend
 spec:
   selector:
     matchLabels:
@@ -188,10 +190,10 @@ spec:
       - name: kubedepend-adminer
         image: adminer:4.7.7
         imagePullPolicy: "IfNotPresent"
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "100m"
         ports:
         - containerPort: 8080
           name: adminer-port

@@ -1,0 +1,24 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+    name: worker-hpa
+    namespace: kubedepend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubedepend-worker-depl
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+      - type: Object
+        object:
+              metric:
+                  name: readyReplicas
+              describedObject:
+                  apiVersion: apps/v1
+                  kind: Deployment
+                  name: kubedepend-worker-depl
+              target:
+                  type: Value
+                  value: 2
