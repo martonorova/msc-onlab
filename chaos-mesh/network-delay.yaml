@@ -2,6 +2,7 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: backend-network-delay
+  namespace: chaos-testing
 spec:
   action: delay # the specific chaos action to inject
   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
