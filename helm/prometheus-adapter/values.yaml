@@ -49,7 +49,16 @@ resources: {}
 
 rules:
   default: true
-  custom: []
+  custom:
+    - seriesQuery: '{__name__=~"^kube_deployment_status_replicas_available$", deployment="kubedepend-worker-depl"}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          deployment: {group: "apps", resource: "deployment"}
+      name:
+        matches: ".*"
+        as: "available_worker_ratio"
+      metricsQuery: (1 + kube_deployment_status_replicas_unavailable{deployment="kubedepend-worker-depl"}) / kube_deployment_status_replicas{deployment="kubedepend-worker-depl"}
 # - seriesQuery: '{__name__=~"^some_metric_count$"}'
 #   resources:
 #     template: <<.Resource>>
