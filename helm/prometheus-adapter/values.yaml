@@ -58,7 +58,7 @@ rules:
       name:
         matches: ".*"
         as: "available_worker_ratio"
-      metricsQuery: (1 + kube_deployment_status_replicas_unavailable{deployment="kubedepend-worker-depl"}) / kube_deployment_status_replicas{deployment="kubedepend-worker-depl"}
+      metricsQuery: (2 + kube_deployment_status_replicas_unavailable{deployment="kubedepend-worker-depl"}) / kube_deployment_status_replicas{deployment="kubedepend-worker-depl"}
 # - seriesQuery: '{__name__=~"^some_metric_count$"}'
 #   resources:
 #     template: <<.Resource>>
