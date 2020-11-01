@@ -6,7 +6,7 @@ metadata:
 spec:
   selector:
     app: kubedepend-proxy-app
-  type: LoadBalancer
+  # type: LoadBalancer
   ports:
   - port: 80
     targetPort: proxy-port
