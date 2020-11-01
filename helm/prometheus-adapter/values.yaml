@@ -18,7 +18,7 @@ priorityClassName: ""
 
 # Url to access prometheus
 prometheus:
-  url: http://prometheus-prometheus-oper-prometheus.monitoring.svc
+  url: http://prometheus-operated.monitoring.svc
   port: 9090
   path: ""
 
@@ -27,6 +27,10 @@ replicas: 1
 rbac:
   # Specifies whether RBAC resources should be created
   create: true
+
+psp:
+  # Specifies whether PSP resources should be created
+  create: false
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -45,23 +49,14 @@ resources: {}
 
 rules:
   default: true
-#   custom: []
-  custom: 
-
-    - seriesQuery: '{__name__=~"available_workers"}'
-    resources:
-        # template: <<.Resource>>
-      overrides:
-        namespace: 
-          resource: namespace
-        pod:
-          resource: pod
-        
-    name:
-        matches: "^(.*)"
-        as: "available_workers"
-    # metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)
-    metricsQuery: kube_deployment_status_replicas_available{deployment="kubedepend-worker-depl"}
+  custom: []
+# - seriesQuery: '{__name__=~"^some_metric_count$"}'
+#   resources:
+#     template: <<.Resource>>
+#   name:
+#     matches: ""
+#     as: "my_custom_metric"
+#   metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)
   # Mounts a configMap with pre-generated rules for use. Overrides the
   # default, custom, external and resource entries
   existing:
@@ -148,3 +143,10 @@ hostNetwork:
   # API server unable to communicate with metrics-server. As an example, this is required
   # if you use Weave network on EKS
   enabled: false
+
+podDisruptionBudget:
+  # Specifies if PodDisruptionBudget should be enabled
+  # When enabled, minAvailable or maxUnavailable should also be defined.
+  enabled: false
+  minAvailable:
+  maxUnavailable: 1
