@@ -519,6 +519,19 @@ grafana:
 
   adminPassword: prom-operator
 
+  persistence:
+    type: pvc
+    enabled: true
+    # storageClassName: default
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
+    # subPath: ""
+    # existingClaim:
+
   ingress:
     ## If true, Grafana Ingress will be created
     ##
