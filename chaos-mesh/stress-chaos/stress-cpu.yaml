@@ -1,0 +1,19 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: burn-cpu-namespace
+  namespace: chaos-testing
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - kubedepend
+    # labelSelectors:
+    #   "app": "kubedepend-proxy-app"
+  stressors:
+    cpu:
+      workers: 100
+      load: 100
+  duration: "30s"
+  scheduler:
+    cron: "@every 2m"

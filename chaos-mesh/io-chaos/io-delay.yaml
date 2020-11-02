@@ -1,0 +1,21 @@
+# delay: IO delay action. You can specify the latency before the IO operation returns a result.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IoChaos
+metadata:
+  name: io-delay-db
+  namespace: kubedepend
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespace:
+      - kubedepend
+    labelSelectors:
+      app: kubedepend-db-app
+  volumePath: /var/lib/mysql
+  path: "/var/lib/mysql/**/*"
+  delay: "5000ms"
+  percent: 100
+  duration: "400s"
+  scheduler:
+    cron: "@every 10m"
