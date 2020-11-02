@@ -1,0 +1,3 @@
+
+# To change admin pass
+kubectl exec --namespace monitoring -it grafana-744855d886-j5lss -- grafana-cli admin reset-admin-password admin
