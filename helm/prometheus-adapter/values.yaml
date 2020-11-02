@@ -18,8 +18,8 @@ priorityClassName: ""
 
 # Url to access prometheus
 prometheus:
-  url: http://prometheus-operated.monitoring.svc
-  port: 9090
+  url: http://prometheus-server.monitoring.svc
+  port: 80
   path: ""
 
 replicas: 1

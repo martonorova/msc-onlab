@@ -189,14 +189,14 @@ serviceMonitor:
   tlsConfig: {}
   bearerTokenFile:
 
-  targets:
-   - name: kubedepend-proxy                    # Human readable URL that will appear in Prometheus / AlertManager
-     url: http://kubedepend-proxy.kubedepend.svc.cluster.local:80  # The URL that blackbox will scrape
-     labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
-     interval: 30s                    # Scraping interval. Overrides value set in `defaults`
-     scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
-     module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
-     additionalMetricsRelabels: {}    # Map of metric labels and values to add
+  targets: []
+  #  - name: kubedepend-proxy                    # Human readable URL that will appear in Prometheus / AlertManager
+  #    url: http://kubedepend-proxy.kubedepend.svc.cluster.local:80  # The URL that blackbox will scrape
+  #    labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
+  #    interval: 30s                    # Scraping interval. Overrides value set in `defaults`
+  #    scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
+  #    module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
+  #    additionalMetricsRelabels: {}    # Map of metric labels and values to add
 #    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
 #      url: http://example.com/healthz  # The URL that blackbox will scrape
 #      labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
