@@ -26,3 +26,9 @@
     
 
 To delete Chaos Mesh, delete the namsespace containing it.
+
+
+## Automate API testing with [Artillery](https://artillery.io/)
+
+1. Install Artillery `sudo npm install -g artillery --ignore-scripts
+`
