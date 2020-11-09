@@ -21,7 +21,7 @@ spec:
               name: kubedepend-worker-depl
           target:
               type: Value
-              value: 1
+              value: "1"
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 30 # default is 300
