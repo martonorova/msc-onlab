@@ -1,0 +1,20 @@
+config:
+  target: "http://localhost:8000/api/v1"
+  phases:
+    - duration: 5
+      arrivalRate: 1
+      name: Warm up
+  payload:
+    path: "job_data.csv"
+    fields:
+      - "input"
+
+      
+scenarios:
+  - name: "Load test 1"
+    flow:
+      - post:
+          url: "/jobs"
+          json:
+            input: "{{ input }}"
+    
