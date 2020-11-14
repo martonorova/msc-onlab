@@ -1,7 +1,7 @@
-package com.morova.onlab.worker.messaging;
+package com.morova.onlab.backend.messaging;
 
-import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
-import com.morova.onlab.worker.service.WorkerService;
+import com.morova.onlab.backend.model.Job;
+import com.morova.onlab.backend.repository.JobRepository;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +15,16 @@ import javax.jms.MessageListener;
 public class JMSListener implements MessageListener {
 
     @Autowired
-    WorkerService workerService;
+    JobRepository jobRepository;
 
     @Override
-    @JmsListener(destination = "${activemq.worker.queue}")
+    @JmsListener(destination = "${activemq.backend.queue}")
     public void onMessage(Message message) {
         try{
             String jsonString = ((ActiveMQTextMessage) message).getText();
-
             JSONObject jsonObject = new JSONObject(jsonString);
-            JobSubmitRequestDTO job = new JobSubmitRequestDTO(
+
+            Job job = new Job(
                     jsonObject.getLong("id"),
                     jsonObject.getInt("input"),
                     jsonObject.getLong("result")
@@ -32,10 +32,11 @@ public class JMSListener implements MessageListener {
             //do additional processing
             System.out.println("Received Message from Queue: " + job.toString());
 
-            workerService.submitJob(job);
+            jobRepository.save(job);
 
         } catch(Exception e) {
             e.printStackTrace();
         }
+
     }
 }

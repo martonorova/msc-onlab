@@ -1,6 +1,7 @@
 package com.morova.onlab.backend.controller;
 
 import com.morova.onlab.backend.exception.JobNotFoundException;
+import com.morova.onlab.backend.messaging.JMSProducer;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class JobController {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private JMSProducer jmsProducer;
 
     private final RestTemplate restTemplate;
     @Value("http://${worker.host}:${worker.port}/api/jobs")
@@ -58,15 +62,17 @@ public class JobController {
 
         Job uncompleted = jobRepository.save(job);
 
-        Job result = sendJob(uncompleted);
+        jmsProducer.sendJob(job);
 
-        Job resultToUpdate = jobRepository
-                            .findById(uncompleted.getId())
-                            .orElseThrow(() -> new JobNotFoundException(uncompleted.getId()));
-        resultToUpdate.setResult(result.getResult());
-        Job savedResult = jobRepository.save(resultToUpdate);
-
-        return ResponseEntity.ok().body(savedResult);
+//        Job result = sendJob(uncompleted);
+//
+//        Job resultToUpdate = jobRepository
+//                            .findById(uncompleted.getId())
+//                            .orElseThrow(() -> new JobNotFoundException(uncompleted.getId()));
+//        resultToUpdate.setResult(result.getResult());
+//        Job savedResult = jobRepository.save(resultToUpdate);
+//
+        return ResponseEntity.ok().body(uncompleted);
     }
 
     @DeleteMapping

@@ -15,6 +15,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-activemq'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.json:json:20200518'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
