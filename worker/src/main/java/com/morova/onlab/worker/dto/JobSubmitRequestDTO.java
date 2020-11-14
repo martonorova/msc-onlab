@@ -38,4 +38,13 @@ public class JobSubmitRequestDTO implements Serializable {
     public void setResult(Long result) {
         this.result = result;
     }
+
+    @Override
+    public String toString() {
+        return "JobSubmitRequestDTO{" +
+                "id=" + id +
+                ", input=" + input +
+                ", result=" + result +
+                '}';
+    }
 }

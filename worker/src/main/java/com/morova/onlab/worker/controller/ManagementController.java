@@ -30,7 +30,7 @@ public class ManagementController {
         // submit job to worker service
 //        workerService.submitJob(job);
 
-        jmsProducer.sendJob(job);
+//        jmsProducer.sendJob(job);
 
         return ResponseEntity.ok("Job submitted");
     }

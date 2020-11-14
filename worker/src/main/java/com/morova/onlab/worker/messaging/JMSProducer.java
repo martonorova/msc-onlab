@@ -12,12 +12,12 @@ public class JMSProducer {
     @Autowired
     JmsTemplate jmsTemplate;
 
-    @Value("${activemq.queue}")
+    @Value("${activemq.backend.queue}")
     private String queue;
 
     public void sendJob(JobSubmitRequestDTO job){
         try {
-            System.out.println("Attempting Send message to Topic: " + queue);
+            System.out.println("Attempting Send message to Queue: " + queue + "job: " + job.toString());
             jmsTemplate.convertAndSend(queue, job);
         } catch(Exception e){
             e.printStackTrace();
