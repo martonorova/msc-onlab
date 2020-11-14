@@ -16,6 +16,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-activemq'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.json:json:20200518'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus:latest.release'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

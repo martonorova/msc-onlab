@@ -25,4 +25,8 @@ public class WorkerService {
     public void submitJob(JobSubmitRequestDTO job) {
         executor.execute(new WorkerTask(job, jmsProducer));
     }
+
+    public int getBusyThreads() {
+        return this.executor.getActiveCount();
+    }
 }
