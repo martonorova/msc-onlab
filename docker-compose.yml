@@ -88,10 +88,11 @@ services:
       - db
 
   activemq:
-    image: rmohr/activemq
+    image: bwolf/activemq-prometheus
     ports:
       - 61616:61616
       - 8161:8161
+      - 8080:8080
   
 volumes: 
   db-data:
