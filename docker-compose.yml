@@ -86,6 +86,12 @@ services:
       - 8080:8080
     depends_on:
       - db
+
+  activemq:
+    image: rmohr/activemq
+    ports:
+      - 61616:61616
+      - 8161:8161
   
 volumes: 
   db-data:
