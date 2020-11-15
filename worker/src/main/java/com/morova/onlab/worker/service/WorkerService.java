@@ -5,8 +5,7 @@ import com.morova.onlab.worker.messaging.JMSProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -22,8 +21,8 @@ public class WorkerService {
         executor =  (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     }
 
-    public void submitJob(JobSubmitRequestDTO job) {
-        executor.execute(new WorkerTask(job, jmsProducer));
+    public void submitJob(JobSubmitRequestDTO job, CountDownLatch countDownLatch) {
+        executor.execute(new WorkerTask(job, jmsProducer, countDownLatch));
     }
 
     public int getBusyThreads() {

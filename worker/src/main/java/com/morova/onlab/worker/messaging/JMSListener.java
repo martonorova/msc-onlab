@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import java.util.concurrent.CountDownLatch;
 
 @Component
 public class JMSListener implements MessageListener {
@@ -32,10 +34,13 @@ public class JMSListener implements MessageListener {
             //do additional processing
             System.out.println("Received Message from Queue: " + job.toString());
 
-            workerService.submitJob(job);
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            workerService.submitJob(job, countDownLatch);
 
-        } catch(Exception e) {
-            e.printStackTrace();
+            countDownLatch.await();
+
+        } catch(JMSException | InterruptedException ex) {
+            ex.printStackTrace();
         }
     }
 }

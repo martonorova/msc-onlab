@@ -3,14 +3,18 @@ package com.morova.onlab.worker.service;
 import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
 import com.morova.onlab.worker.messaging.JMSProducer;
 
+import java.util.concurrent.CountDownLatch;
+
 public class WorkerTask implements Runnable{
 
     private final JobSubmitRequestDTO job;
     private final JMSProducer jmsProducer;
+    private final CountDownLatch countDownLatch;
 
-    public WorkerTask(JobSubmitRequestDTO job, JMSProducer jmsProducer) {
+    public WorkerTask(JobSubmitRequestDTO job, JMSProducer jmsProducer, CountDownLatch countDownLatch) {
         this.job = job;
         this.jmsProducer = jmsProducer;
+        this.countDownLatch = countDownLatch;
     }
 
     @Override
@@ -21,6 +25,8 @@ public class WorkerTask implements Runnable{
 
         // send result to ActiveMQ broker
         jmsProducer.sendJob(job);
+
+        countDownLatch.countDown();
     }
 
     private long fibonacci(long n) {
