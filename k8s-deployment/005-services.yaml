@@ -74,6 +74,9 @@ kind: Service
 metadata:
   name: kubedepend-activemq
   namespace: kubedepend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
 spec:
   selector:
     app: kubedepend-activemq-app
