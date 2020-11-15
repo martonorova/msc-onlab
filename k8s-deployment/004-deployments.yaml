@@ -119,8 +119,11 @@ spec:
     spec:
       containers:
       - name: kubedepend-worker
-        image: morova/kubedepend-worker:1.0
+        image: morova/kubedepend-worker:1.0-java
         imagePullPolicy: Always
+        envFrom:
+            - configMapRef:
+                  name: worker-config
         # resources:
         #   limits:
         #     memory: "256Mi"
@@ -128,14 +131,14 @@ spec:
         ports:
         - containerPort: 5000
           name: worker-port
-        readinessProbe:
-              httpGet:
-                path: /api/jobs/busy
-                port: 5000
-              timeoutSeconds: 2
-              periodSeconds: 3
-              initialDelaySeconds: 5
-              failureThreshold: 1
+        # readinessProbe:
+        #       httpGet:
+        #         path: /api/jobs/busy
+        #         port: 5000
+        #       timeoutSeconds: 2
+        #       periodSeconds: 3
+        #       initialDelaySeconds: 5
+        #       failureThreshold: 1
 
 ---
 
@@ -198,3 +201,35 @@ spec:
         - containerPort: 8080
           name: adminer-port
 
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubedepend-activemq-depl
+  namespace: kubedepend
+spec:
+  selector:
+    matchLabels:
+      app: kubedepend-activemq-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubedepend-activemq-app
+    spec:
+      containers:
+      - name: kubedepend-activemq
+        image: bwolf/activemq-prometheus
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "500m"
+        ports:
+        - containerPort: 61616
+          name: amq-broker
+        - containerPort: 8161
+          name: amq-webconsole
+        - containerPort: 8080
+          name: amq-metrics

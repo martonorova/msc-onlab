@@ -67,3 +67,25 @@ spec:
   - port: 3306
     targetPort: db-port
 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubedepend-activemq
+  namespace: kubedepend
+spec:
+  selector:
+    app: kubedepend-activemq-app
+  ports:
+  - port: 61616
+    targetPort: amq-broker
+    name: amq-broker
+  - port: 8161
+    targetPort: amq-webconsole
+    name: amq-webconsole
+  - port: 8080
+    targetPort: amq-metrics
+    name: amq-metrics
+
+
