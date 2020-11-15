@@ -116,6 +116,10 @@ spec:
     metadata:
       labels:
         app: kubedepend-worker-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "5000"
     spec:
       containers:
       - name: kubedepend-worker
