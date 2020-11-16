@@ -1,6 +1,7 @@
 package com.morova.onlab.worker.messaging;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,11 @@ public class ActiveMQConfig {
     public ConnectionFactory connectionFactory(){
         ActiveMQConnectionFactory activeMQConnectionFactory  = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setBrokerURL(brokerUrl);
+        ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
+        prefetchPolicy.setQueuePrefetch(1);
+        activeMQConnectionFactory.setPrefetchPolicy(
+                prefetchPolicy
+        );
         activeMQConnectionFactory.setTrustedPackages(
                 new ArrayList<>(Arrays.asList("com.morova.onlab,java.lang,javax.security,java.util,org.apache.activemq".split(",")))
         );

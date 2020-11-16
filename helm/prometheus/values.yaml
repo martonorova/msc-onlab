@@ -1369,7 +1369,7 @@ serverFiles:
       # service then set this appropriately.
       - job_name: 'kubernetes-service-endpoints'
 
-        scrape_interval: 10s
+        scrape_interval: 15s
 
         kubernetes_sd_configs:
           - role: endpoints
@@ -1505,7 +1505,7 @@ serverFiles:
       # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
       - job_name: 'kubernetes-pods'
 
-        scrape_interval: 10s
+        scrape_interval: 15s
 
         kubernetes_sd_configs:
           - role: pod
