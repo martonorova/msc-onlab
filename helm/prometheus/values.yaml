@@ -636,7 +636,7 @@ server:
   global:
     ## How frequently to scrape targets by default
     ##
-    scrape_interval: 1m
+    scrape_interval: 15s
     ## How long until a scrape request times out
     ##
     scrape_timeout: 10s
@@ -1396,6 +1396,7 @@ serverFiles:
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
             target_label: kubernetes_namespace
+            # target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             action: replace
             target_label: kubernetes_name
@@ -1595,6 +1596,14 @@ extraScrapeConfigs: |
         target_label: instance
       - target_label: __address__
         replacement: prometheus-blackbox-exporter:9115
+
+  - job_name: activemq
+    
+    static_configs:
+      - targets:
+        - kubedepend-activemq.kubedepend.svc.cluster.local:8080
+        labels:
+          namespace: kubedepend
 
 # Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
 # useful in H/A prometheus with different external labels but the same alerts

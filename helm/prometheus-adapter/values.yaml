@@ -6,7 +6,7 @@ image:
   tag: v0.7.0
   pullPolicy: IfNotPresent
 
-logLevel: 4
+logLevel: 6
 
 metricsRelistInterval: 1m
 
@@ -59,6 +59,20 @@ rules:
         matches: ".*"
         as: "available_worker_ratio"
       metricsQuery: (2 + kube_deployment_status_replicas_unavailable{deployment="kubedepend-worker-depl"}) / kube_deployment_status_replicas{deployment="kubedepend-worker-depl"}
+      # metricsQuery: sum(1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / sum(kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+    
+    # - seriesQuery: '{__name__=~"^kube_deployment_status_replicas$", kubernetes_namespace="kubedepend"}'
+    - seriesQuery: 'kube_deployment_status_replicas'
+      resources:
+        template: <<.Resource>>
+        # overrides:
+        #   namespace: {resource: "namespace"}
+        #   deployment: {group: "apps", resource: "deployment"}
+      name:
+        matches: ".*"
+        as: "needed_worker_ratio"
+      # metricsQuery: sum(1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / sum(kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+      metricsQuery: (1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
 # - seriesQuery: '{__name__=~"^some_metric_count$"}'
 #   resources:
 #     template: <<.Resource>>

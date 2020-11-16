@@ -5,3 +5,13 @@ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1
 
 Get worker deployment metrics
 kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/kubedepend/deployments/kubedepend-worker-depl/available_worker_ratio | jq .
+
+kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/kubedepend/deployments/kubedepend-worker-depl/needed_worker_ratio | jq .
+
+ERROR
+
+None of the results returned by when fetching metric deployments/needed_worker_ratio(namespaced) for "kubedepend/kubedepend-worker-depl" matched the resource name
+
+NEW METRIC
+
+kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/*/metrics/needed_worker_ratio | jq .
