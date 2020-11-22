@@ -24,6 +24,7 @@ public class ActiveMQConfig {
         activeMQConnectionFactory.setTrustedPackages(
                 new ArrayList<>(Arrays.asList("com.morova.onlab,java.lang,javax.security,java.util,org.apache.activemq".split(",")))
         );
+
         return activeMQConnectionFactory;
     }
 

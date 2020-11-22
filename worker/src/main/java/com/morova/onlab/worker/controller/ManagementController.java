@@ -17,12 +17,10 @@ public class ManagementController {
     @Autowired
     JMSProducer jmsProducer;
 
-    @GetMapping
-    public String hello() {
-        return "Hello";
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Healthy");
     }
-
-    // TODO health endpoint
 
     @PostMapping("/jobs")
     public ResponseEntity<String> submitJob(@RequestBody JobSubmitRequestDTO job) {
