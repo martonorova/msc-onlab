@@ -1589,6 +1589,7 @@ extraScrapeConfigs: |
     static_configs:
       - targets:
         - http://kubedepend-proxy.kubedepend.svc.cluster.local:80
+        - http://kubedepend-backend.kubedepend.svc.cluster.local:8000/api/v1/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
