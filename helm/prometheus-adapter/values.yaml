@@ -72,7 +72,12 @@ rules:
         matches: ".*"
         as: "needed_worker_ratio"
       # metricsQuery: sum(1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / sum(kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
-      metricsQuery: (1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+      metricsQuery: (1 + sum by (namespace)(worker_busy_threads{job="worker-pods"})) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+
+
+# (1 + sum by (namespace)(worker_busy_threads{job="worker-pods"})) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+
+
 # - seriesQuery: '{__name__=~"^some_metric_count$"}'
 #   resources:
 #     template: <<.Resource>>
