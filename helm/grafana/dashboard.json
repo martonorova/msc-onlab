@@ -1011,6 +1011,86 @@
       "timeShift": null,
       "title": "Mean Up Time",
       "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 17,
+        "y": 28
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "expr": "probe_success{instance=~\".*kubedepend-backend.*\"}",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Divident",
+          "refId": "B"
+        },
+        {
+          "expr": "changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Changes",
+          "refId": "C"
+        },
+        {
+          "expr": "count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "MDT",
+          "refId": "D"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mean Down Time",
+      "type": "stat"
     }
   ],
   "refresh": "5s",
@@ -1028,5 +1108,5 @@
   "timezone": "",
   "title": "K8S Dependability",
   "uid": "yVlYZShGk",
-  "version": 14
+  "version": 15
 }
