@@ -6,36 +6,38 @@
 #### Backend availability ####
 ##############################
 
-# URL encoded
-curl 'http://localhost:9090/api/v1/query?query=avg_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .
+curl "http://localhost:9090/api/v1/query?query=$( urlencode 'avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[15s])' )" | jq .data.result[0].value[1]
 
-# Get only the value
-jq | .data.result[0].value[1]
+curl "http://localhost:9090/api/v1/query?query=$( urlencode 'avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${INTERVAL}])' )" | jq .data.result[0].value[1]
 
 ##################################
 #### Backend not availability ####
 #################################
 
-# URL encoded
-curl 'http://localhost:9090/api/v1/query?query=%281%20-%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29%29%20%2F%20count_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '(1 - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${INTERVAL}])) / count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${INTERVAL}])' )" | jq .
+
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '(1 - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[15s])) / count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[15s])' )" | jq .
 
 ######################
 #### Backend MUT #####
 ######################
 
-# URL encoded
-curl 'http://localhost:9090/api/v1/query?query=15%20%2A%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2F%20%28floor%28%28changes%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2B%201%20%2B%20probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%20offset%2030m%29%20%2F%202%29%29' | jq .
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '15 * sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) + 1 + probe_success{instance=~".*kubedepend-backend.*"} offset ${RANGE}) / 2))' )" | jq .
+
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '15 * sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[30m]) + 1 + probe_success{instance=~".*kubedepend-backend.*"} offset 30m) / 2))' )" | jq .
 
 ######################
 #### Backend MDT #####
 ######################
 
-# URL encoded
-curl 'http://localhost:9090/api/v1/query?query=15%20%2A%20%28count_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20-%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%29%20%2F%20%28floor%28%28changes%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2B%202%20-%20probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%20offset%2030m%29%20%2F%202%29%29' | jq .
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '15 * (count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}])) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset ${RANGE}) / 2))' )" | jq .
+
+curl "http://localhost:9090/api/v1/query?query=$( urlencode '15 * (count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m])) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[30m]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset 30m) / 2))' )" | jq .
 
 ######################
 #### Backend MTBF ####
 ######################
 
-# URL encoded
-curl 'http://localhost:9090/api/v1/query?query='' | jq .
+curl "http://localhost:9090/api/v1/query?query=$( urlencode 'sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) + 1 + probe_success{instance=~".*kubedepend-backend.*"} offset ${RANGE}) / 2)) + count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[${RANGE}]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset ${RANGE}) / 2))' )" | jq .
+
+curl "http://localhost:9090/api/v1/query?query=$( urlencode 'sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[30m]) + 1 + probe_success{instance=~".*kubedepend-backend.*"} offset 30m) / 2)) + count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[30m]) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[30m]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset 30m) / 2))' )" | jq .

@@ -1,7 +1,32 @@
 #!/bin/bash
 
+
+# variables used in the queries
+RANGE=30m
+INTERVAL=15s
+
+### Prometheus query variables ###
+BACKEND_AVAILABILITY_QUERY="avg_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${INTERVAL}])"
+
+BACKEND_UNAVAILABILITY_QUERY="(1 - sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${INTERVAL}])) / count_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${INTERVAL}])"
+
+BACKEND_MUT_QUERY="15 * sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) / (floor((changes(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) + 1 + probe_success{instance=~'.*kubedepend-backend.*'} offset ${RANGE}) / 2))"
+
+BACKEND_MDT_QUERY="15 * (count_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) - sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}])) / (floor((changes(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) + 2 - probe_success{instance=~'.*kubedepend-backend.*'} offset ${RANGE}) / 2))"
+
+BACKEND_MTBF_QUERY="${BACKEND_MUT_QUERY} + ${BACKEND_MDT_QUERY}"
+
+
+# echo "Backend availability query: ${BACKEND_AVAILABILITY_QUERY}"
+# echo "Backend unavailability query: ${BACKEND_UNAVAILABILITY_QUERY}"
+# echo "Backend MUT query: ${BACKEND_MUT_QUERY}"
+# echo "Backend MDT query: ${BACKEND_MDT_QUERY}"
+# echo "Backend MTBF query: ${BACKEND_MTBF_QUERY}"
+
 # Open backend port on localhost
 # currently by hand
+
+# Check if system is in a stable state (busy worker = 0, queue size = 0, worker-pods = 1, needed worker ration = 1)
 
 # apply chaos files
 echo "Creating chaos objects..."
@@ -13,7 +38,7 @@ echo "Chaos objects created."
 echo "Testing in progress..."
 SECONDS=0
 
-artillery run ../artillery/submit_jobs.yaml
+# artillery run ../artillery/submit_jobs.yaml
 
 echo "Load sent, waiting for jobs to finish..."
 
