@@ -107,7 +107,7 @@ chaosDaemon:
   tolerations: []
 
 dashboard:
-  create: false
+  create: true
 
   replicaCount: 1
 
@@ -306,8 +306,8 @@ webhook:
     - stresschaos
     - podiochaos
     - podnetworkchaos
-    - dnschaos
-    - jvmchaos
+    # - dnschaos
+    # - jvmchaos
 
 bpfki:
   create: false

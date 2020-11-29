@@ -1,0 +1,27 @@
+# INTERVAL is 15s
+
+# Range is 30m --> should be the length of the test
+
+##############################
+#### Backend availability ####
+##############################
+
+# URL encoded
+curl 'http://localhost:9090/api/v1/query?query=avg_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .
+
+# Get only the value
+jq | .data.result[0].value[1]
+
+##################################
+#### Backend not availability ####
+#################################
+
+# URL encoded
+curl 'http://localhost:9090/api/v1/query?query=%281%20-%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29%29%20%2F%20count_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .
+
+######################
+#### Backend MUT #####
+######################
+
+# URL encoded
+curl 'http://localhost:9090/api/v1/query?query=15%20%2A%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2F%20%28floor%28%28changes%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2B%201%20%2B%20probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%20offset%2030m%29%20%2F%202%29%29' | jq .
