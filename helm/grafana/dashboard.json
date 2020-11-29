@@ -673,7 +673,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -683,7 +683,7 @@
       "pluginVersion": "7.2.1",
       "targets": [
         {
-          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) + count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) + 15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
           "interval": "",
           "legendFormat": "Backend",
           "refId": "A"
@@ -963,7 +963,7 @@
           "refId": "C"
         },
         {
-          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
           "hide": false,
           "interval": "",
           "legendFormat": "MUT",
@@ -1043,7 +1043,7 @@
           "refId": "C"
         },
         {
-          "expr": "count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "expr": "15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
           "hide": false,
           "interval": "",
           "legendFormat": "MDT",
@@ -1056,7 +1056,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "5s",
+  "refresh": "10s",
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -1071,5 +1071,5 @@
   "timezone": "",
   "title": "K8S Dependability",
   "uid": "yVlYZShGk",
-  "version": 16
+  "version": 17
 }
