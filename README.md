@@ -32,4 +32,9 @@ To delete Chaos Mesh, delete the namsespace containing it.
 
 1. Install Artillery `sudo npm install -g artillery --ignore-scripts
 1. Run test with `artillery run submit_jobs.yaml`
+
+## Install urlencode
+
+`sudo apt-get install gridsite-clients
+`
 `
