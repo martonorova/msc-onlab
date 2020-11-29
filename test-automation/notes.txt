@@ -1,4 +1,4 @@
-# INTERVAL is 15s
+# INTERVAL is 15s it comes from prometheus scrape interval (we only have data every 15s, so in order to get time interval we need sum values * 15 (probe_success is 1 or 0))
 
 # Range is 30m --> should be the length of the test
 
@@ -25,3 +25,10 @@ curl 'http://localhost:9090/api/v1/query?query=%281%20-%20sum_over_time%28probe_
 
 # URL encoded
 curl 'http://localhost:9090/api/v1/query?query=15%20%2A%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2F%20%28floor%28%28changes%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2B%201%20%2B%20probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%20offset%2030m%29%20%2F%202%29%29' | jq .
+
+######################
+#### Backend MDT #####
+######################
+
+# URL encoded
+curl 'http://localhost:9090/api/v1/query?query=15%20%2A%20%28count_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20-%20sum_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%29%20%2F%20%28floor%28%28changes%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B30m%5D%29%20%2B%202%20-%20probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%20offset%2030m%29%20%2F%202%29%29' | jq .
