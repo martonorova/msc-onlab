@@ -371,7 +371,8 @@ extraVolumeMounts: []
 
 ## Pass the plugins you want installed as a list.
 ##
-plugins: []
+plugins:
+  - yeya24-chaosmesh-datasource
   # - digrich-bubblechart-panel
   # - grafana-clock-panel
 
