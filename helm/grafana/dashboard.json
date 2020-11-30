@@ -544,7 +544,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -568,7 +568,8 @@
           "refId": "B"
         },
         {
-          "expr": "avg_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__interval])",
+          "expr": "avg_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
+          "hide": false,
           "interval": "",
           "legendFormat": "Backend",
           "refId": "C"
@@ -1071,5 +1072,5 @@
   "timezone": "",
   "title": "K8S Dependability",
   "uid": "yVlYZShGk",
-  "version": 19
+  "version": 21
 }
