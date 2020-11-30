@@ -35,6 +35,9 @@ To delete Chaos Mesh, delete the namsespace containing it.
 
 ## Install urlencode
 
-`sudo apt-get install gridsite-clients
-`
-`
+`sudo apt-get install gridsite-clients`
+
+## Grafana
+https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
+changed admin password by running grafana-cli inside container
+
