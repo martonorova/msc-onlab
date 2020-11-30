@@ -16,12 +16,25 @@ BACKEND_MDT_QUERY="15 * (count_over_time(probe_success{instance=~'.*kubedepend-b
 
 BACKEND_MTBF_QUERY="${BACKEND_MUT_QUERY} + ${BACKEND_MDT_QUERY}"
 
+WORKER_BUSY_THREADS_QUERY="sum(worker_busy_threads{job='kubernetes-service-endpoints'})"
+
+WORKER_PODS_COUNT_QUERY="kube_deployment_status_replicas{deployment='kubedepend-worker-depl'}"
+
+NEEDED_WORKER_RATIO_QUERY="(1 + sum by (namespace)(worker_busy_threads{job='worker-pods'})) / on(namespace) (kube_deployment_status_replicas{deployment='kubedepend-worker-depl'})"
+
+QUEUE_SIZE_QUERY="org_apache_activemq_Broker_QueueSize{destinationName=~'jobWorker.*', job='activemq'}"
+
+
+
 
 # echo "Backend availability query: ${BACKEND_AVAILABILITY_QUERY}"
 # echo "Backend unavailability query: ${BACKEND_UNAVAILABILITY_QUERY}"
 # echo "Backend MUT query: ${BACKEND_MUT_QUERY}"
 # echo "Backend MDT query: ${BACKEND_MDT_QUERY}"
 # echo "Backend MTBF query: ${BACKEND_MTBF_QUERY}"
+# echo "Worker busy threads query: ${WORKER_BUSY_THREADS_QUERY}"
+# echo "Needed worker ratio query: ${NEEDED_WORKER_RATIO_QUERY}"
+# echo "Queue siye query: ${QUEUE_SIZE_QUERY}"
 
 # Open backend port on localhost
 # currently by hand
