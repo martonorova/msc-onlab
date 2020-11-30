@@ -49,18 +49,24 @@ WORKER_PODS_COUNT=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${WORKER
 NEEDED_WORKER_RATIO=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${NEEDED_WORKER_RATIO_QUERY}" )" | jq .data.result[0].value[1])
 # echo ${WORKER_BUSY_THREADS_COUNT}
 
-# Open backend port on localhost
+### Open backend port on localhost ###
 # currently by hand
 
 # Check if system is in a stable state (busy worker = 0, queue size = 0, worker-pods = 1, needed worker ration = 1)
 
-# wait for system to be in a stable state
+# wait for system to be in a stable stat
+while ! [[ $WORKER_BUSY_THREADS_COUNT =~ "0" ]] || ! [[ $QUEUE_SIZE =~ "0" ]] || ! [[ $WORKER_PODS_COUNT =~ "1" ]] || ! [[ $NEEDED_WORKER_RATIO =~ "1" ]]; do
+    echo "State NOT OK..."
+    sleep 5
 
-if [[ $WORKER_BUSY_THREADS_COUNT =~ "0" ]] && [[ $QUEUE_SIZE =~ "0" ]] && [[ $WORKER_PODS_COUNT =~ "1" ]] && [[ $NEEDED_WORKER_RATIO =~ "1" ]]; then
-    echo "State OK"
-else
-    echo "State NOT OK!"
-fi
+    WORKER_BUSY_THREADS_COUNT=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${WORKER_BUSY_THREADS_QUERY}" )" | jq .data.result[0].value[1])
+    QUEUE_SIZE=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${QUEUE_SIZE_QUERY}" )" | jq .data.result[0].value[1])
+    WORKER_PODS_COUNT=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${WORKER_PODS_COUNT_QUERY}" )" | jq .data.result[0].value[1])
+    NEEDED_WORKER_RATIO=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${NEEDED_WORKER_RATIO_QUERY}" )" | jq .data.result[0].value[1])
+    
+done
+
+echo "State OK, start test..."
 
 # if [ curl "http://localhost:9090/api/v1/query?query=$( urlencode 'avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[15s])' )" | jq .data.result[0].value[1] ]; then
 
