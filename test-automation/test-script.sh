@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # variables used in the queries
 RANGE=30m
 INTERVAL=15s
@@ -16,16 +15,15 @@ BACKEND_MDT_QUERY="15 * (count_over_time(probe_success{instance=~'.*kubedepend-b
 
 BACKEND_MTBF_QUERY="${BACKEND_MUT_QUERY} + ${BACKEND_MDT_QUERY}"
 
+# shellcheck disable=SC2089
 WORKER_BUSY_THREADS_QUERY="sum(worker_busy_threads{job='kubernetes-service-endpoints'})"
 
 WORKER_PODS_COUNT_QUERY="kube_deployment_status_replicas{deployment='kubedepend-worker-depl'}"
 
 NEEDED_WORKER_RATIO_QUERY="(1 + sum by (namespace)(worker_busy_threads{job='worker-pods'})) / on(namespace) (kube_deployment_status_replicas{deployment='kubedepend-worker-depl'})"
 
+# shellcheck disable=SC2089
 QUEUE_SIZE_QUERY="org_apache_activemq_Broker_QueueSize{destinationName=~'jobWorker.*', job='activemq'}"
-
-
-
 
 # echo "Backend availability query: ${BACKEND_AVAILABILITY_QUERY}"
 # echo "Backend unavailability query: ${BACKEND_UNAVAILABILITY_QUERY}"
@@ -36,43 +34,75 @@ QUEUE_SIZE_QUERY="org_apache_activemq_Broker_QueueSize{destinationName=~'jobWork
 # echo "Needed worker ratio query: ${NEEDED_WORKER_RATIO_QUERY}"
 # echo "Queue siye query: ${QUEUE_SIZE_QUERY}"
 
+# Prometheus HOST
+PROMETHEUS_QUERY_URL="http://localhost:9090/api/v1/query?query="
+# echo ${PROMETHEUS_QUERY_URL}
+# echo "${PROMETHEUS_QUERY_URL}$( urlencode ${WORKER_BUSY_THREADS_QUERY} )"
+
+
+WORKER_BUSY_THREADS_COUNT=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${WORKER_BUSY_THREADS_QUERY}" )" | jq .data.result[0].value[1])
+
+QUEUE_SIZE=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${QUEUE_SIZE_QUERY}" )" | jq .data.result[0].value[1])
+
+WORKER_PODS_COUNT=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${WORKER_PODS_COUNT_QUERY}" )" | jq .data.result[0].value[1])
+
+NEEDED_WORKER_RATIO=$(curl --silent "${PROMETHEUS_QUERY_URL}$( urlencode "${NEEDED_WORKER_RATIO_QUERY}" )" | jq .data.result[0].value[1])
+# echo ${WORKER_BUSY_THREADS_COUNT}
+
 # Open backend port on localhost
 # currently by hand
 
 # Check if system is in a stable state (busy worker = 0, queue size = 0, worker-pods = 1, needed worker ration = 1)
 
-# apply chaos files
-echo "Creating chaos objects..."
+# wait for system to be in a stable state
 
-kubectl apply -f "$(pwd)/chaos-files"
+if [[ $WORKER_BUSY_THREADS_COUNT =~ "0" ]] && [[ $QUEUE_SIZE =~ "0" ]] && [[ $WORKER_PODS_COUNT =~ "1" ]] && [[ $NEEDED_WORKER_RATIO =~ "1" ]]; then
+    echo "State OK"
+else
+    echo "State NOT OK!"
+fi
 
-echo "Chaos objects created."
+# if [ curl "http://localhost:9090/api/v1/query?query=$( urlencode 'avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[15s])' )" | jq .data.result[0].value[1] ]; then
 
-echo "Testing in progress..."
-SECONDS=0
+# fi
 
-# artillery run ../artillery/submit_jobs.yaml
+# until $(curl --output /dev/null --silent --head --fail "${SSO_INTERNAL_URL}"/auth/realms/master); do
+#    echo "Waiting system to be in a stable state..."
+#    sleep 5
+# done
 
-echo "Load sent, waiting for jobs to finish..."
+# # apply chaos files
+# echo "Creating chaos objects..."
 
-sleep 2
+# kubectl apply -f "$(pwd)/chaos-files"
 
-echo "Jobs finished in $SECONDS seconds."
+# echo "Chaos objects created."
 
-# delete chaos files
-echo "Deleting chaos objects..."
+# echo "Testing in progress..."
+# SECONDS=0
 
-kubectl delete -f "$(pwd)/chaos-files"
+# # artillery run ../artillery/submit_jobs.yaml
 
-echo "Chaos objects deleted."
+# echo "Load sent, waiting for jobs to finish..."
 
-echo "Elapsed time is"
+# sleep 2
 
-echo "Get results..."
-echo "Range = __, Interval = __"
+# echo "Jobs finished in $SECONDS seconds."
 
-echo "Backend availability"
-# prometheus query
-# curl 'http://localhost:9090/api/v1/query?query=avg_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .data.result[0].value[1]
+# # delete chaos files
+# echo "Deleting chaos objects..."
 
-echo "Backend unavailability -"
+# kubectl delete -f "$(pwd)/chaos-files"
+
+# echo "Chaos objects deleted."
+
+# echo "Elapsed time is"
+
+# echo "Get results..."
+# echo "Range = __, Interval = __"
+
+# echo "Backend availability"
+# # prometheus query
+# # curl 'http://localhost:9090/api/v1/query?query=avg_over_time%28probe_success%7Binstance%3D~%22.%2Akubedepend-backend.%2A%22%7D%5B15s%5D%29' | jq .data.result[0].value[1]
+
+# echo "Backend unavailability -"
