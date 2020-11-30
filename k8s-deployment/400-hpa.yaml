@@ -22,7 +22,7 @@ spec:
           target:
               type: Value
               value: "1"
-  # behavior:
-  #   scaleDown:
-  #     stabilizationWindowSeconds: 30 # default is 300
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 30 # default is 300
       
