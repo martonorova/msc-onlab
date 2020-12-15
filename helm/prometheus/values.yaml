@@ -636,7 +636,7 @@ server:
   global:
     ## How frequently to scrape targets by default
     ##
-    scrape_interval: 1m
+    scrape_interval: 15s
     ## How long until a scrape request times out
     ##
     scrape_timeout: 10s
@@ -1369,6 +1369,8 @@ serverFiles:
       # service then set this appropriately.
       - job_name: 'kubernetes-service-endpoints'
 
+        scrape_interval: 15s
+
         kubernetes_sd_configs:
           - role: endpoints
 
@@ -1394,6 +1396,7 @@ serverFiles:
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
             target_label: kubernetes_namespace
+            # target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             action: replace
             target_label: kubernetes_name
@@ -1503,6 +1506,8 @@ serverFiles:
       # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
       - job_name: 'kubernetes-pods'
 
+        scrape_interval: 15s
+
         kubernetes_sd_configs:
           - role: pod
 
@@ -1584,6 +1589,7 @@ extraScrapeConfigs: |
     static_configs:
       - targets:
         - http://kubedepend-proxy.kubedepend.svc.cluster.local:80
+        - http://kubedepend-backend.kubedepend.svc.cluster.local:8000/api/v1/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -1591,6 +1597,51 @@ extraScrapeConfigs: |
         target_label: instance
       - target_label: __address__
         replacement: prometheus-blackbox-exporter:9115
+
+  - job_name: activemq
+    
+    static_configs:
+      - targets:
+        - kubedepend-activemq.kubedepend.svc.cluster.local:8080
+        labels:
+          namespace: kubedepend
+  
+  - job_name: worker-pods
+    kubernetes_sd_configs:
+    - role: pod
+      namespaces:
+        names:
+          - 'kubedepend'
+      selectors:
+        - role: pod
+          label: app=kubedepend-worker-app
+    
+    relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+        - source_labels: [__meta_kubernetes_pod_phase]
+          regex: Pending|Succeeded|Failed
+          action: drop
+
+    
 
 # Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
 # useful in H/A prometheus with different external labels but the same alerts

@@ -3,9 +3,9 @@ version: '3.1'
 services:
 
   proxy:
-    build:
-      context: ./proxy
-      dockerfile: Dockerfile
+    # build:
+    #   context: ./proxy
+    #   dockerfile: Dockerfile
     image: morova/kubedepend-proxy:1.0
     # volumes: 
     #   - ./proxy/nginx.conf:/etc/nginx/nginx.conf
@@ -36,14 +36,18 @@ services:
       - MYSQL_DB_HOST=db
       - MYSQL_DB_PORT=3306
       - MYSQL_DB_DB_NAME=jobs
+      - ACTIVEMQ_BROKER_HOST=activemq
+      - ACTIVEMQ_BROKER_PORT=61616
+      - ACTIVEMQ_WORKER_QUEUE=jobWorkerQueue
+      - ACTIVEMQ_BACKEND_QUEUE=jobBackendQueue
     depends_on:
       - db
       - worker
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
     image: morova/kubedepend-frontend:1.0
     volumes:
       - './frontend:/code'
@@ -60,10 +64,15 @@ services:
     build:
       context: ./worker
       dockerfile: Dockerfile
-    image: morova/kubedepend-worker:1.0
+    image: morova/kubedepend-worker:1.0-java
     restart: always
     ports:
       - "5000:5000"
+    environment:
+      - ACTIVEMQ_BROKER_HOST=activemq
+      - ACTIVEMQ_BROKER_PORT=61616
+      - ACTIVEMQ_WORKER_QUEUE=jobWorkerQueue
+      - ACTIVEMQ_BACKEND_QUEUE=jobBackendQueue
 
   db:
     image: mysql
@@ -83,9 +92,16 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8080
     depends_on:
       - db
+
+  activemq:
+    image: bwolf/activemq-prometheus
+    ports:
+      - 61616:61616
+      - 8161:8161
+      - 8080:8080
   
 volumes: 
   db-data:

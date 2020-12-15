@@ -25,6 +25,23 @@ data:
   MYSQL_DB_HOST: kubedepend-db.kubedepend.svc.cluster.local
   MYSQL_DB_PORT: "3306"
   MYSQL_DB_DB_NAME: jobs
+  ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
+  ACTIVEMQ_BROKER_PORT: "61616"
+  ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
+  ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: worker-config
+  namespace: kubedepend
+data:
+  ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
+  ACTIVEMQ_BROKER_PORT: "61616"
+  ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
+  ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
 
 
 ---

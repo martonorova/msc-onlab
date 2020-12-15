@@ -14,11 +14,11 @@ spec:
       - type: Object
         object:
           metric:
-              name: available_worker_ratio
+              name: needed_worker_ratio
           describedObject:
-              apiVersion: apps/v1
-              kind: Deployment
-              name: kubedepend-worker-depl
+              apiVersion: /v1
+              kind: Namespace
+              name: kubedepend
           target:
               type: Value
               value: "1"

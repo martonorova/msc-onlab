@@ -47,6 +47,11 @@ kind: Service
 metadata:
   name: kubedepend-worker
   namespace: kubedepend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "5000"
+
 spec:
   selector:
     app: kubedepend-worker-app
@@ -66,4 +71,29 @@ spec:
   ports:
   - port: 3306
     targetPort: db-port
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubedepend-activemq
+  namespace: kubedepend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  selector:
+    app: kubedepend-activemq-app
+  ports:
+  - port: 61616
+    targetPort: amq-broker
+    name: amq-broker
+  - port: 8161
+    targetPort: amq-webconsole
+    name: amq-webconsole
+  - port: 8080
+    targetPort: amq-metrics
+    name: amq-metrics
+
 

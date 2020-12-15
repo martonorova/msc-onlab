@@ -2,9 +2,10 @@ package com.morova.onlab.backend.model;
 
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
-public class Job {
+public class Job implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -18,6 +19,12 @@ public class Job {
 
     public Job(int input) {
         this.input = input;
+    }
+
+    public Job(Long id, int input, Long result) {
+        this.id = id;
+        this.input = input;
+        this.result = result;
     }
 
     public Long getId() {
@@ -42,5 +49,14 @@ public class Job {
 
     public void setResult(Long result) {
         this.result = result;
+    }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "id=" + id +
+                ", input=" + input +
+                ", result=" + result +
+                '}';
     }
 }

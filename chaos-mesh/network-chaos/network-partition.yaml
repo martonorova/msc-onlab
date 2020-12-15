@@ -4,7 +4,7 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-partition-backend-to-db
-  namespace: chaos-testing
+  namespace: kubedepend
 spec:
   action: partition
   mode: one
@@ -21,6 +21,6 @@ spec:
       labelSelectors:
         "app": "kubedepend-db-app"
     mode: one
-  duration: "10s"
+  duration: "5s"
   scheduler:
     cron: "@every 15s"

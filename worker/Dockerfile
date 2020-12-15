@@ -1,13 +1,11 @@
-FROM node:12
+FROM openjdk:11
 
-WORKDIR /code
+ARG JAR_FILE=/build/libs/*.jar
 
-COPY package*.json ./
+RUN echo ${JAR_FILE}
 
-RUN npm install
-
-COPY . .
+COPY ${JAR_FILE} app.jar
 
 EXPOSE 5000
 
-CMD [ "npm", "run", "start"]
+ENTRYPOINT ["java","-jar","/app.jar"]
