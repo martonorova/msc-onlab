@@ -105,7 +105,7 @@ data:
             proxy_pass http://kubedepend-frontend:3000;
             proxy_set_header Host $host;
             proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection $connection_upgrade;
+            proxy_set_header Connection $connection_upgrade;
           }
         }
     }

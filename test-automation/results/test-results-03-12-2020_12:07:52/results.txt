@@ -1,0 +1,5 @@
+Test time:	158 seconds
+Backend availability:	"0.5"
+Backend MUT:	"25"
+Backend MDT:	"25"
+Backend MTBF:	"50"
