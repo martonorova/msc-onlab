@@ -1,4 +1,5 @@
 import requests
+import locust
 
 import logging
 import urllib.parse
@@ -22,9 +23,15 @@ def main():
     wait_for_stable_state()
 
     logging.info('Creating chaos objects...')
-
-
     os.system('pwd')
+
+    logging.info('Chaos objects applied.')
+
+    logging.info('Generating load...')
+
+
+
+
 
 
 
