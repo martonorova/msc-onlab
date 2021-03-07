@@ -75,6 +75,16 @@ def main():
 
     logging.info('Load generation finished')
 
+    # get dependability metrics
+
+    # save dependability metrics
+
+    logging.info('Deleting chaos objects...')
+
+    logging.info('Chaos objects deleted.')
+
+
+
 
 
 
