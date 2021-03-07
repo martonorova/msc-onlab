@@ -22,7 +22,7 @@ setup_logging('DEBUG', None)
 
 class User(HttpUser):
     # constant_pacing for an adaptive time that ensures the task runs (at most) once every X seconds
-    wait_time = constant_pacing(10)
+    wait_time = constant_pacing(5)
     host = c.BACKEND_HOST
 
     @task
@@ -32,7 +32,7 @@ class User(HttpUser):
             'Accept': 'application/json'
         }
         data = {
-            'input': 30
+            'input': 50
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
@@ -65,7 +65,7 @@ def main():
     logging.info('Generating load...')
 
     # start the test
-    env.runner.start(1, spawn_rate=10)
+    env.runner.start(user_count=10, spawn_rate=1)
 
     # in 60 seconds stop the runner
     gevent.spawn_later(60, lambda: env.runner.quit())
