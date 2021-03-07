@@ -12,6 +12,8 @@ import os
 import sys
 
 import constants as c
+from model import BackendDependabilityMetrics
+from model import SystemState
 
 logging.basicConfig(
     level=logging.INFO
@@ -76,6 +78,7 @@ def main():
     logging.info('Load generation finished')
 
     # get dependability metrics
+    
 
     # save dependability metrics
 
@@ -131,6 +134,11 @@ def wait_for_stable_state():
 
 def generate_load():
     pass
+
+def get_dependability_metrics():
+    metrics = BackendDependabilityMetrics()
+
+    
 
 if __name__ == "__main__":
     main()

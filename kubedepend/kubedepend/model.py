@@ -1,4 +1,4 @@
-class BackendDependabilityAttributes:
+class BackendDependabilityMetrics:
     def __init__(self):
         self.availability = None
         # Mean Up Time
