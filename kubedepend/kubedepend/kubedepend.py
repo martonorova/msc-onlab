@@ -1,5 +1,9 @@
 import requests
-import locust
+from locust import HttpUser, task, constant_pacing
+from locust.env import Environment
+from locust.stats import stats_history, stats_printer
+from locust.log import setup_logging
+import gevent
 
 import logging
 import urllib.parse
@@ -13,6 +17,25 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+# setup Locust logging
+setup_logging('DEBUG', None)
+
+class User(HttpUser):
+    # constant_pacing for an adaptive time that ensures the task runs (at most) once every X seconds
+    wait_time = constant_pacing(10)
+    host = c.BACKEND_HOST
+
+    @task
+    def submit_job_task(self):
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        data = {
+            'input': 30
+        }
+        self.client.post('/api/v1/jobs', json=data, headers=headers)
+
 
 def main():
 
@@ -22,6 +45,18 @@ def main():
 
     wait_for_stable_state()
 
+    # Setup Locust objects
+
+    # setup Environment and Runner
+    env = Environment(user_classes=[User])
+    env.create_local_runner()
+
+    # start a greenlet that periodically outputs the current stats
+    gevent.spawn(stats_printer(env.stats))
+
+    # start a greenlet that save current stats to history
+    gevent.spawn(stats_history, env.runner)
+
     logging.info('Creating chaos objects...')
     os.system('pwd')
 
@@ -29,10 +64,16 @@ def main():
 
     logging.info('Generating load...')
 
+    # start the test
+    env.runner.start(1, spawn_rate=10)
 
+    # in 60 seconds stop the runner
+    gevent.spawn_later(60, lambda: env.runner.quit())
 
+    # wait for the greenlets
+    env.runner.greenlet.join()
 
-
+    logging.info('Load generation finished')
 
 
 
@@ -77,6 +118,9 @@ def wait_for_stable_state():
         logging.info('State NOT OK, waiting...')
         time.sleep(5)
     logging.info('State OK')
+
+def generate_load():
+    pass
 
 if __name__ == "__main__":
     main()
