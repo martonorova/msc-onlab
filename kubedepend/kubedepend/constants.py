@@ -18,17 +18,25 @@ def backend_availability_query(range_length):
     """
     if type(range_length) is not int:
         raise TypeError('range_length must be int')
-    return f'avg_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}])'
+    return f'avg_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s])'
 
 def backend_unavailability_query(interval):
     if type(interval) is not int:
         raise TypeError('interval must be int')
 
-    return f'(1 - sum_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{interval}])) / count_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{interval}])'
+    return f'(1 - sum_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{interval}s])) / count_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{interval}s])'
 
-BACKEND_UNAVAILABILITY_QUERY="(1 - sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${INTERVAL}])) / count_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${INTERVAL}])"
+def backend_mut_query(range_length):
+    if type(range_length) is not int:
+        raise TypeError('range_length must be int')
 
-BACKEND_MUT_QUERY="15 * sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) / (floor((changes(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) + 1 + probe_success{instance=~'.*kubedepend-backend.*'} offset ${RANGE}) / 2))"
+    return f'15 * sum_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) / (floor((changes(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) + 1 + probe_success{{instance=~".*kubedepend-backend.*"}} offset {range_length}s) / 2))'
+
+def backend_mdt_query(range_length):
+    if type(range_length) is not int:
+        raise TypeError('range_length must be int')
+    
+    return f'15 * (count_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) - sum_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s])) / (floor((changes(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) + 2 - probe_success{{instance=~".*kubedepend-backend.*"}} offset {range_length}) / 2))'
 
 BACKEND_MDT_QUERY="15 * (count_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) - sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}])) / (floor((changes(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) + 2 - probe_success{instance=~'.*kubedepend-backend.*'} offset ${RANGE}) / 2))"
 
