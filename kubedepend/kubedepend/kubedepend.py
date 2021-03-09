@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 
 # setup Locust logging
-setup_logging('DEBUG', None)
+setup_logging('INFO', None)
 
 class User(HttpUser):
     # constant_pacing for an adaptive time that ensures the task runs (at most) once every X seconds
@@ -62,8 +62,13 @@ def main():
     logging.info('Creating chaos objects...')
 
     os.system('''
-    helm version
-    helm ls
+    helm upgrade \
+        --install \
+        --namespace chaos-testing \
+        -f charts/kubedepend-chaos/values.yaml \
+        kubedepend-chaos \
+        ./charts/kubedepend-chaos \
+        --set podChaos.enabled=true
     ''')
 
     logging.info('Chaos objects applied.')
@@ -89,7 +94,16 @@ def main():
 
     # save dependability metrics
 
+    # save chaos configuration
+    os.system('''
+        helm get manifest kubedepend-chaos -n chaos-testing
+    ''')
+
     logging.info('Deleting chaos objects...')
+
+    # os.system('''
+    #     helm delete kubedepend-chaos -n chaos-testing
+    # ''')
 
     logging.info('Chaos objects deleted.')
 
@@ -120,9 +134,6 @@ def query_prometheus(query, trycount=0):
         # values is string originally (comes from JSON)
         # print(value)
         return float(value)
-    
-    
-
 
 def is_stable_state():
     worker_busy_threads_count = query_prometheus(c.WORKER_BUSY_THREADS_QUERY)

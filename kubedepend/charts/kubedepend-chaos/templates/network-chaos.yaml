@@ -1,0 +1,19 @@
+{{- if .Values.networkChaos.enabled -}}
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: backend-network-delay
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - kubedepend
+    labelSelectors:
+      "app": "kubedepend-backend-app"
+  delay:
+    latency: "500ms"
+  duration: "30s"
+  scheduler:
+    cron: "@every 60s"
+{{- end }}
