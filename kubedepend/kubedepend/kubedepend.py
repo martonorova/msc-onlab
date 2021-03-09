@@ -34,7 +34,7 @@ class User(HttpUser):
             'Accept': 'application/json'
         }
         data = {
-            'input': 50
+            'input': 20
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
@@ -54,10 +54,10 @@ def main():
     env.create_local_runner()
 
     # start a greenlet that periodically outputs the current stats
-    gevent.spawn(stats_printer(env.stats))
+    # gevent.spawn(stats_printer(env.stats))
 
     # start a greenlet that save current stats to history
-    gevent.spawn(stats_history, env.runner)
+    # gevent.spawn(stats_history, env.runner)
 
     logging.info('Creating chaos objects...')
     os.system('pwd')
@@ -67,18 +67,21 @@ def main():
     logging.info('Generating load...')
 
     # start the test
-    env.runner.start(user_count=10, spawn_rate=1)
+    # env.runner.start(user_count=10, spawn_rate=1)
 
     # in 60 seconds stop the runner
-    gevent.spawn_later(60, lambda: env.runner.quit())
+    # gevent.spawn_later(60, lambda: env.runner.quit())
 
     # wait for the greenlets
-    env.runner.greenlet.join()
+    # env.runner.greenlet.join()
 
     logging.info('Load generation finished')
 
     # get dependability metrics
     
+    metrics = get_dependability_metrics(10)
+    print(metrics)
+
 
     # save dependability metrics
 
@@ -135,8 +138,16 @@ def wait_for_stable_state():
 def generate_load():
     pass
 
-def get_dependability_metrics():
+def get_dependability_metrics(range_length):
     metrics = BackendDependabilityMetrics()
+
+    metrics.availability = query_prometheus(c.backend_availability_query(range_length))
+    metrics.mut = query_prometheus(c.backend_availability_query(range_length))
+    metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
+    metrics.mtbf = query_prometheus(c.backend_mtbf_query(range_length))
+
+    return metrics
+
 
     
 
