@@ -44,3 +44,8 @@ https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
 #### Notes
 * changed admin password by running grafana-cli inside container
 
+## Prometheus Adapter
+
+upgrade:
+`helm upgrade prometheus-adapter prometheus-community/prometheus-adapter -f values.yaml -n monitoring`
+

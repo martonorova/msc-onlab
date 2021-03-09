@@ -2,8 +2,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
-  name: io-delay-db
-  namespace: kubedepend
+  name: io-delay
 spec:
   action: latency
   mode: one
