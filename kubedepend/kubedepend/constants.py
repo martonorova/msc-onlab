@@ -38,10 +38,11 @@ def backend_mdt_query(range_length):
     
     return f'15 * (count_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) - sum_over_time(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s])) / (floor((changes(probe_success{{instance=~".*kubedepend-backend.*"}}[{range_length}s]) + 2 - probe_success{{instance=~".*kubedepend-backend.*"}} offset {range_length}) / 2))'
 
-BACKEND_MDT_QUERY="15 * (count_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) - sum_over_time(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}])) / (floor((changes(probe_success{instance=~'.*kubedepend-backend.*'}[${RANGE}]) + 2 - probe_success{instance=~'.*kubedepend-backend.*'} offset ${RANGE}) / 2))"
+def backend_mtbf_query(range_length):
+    if type(range_length) is not int:
+        raise TypeError('range_length must be int')
 
-BACKEND_MTBF_QUERY="${BACKEND_MUT_QUERY} + ${BACKEND_MDT_QUERY}"
-
+    return f'{backend_mut_query(range_length)} + {backend_mdt_query(range_length)}'
 
 ### Backend host
 BACKEND_HOST = "http://localhost:8080"
