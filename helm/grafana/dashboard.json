@@ -66,7 +66,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(1 + sum by (namespace)(worker_busy_threads{job=\"worker-pods\"})) / on(namespace) (kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"})",
+          "expr": "(1 + (( sum by (namespace)  (worker_busy_threads{job=\"worker-pods\"} )) or label_replace(vector(0), \"namespace\", \"kubedepend\", \"\", \"\"))) / on(namespace) (kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"})",
           "instant": false,
           "interval": "",
           "legendFormat": "",
