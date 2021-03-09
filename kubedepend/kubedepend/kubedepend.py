@@ -60,7 +60,11 @@ def main():
     # gevent.spawn(stats_history, env.runner)
 
     logging.info('Creating chaos objects...')
-    os.system('pwd')
+
+    os.system('''
+    helm version
+    helm ls
+    ''')
 
     logging.info('Chaos objects applied.')
 
@@ -96,17 +100,28 @@ def main():
 
 
 # Queries Prometheus with the given Prometheus format query
-def query_prometheus(query):
+def query_prometheus(query, trycount=0):
     # assemble url
     url = f'{c.PROMETHEUS_HOST}{c.PROMETHEUS_QUERY_ENDPOINT}?query={urllib.parse.quote(query)}'
     # get data
     res = requests.get(url=url)
     # print(res.json())
-    value = res.json()['data']['result'][0]['value'][1]
-    # print(value)
-
-    # values is string originally (comes from JSON)
-    return float(value)
+    value = None
+    try:
+        value = res.json()['data']['result'][0]['value'][1]
+    except IndexError:
+        if trycount >= 10:
+            raise ValueError('No data from Prometheus')
+        # wait 1 sec with next attempt
+        time.sleep(1)
+        return query_prometheus(query, trycount=trycount + 1)
+    
+    else:
+        # values is string originally (comes from JSON)
+        # print(value)
+        return float(value)
+    
+    
 
 
 def is_stable_state():
