@@ -10,10 +10,12 @@ import urllib.parse
 import time
 import os
 import sys
+from datetime import datetime
 
 import constants as c
 from model import BackendDependabilityMetrics
 from model import SystemState
+from model import TestResult
 
 logging.basicConfig(
     level=logging.INFO
@@ -34,82 +36,90 @@ class User(HttpUser):
             'Accept': 'application/json'
         }
         data = {
-            'input': 20
+            'input': 49
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
 
 def main():
 
-    args = [arg for arg in sys.argv[1:]]
-    for i, arg in enumerate(args):
-        print(i, arg)
+    # args = [arg for arg in sys.argv[1:]]
+    # for i, arg in enumerate(args):
+    #     print(i, arg)
 
+
+    logging.info('Waiting for stable system state...')
     wait_for_stable_state()
 
-    # Setup Locust objects
+    result = TestResult()
 
-    # setup Environment and Runner
-    env = Environment(user_classes=[User])
-    env.create_local_runner()
+    for i in range(10):
 
-    # start a greenlet that periodically outputs the current stats
-    # gevent.spawn(stats_printer(env.stats))
+        duration = 600 # sec
 
-    # start a greenlet that save current stats to history
-    # gevent.spawn(stats_history, env.runner)
+        # Setup Locust objects
 
-    logging.info('Creating chaos objects...')
+        # setup Environment and Runner
+        env = Environment(user_classes=[User])
+        env.create_local_runner()
 
-    os.system('''
-    helm upgrade \
-        --install \
-        --namespace chaos-testing \
-        -f charts/kubedepend-chaos/values.yaml \
-        kubedepend-chaos \
-        ./charts/kubedepend-chaos \
-        --set podChaos.enabled=true
-    ''')
+        # start a greenlet that periodically outputs the current stats
+        gevent.spawn(stats_printer(env.stats))
 
-    logging.info('Chaos objects applied.')
+        # start a greenlet that save current stats to history
+        gevent.spawn(stats_history, env.runner)
 
-    logging.info('Generating load...')
+        logging.info('Creating chaos objects...')
 
-    # start the test
-    # env.runner.start(user_count=10, spawn_rate=1)
+        os.system('''
+        helm upgrade \
+            --install \
+            --namespace chaos-testing \
+            -f ../charts/kubedepend-chaos/values.yaml \
+            kubedepend-chaos \
+            ../charts/kubedepend-chaos \
+            --set podChaos.enabled=true
+        ''')
 
-    # in 60 seconds stop the runner
-    # gevent.spawn_later(60, lambda: env.runner.quit())
+        logging.info('Chaos objects applied.')
 
-    # wait for the greenlets
-    # env.runner.greenlet.join()
+        logging.info('Generating load...')
 
-    logging.info('Load generation finished')
+        # start the test
+        env.runner.start(user_count=1, spawn_rate=1)
 
-    # get dependability metrics
-    
-    metrics = get_dependability_metrics(10)
-    print(metrics)
+        # in 60 seconds stop the runner
+        gevent.spawn_later(duration, lambda: env.runner.quit())
 
+        # wait for the greenlets
+        env.runner.greenlet.join()
 
-    # save dependability metrics
+        logging.info('Load generation finished')
 
-    # save chaos configuration
-    os.system('''
-        helm get manifest kubedepend-chaos -n chaos-testing
-    ''')
+        # get dependability metrics
+        
+        metrics = get_dependability_metrics(duration)
+        
+        result.add_metric(metrics)
 
-    logging.info('Deleting chaos objects...')
+        # save dependability metrics
 
-    # os.system('''
-    #     helm delete kubedepend-chaos -n chaos-testing
-    # ''')
+        # save chaos configuration
+        # os.system('''
+        #     helm get manifest kubedepend-chaos -n chaos-testing
+        # ''')
 
-    logging.info('Chaos objects deleted.')
+        logging.info('Deleting chaos objects...')
 
+        os.system('''
+            helm delete kubedepend-chaos -n chaos-testing
+        ''')
 
+        logging.info('Chaos objects deleted.')
 
+    result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
 
+    logging.info('Test finished')
 
 
 
@@ -165,6 +175,8 @@ def generate_load():
     pass
 
 def get_dependability_metrics(range_length):
+    logging.info(f'"range_length" is: {range_length}')
+
     metrics = BackendDependabilityMetrics()
 
     metrics.availability = query_prometheus(c.backend_availability_query(range_length))
