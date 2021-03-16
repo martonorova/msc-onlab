@@ -1,0 +1,13 @@
+
+ioChaos:
+  enabled: false
+
+networkChaos:
+  enabled: false
+
+podChaos:
+  enabled: false
+
+stressChaos:
+  enabled: false
+

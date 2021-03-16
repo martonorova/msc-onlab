@@ -1,0 +1,24 @@
+
+{{- /*
+Pod Failure action periodically injects errors to pods.
+And it will cause pod creation failure for a while. 
+In other words, the selected pod will be unavailable in a specified period.
+*/}}
+{{- if .Values.podChaos.enabled -}}
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-failure-worker
+spec:
+  action: pod-failure
+  mode: one
+  value: ''
+  duration: '30s'
+  selector:
+    namespaces:
+      - kubedepend
+    labelSelectors:
+      'app': 'kubedepend-worker-app'
+  scheduler:
+    cron: '@every 1m'
+{{- end }}

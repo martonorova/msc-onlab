@@ -1,8 +1,11 @@
-# delay: IO delay action. You can specify the latency before the IO operation returns a result.
+{{- /*
+delay: IO delay action. You can specify the latency before the IO operation returns a result.
+*/}}
+{{- if .Values.ioChaos.enabled -}}
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
-  name: io-delay
+  name: io-delay-db
 spec:
   action: latency
   mode: one
@@ -18,3 +21,4 @@ spec:
   duration: "400s"
   scheduler:
     cron: "@every 10m"
+{{- end }}

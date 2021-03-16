@@ -59,7 +59,7 @@ data:
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: kubernetes_pod_name
-      - source_labels: [__meta_kubernetes_pod_label_prometheus-app]
+      - source_labels: [__meta_kubernetes_pod_label_prometheus_app]
         regex: .*true.*
         action: keep
       - source_labels: ['__meta_kubernetes_pod_label_daemon', '__meta_kubernetes_pod_node_name']
