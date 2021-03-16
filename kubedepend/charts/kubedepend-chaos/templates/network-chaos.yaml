@@ -1,19 +1,29 @@
 {{- if .Values.networkChaos.enabled -}}
+{{/*
+Network Partition action separates pods into several independent subnets by blocking communication between them.
+*/}}
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: backend-network-delay
+  name: network-partition-backend-to-db
+  namespace: kubedepend
 spec:
-  action: delay
+  action: partition
   mode: one
   selector:
-    namespaces:
+    namespace:
       - kubedepend
     labelSelectors:
       "app": "kubedepend-backend-app"
-  delay:
-    latency: "500ms"
-  duration: "30s"
+  direction: both
+  target:
+    selector:
+      namespaces:
+        - kubedepend
+      labelSelectors:
+        "app": "kubedepend-db-app"
+    mode: one
+  duration: "5s"
   scheduler:
-    cron: "@every 60s"
+    cron: "@every 15s"
 {{- end }}

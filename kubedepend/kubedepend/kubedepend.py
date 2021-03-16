@@ -47,13 +47,12 @@ def main():
     # for i, arg in enumerate(args):
     #     print(i, arg)
 
-
-    logging.info('Waiting for stable system state...')
-    wait_for_stable_state()
-
     result = TestResult()
 
     for i in range(10):
+
+        logging.info('Waiting for stable system state...')
+        wait_for_stable_state()
 
         duration = 600 # sec
 
@@ -78,7 +77,7 @@ def main():
             -f ../charts/kubedepend-chaos/values.yaml \
             kubedepend-chaos \
             ../charts/kubedepend-chaos \
-            --set podChaos.enabled=true
+            --set networkChaos.enabled=true
         ''')
 
         logging.info('Chaos objects applied.')
@@ -88,7 +87,7 @@ def main():
         # start the test
         env.runner.start(user_count=1, spawn_rate=1)
 
-        # in 60 seconds stop the runner
+        # in 'duartion' seconds stop the runner
         gevent.spawn_later(duration, lambda: env.runner.quit())
 
         # wait for the greenlets
@@ -180,7 +179,7 @@ def get_dependability_metrics(range_length):
     metrics = BackendDependabilityMetrics()
 
     metrics.availability = query_prometheus(c.backend_availability_query(range_length))
-    metrics.mut = query_prometheus(c.backend_availability_query(range_length))
+    metrics.mut = query_prometheus(c.backend_mut_query(range_length))
     metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
     metrics.mtbf = query_prometheus(c.backend_mtbf_query(range_length))
 
