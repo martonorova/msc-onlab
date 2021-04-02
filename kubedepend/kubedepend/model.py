@@ -51,20 +51,22 @@ class MeasurementSequenceResult:
     
     def save_results(self, filename):
 
-        now = int(time.time())
-        git_commit_short = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+        # if there are result values
+        if self.metrics:
+            now = int(time.time())
+            git_commit_short = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 
-        # open(filename, mode='x').close()
+            # open(filename, mode='x').close()
 
-        with open(filename, mode='w') as csv_file:
-            fieldnames = ['timestamp'] + list(self.metrics[0].asdict().keys()) + ['prev_git_commit_short']
-            print(fieldnames)
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            with open(filename, mode='w') as csv_file:
+                fieldnames = ['timestamp'] + list(self.metrics[0].asdict().keys()) + ['prev_git_commit_short']
+                print(fieldnames)
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
-            writer.writeheader()
-            for metric in self.metrics:
-                row = metric.asdict()
-                row['timestamp'] = now
-                row['prev_git_commit_short'] = git_commit_short
-                writer.writerow(row)
+                writer.writeheader()
+                for metric in self.metrics:
+                    row = metric.asdict()
+                    row['timestamp'] = now
+                    row['prev_git_commit_short'] = git_commit_short
+                    writer.writerow(row)
 

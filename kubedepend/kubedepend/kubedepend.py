@@ -4,6 +4,7 @@ from locust.env import Environment
 from locust.stats import stats_history, stats_printer
 from locust.log import setup_logging
 import gevent
+import click
 
 import logging
 import urllib.parse
@@ -44,7 +45,15 @@ class User(HttpUser):
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
 
-def main():
+@click.command()
+@click.option('--nosave', is_flag=True)
+@click.option('--fault-profile', type=click.Choice(['custom', 'slow-network']), default='custom', help='Name of the fault profile')
+@click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
+@click.option('--measurement-duration', type=click.INT, default=600, help='Duration of a single measurement in SECONDS')
+@click.option('--comment', type=click.STRING, help='Give a comment about the measurement sequence')
+def main(nosave, fault_profile, measurement_count, measurement_duration, comment):
+
+    print(fault_profile)
 
     check_working_dir()
 
@@ -56,78 +65,78 @@ def main():
     start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
 
     # Save current stack into archive
-    archive_stack(start_time)
+    if not nosave:
+        archive_stack(start_time)
 
     result = MeasurementSequenceResult()
 
-    # for i in range(10):
+    for i in range(measurement_count):
 
-    #     logging.info('Waiting for stable system state...')
-    #     wait_for_stable_state()
+        logging.info('Waiting for stable system state...')
+        wait_for_stable_state()
 
-    #     duration = 600 # sec
+        # Setup Locust objects
 
-    #     # Setup Locust objects
+        # setup Environment and Runner
+        env = Environment(user_classes=[User])
+        env.create_local_runner()
 
-    #     # setup Environment and Runner
-    #     env = Environment(user_classes=[User])
-    #     env.create_local_runner()
+        # start a greenlet that periodically outputs the current stats
+        gevent.spawn(stats_printer(env.stats))
 
-    #     # start a greenlet that periodically outputs the current stats
-    #     gevent.spawn(stats_printer(env.stats))
+        # start a greenlet that save current stats to history
+        gevent.spawn(stats_history, env.runner)
 
-    #     # start a greenlet that save current stats to history
-    #     gevent.spawn(stats_history, env.runner)
+        logging.info('Creating chaos objects...')
 
-    #     logging.info('Creating chaos objects...')
+        os.system('''
+        helm upgrade \
+            --install \
+            --namespace chaos-testing \
+            -f ../charts/kubedepend-chaos/values.yaml \
+            kubedepend-chaos \
+            ../charts/kubedepend-chaos \
+            --set networkChaos.enabled=true
+        ''')
 
-    #     os.system('''
-    #     helm upgrade \
-    #         --install \
-    #         --namespace chaos-testing \
-    #         -f ../charts/kubedepend-chaos/values.yaml \
-    #         kubedepend-chaos \
-    #         ../charts/kubedepend-chaos \
-    #         --set networkChaos.enabled=true
-    #     ''')
+        logging.info('Chaos objects applied.')
 
-    #     logging.info('Chaos objects applied.')
+        logging.info('Generating load...')
 
-    #     logging.info('Generating load...')
+        # start the test
+        env.runner.start(user_count=1, spawn_rate=1)
 
-    #     # start the test
-    #     env.runner.start(user_count=1, spawn_rate=1)
+        # in 'duartion' seconds stop the runner
+        gevent.spawn_later(duration, lambda: env.runner.quit())
 
-    #     # in 'duartion' seconds stop the runner
-    #     gevent.spawn_later(duration, lambda: env.runner.quit())
+        # wait for the greenlets
+        env.runner.greenlet.join()
 
-    #     # wait for the greenlets
-    #     env.runner.greenlet.join()
+        logging.info('Load generation finished')
 
-    #     logging.info('Load generation finished')
+        # get dependability metrics
 
-    #     # get dependability metrics
+        metrics = get_dependability_metrics(measurement_duration)
 
-    #     metrics = get_dependability_metrics(duration)
+        result.add_metric(metrics)
 
-    #     result.add_metric(metrics)
+        # save dependability metrics
 
-    #     # save dependability metrics
+        # save chaos configuration
+        # os.system('''
+        #     helm get manifest kubedepend-chaos -n chaos-testing
+        # ''')
 
-    #     # save chaos configuration
-    #     # os.system('''
-    #     #     helm get manifest kubedepend-chaos -n chaos-testing
-    #     # ''')
+        logging.info('Deleting chaos objects...')
 
-    #     logging.info('Deleting chaos objects...')
+        os.system('''
+            helm delete kubedepend-chaos -n chaos-testing
+        ''')
 
-    #     os.system('''
-    #         helm delete kubedepend-chaos -n chaos-testing
-    #     ''')
+        logging.info('Chaos objects deleted.')
 
-    #     logging.info('Chaos objects deleted.')
-
-    # result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
+    if not nosave:
+        result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
 
     logging.info('Test finished')
 
