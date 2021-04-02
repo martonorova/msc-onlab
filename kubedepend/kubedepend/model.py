@@ -2,7 +2,7 @@ import csv
 import time
 import subprocess
 
-class BackendDependabilityMetrics:
+class MeasurementResult:
     def __init__(self):
         self.availability = None
         # Mean Up Time
@@ -22,7 +22,7 @@ class BackendDependabilityMetrics:
     
     def __str__(self):
         return (
-            f'BackendDependabilityMetrics( Availability={self.availability}, '
+            f'MeasurementResult( Availability={self.availability}, '
             f'Mean Up Time={self.mut}, '
             f'Mean Down Time={self.mdt}, '
             f'Mean Time Between Failures={self.mtbf} )'
@@ -36,7 +36,7 @@ class SystemState:
         self.worker_busy_threads_count = None
         self.worker_pods_count = None
 
-class TestResult:
+class MeasurementSequenceResult:
     def __init__(self, metrics=[]):
         self.metrics = []
 
@@ -45,8 +45,8 @@ class TestResult:
         self.metrics = metrics
 
     def add_metric(self, metric):
-        if not isinstance(metric, BackendDependabilityMetrics):
-            raise ValueError('metric must be BackendDependabilityMetrics')
+        if not isinstance(metric, MeasurementResult):
+            raise ValueError('metric must be MeasurementResult')
         self.metrics.append(metric)
     
     def save_results(self, filename):

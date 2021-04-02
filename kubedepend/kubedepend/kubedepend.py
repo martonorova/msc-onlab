@@ -13,9 +13,9 @@ import sys
 from datetime import datetime
 
 import constants as c
-from model import BackendDependabilityMetrics
+from model import MeasurementResult
 from model import SystemState
-from model import TestResult
+from model import MeasurementSequenceResult
 
 logging.basicConfig(
     level=logging.INFO
@@ -36,7 +36,7 @@ class User(HttpUser):
             'Accept': 'application/json'
         }
         data = {
-            'input': 49
+            'input': 40
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
@@ -47,7 +47,7 @@ def main():
     # for i, arg in enumerate(args):
     #     print(i, arg)
 
-    result = TestResult()
+    result = MeasurementSequenceResult()
 
     for i in range(10):
 
@@ -176,7 +176,7 @@ def generate_load():
 def get_dependability_metrics(range_length):
     logging.info(f'"range_length" is: {range_length}')
 
-    metrics = BackendDependabilityMetrics()
+    metrics = MeasurementResult()
 
     metrics.availability = query_prometheus(c.backend_availability_query(range_length))
     metrics.mut = query_prometheus(c.backend_mut_query(range_length))
