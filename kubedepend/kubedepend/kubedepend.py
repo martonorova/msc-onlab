@@ -11,6 +11,8 @@ import time
 import os
 import sys
 from datetime import datetime
+import tarfile
+import pathlib
 
 import constants as c
 from model import MeasurementResult
@@ -23,6 +25,7 @@ logging.basicConfig(
 
 # setup Locust logging
 setup_logging('INFO', None)
+
 
 class User(HttpUser):
     # constant_pacing for an adaptive time that ensures the task runs (at most) once every X seconds
@@ -43,83 +46,90 @@ class User(HttpUser):
 
 def main():
 
+    check_working_dir()
+
     # args = [arg for arg in sys.argv[1:]]
     # for i, arg in enumerate(args):
     #     print(i, arg)
 
+    # Save the start time of the measurement sequence
+    start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+
+    # Save current stack into archive
+    archive_stack(start_time)
+
     result = MeasurementSequenceResult()
 
-    for i in range(10):
+    # for i in range(10):
 
-        logging.info('Waiting for stable system state...')
-        wait_for_stable_state()
+    #     logging.info('Waiting for stable system state...')
+    #     wait_for_stable_state()
 
-        duration = 600 # sec
+    #     duration = 600 # sec
 
-        # Setup Locust objects
+    #     # Setup Locust objects
 
-        # setup Environment and Runner
-        env = Environment(user_classes=[User])
-        env.create_local_runner()
+    #     # setup Environment and Runner
+    #     env = Environment(user_classes=[User])
+    #     env.create_local_runner()
 
-        # start a greenlet that periodically outputs the current stats
-        gevent.spawn(stats_printer(env.stats))
+    #     # start a greenlet that periodically outputs the current stats
+    #     gevent.spawn(stats_printer(env.stats))
 
-        # start a greenlet that save current stats to history
-        gevent.spawn(stats_history, env.runner)
+    #     # start a greenlet that save current stats to history
+    #     gevent.spawn(stats_history, env.runner)
 
-        logging.info('Creating chaos objects...')
+    #     logging.info('Creating chaos objects...')
 
-        os.system('''
-        helm upgrade \
-            --install \
-            --namespace chaos-testing \
-            -f ../charts/kubedepend-chaos/values.yaml \
-            kubedepend-chaos \
-            ../charts/kubedepend-chaos \
-            --set networkChaos.enabled=true
-        ''')
+    #     os.system('''
+    #     helm upgrade \
+    #         --install \
+    #         --namespace chaos-testing \
+    #         -f ../charts/kubedepend-chaos/values.yaml \
+    #         kubedepend-chaos \
+    #         ../charts/kubedepend-chaos \
+    #         --set networkChaos.enabled=true
+    #     ''')
 
-        logging.info('Chaos objects applied.')
+    #     logging.info('Chaos objects applied.')
 
-        logging.info('Generating load...')
+    #     logging.info('Generating load...')
 
-        # start the test
-        env.runner.start(user_count=1, spawn_rate=1)
+    #     # start the test
+    #     env.runner.start(user_count=1, spawn_rate=1)
 
-        # in 'duartion' seconds stop the runner
-        gevent.spawn_later(duration, lambda: env.runner.quit())
+    #     # in 'duartion' seconds stop the runner
+    #     gevent.spawn_later(duration, lambda: env.runner.quit())
 
-        # wait for the greenlets
-        env.runner.greenlet.join()
+    #     # wait for the greenlets
+    #     env.runner.greenlet.join()
 
-        logging.info('Load generation finished')
+    #     logging.info('Load generation finished')
 
-        # get dependability metrics
-        
-        metrics = get_dependability_metrics(duration)
-        
-        result.add_metric(metrics)
+    #     # get dependability metrics
 
-        # save dependability metrics
+    #     metrics = get_dependability_metrics(duration)
 
-        # save chaos configuration
-        # os.system('''
-        #     helm get manifest kubedepend-chaos -n chaos-testing
-        # ''')
+    #     result.add_metric(metrics)
 
-        logging.info('Deleting chaos objects...')
+    #     # save dependability metrics
 
-        os.system('''
-            helm delete kubedepend-chaos -n chaos-testing
-        ''')
+    #     # save chaos configuration
+    #     # os.system('''
+    #     #     helm get manifest kubedepend-chaos -n chaos-testing
+    #     # ''')
 
-        logging.info('Chaos objects deleted.')
+    #     logging.info('Deleting chaos objects...')
 
-    result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
+    #     os.system('''
+    #         helm delete kubedepend-chaos -n chaos-testing
+    #     ''')
+
+    #     logging.info('Chaos objects deleted.')
+
+    # result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
 
     logging.info('Test finished')
-
 
 
 # Queries Prometheus with the given Prometheus format query
@@ -138,11 +148,12 @@ def query_prometheus(query, trycount=0):
         # wait 1 sec with next attempt
         time.sleep(1)
         return query_prometheus(query, trycount=trycount + 1)
-    
+
     else:
         # values is string originally (comes from JSON)
         # print(value)
         return float(value)
+
 
 def is_stable_state():
     worker_busy_threads_count = query_prometheus(c.WORKER_BUSY_THREADS_QUERY)
@@ -151,9 +162,10 @@ def is_stable_state():
     needed_worker_ratio = query_prometheus(c.NEEDED_WORKER_RATIO_QUERY)
 
     if worker_busy_threads_count != 0:
-        logging.info(f'There are still busy worker threads ({worker_busy_threads_count})')
+        logging.info(
+            f'There are still busy worker threads ({worker_busy_threads_count})')
         return False
-    
+
     if queue_size != 0:
         logging.info(f'Queue is not empty ({queue_size} jobs waiting)')
         return False
@@ -161,8 +173,9 @@ def is_stable_state():
     if worker_pods_count != 1:
         logging.info(f'There are multiple worker pods ({worker_pods_count})')
         return False
-    
+
     return True
+
 
 def wait_for_stable_state():
     while not is_stable_state():
@@ -170,15 +183,18 @@ def wait_for_stable_state():
         time.sleep(5)
     logging.info('State OK')
 
+
 def generate_load():
     pass
+
 
 def get_dependability_metrics(range_length):
     logging.info(f'"range_length" is: {range_length}')
 
     metrics = MeasurementResult()
 
-    metrics.availability = query_prometheus(c.backend_availability_query(range_length))
+    metrics.availability = query_prometheus(
+        c.backend_availability_query(range_length))
     metrics.mut = query_prometheus(c.backend_mut_query(range_length))
     metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
     metrics.mtbf = query_prometheus(c.backend_mtbf_query(range_length))
@@ -186,7 +202,30 @@ def get_dependability_metrics(range_length):
     return metrics
 
 
-    
+def check_working_dir():
+    # Check if in right working dir
+    actual_working_dir = '/'.join(str(pathlib.Path.cwd()).split('/')[-3:])
+    expected_working_dir = 'msc-onlab/kubedepend/kubedepend'
+
+    if (actual_working_dir != expected_working_dir):
+        raise RuntimeError(f'Working directory must be {expected_working_dir}')
+
+
+def archive_stack(datestring):
+
+    with tarfile.open(f'archives/archive-{datestring}.tgz', 'w:gz') as tar:
+        tar.add('../../', arcname=os.path.basename('../../'),
+                filter=archive_filter)
+
+
+def archive_filter(tarinfo):
+    file_path = tarinfo.name.split('/')
+    EXCLUDES = ['node_modules', '.gradle', 'build', 'archives']
+
+    if any(item in file_path for item in EXCLUDES):
+        return None
+    return tarinfo
+
 
 if __name__ == "__main__":
     main()
