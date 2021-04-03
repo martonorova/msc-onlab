@@ -1,0 +1,2 @@
+id,measurement_seq_start_time,availability,mut,mdt,mtbf,measurement_start_time,measurement_end_time,fault_profile,cluster_type,measurement_count,load_duration,locust_user_count,locust_spawn_rate,prev_git_commit_short,comment
+da2ce387-f456-4135-8b7d-2883a850c0a4,04-03-2021_20-12-16.169358,1.0,15.0,nan,nan,04-03-2021_20-12-16.609530,04-03-2021_20-12-27.898936,custom,minikube,1,10,1,1,e0b1442,Some comment

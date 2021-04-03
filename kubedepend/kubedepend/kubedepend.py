@@ -17,6 +17,7 @@ import pathlib
 
 import constants as c
 from model import MeasurementResult
+from model import BackendMetrics
 from model import SystemState
 from model import MeasurementSequenceResult
 
@@ -40,7 +41,7 @@ class User(HttpUser):
             'Accept': 'application/json'
         }
         data = {
-            'input': 40
+            'input': 48
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
@@ -49,31 +50,38 @@ class User(HttpUser):
 @click.option('--nosave', is_flag=True)
 @click.option('--fault-profile', type=click.Choice(['custom', 'slow-network']), default='custom', help='Name of the fault profile')
 @click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
-@click.option('--measurement-duration', type=click.INT, default=600, help='Duration of a single measurement in SECONDS')
+@click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
+@click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
+@click.option('--locust_user_count', type=click.INT, default=1, help='Total number of Locust users to start')
+@click.option('--locust_spawn_rate', type=click.INT, default=1, help='Number of Locust users to spawn per second')
 @click.option('--comment', type=click.STRING, help='Give a comment about the measurement sequence')
-def main(nosave, fault_profile, measurement_count, measurement_duration, comment):
-
-    print(fault_profile)
+def main(nosave, fault_profile, measurement_count, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
 
     check_working_dir()
 
-    # args = [arg for arg in sys.argv[1:]]
-    # for i, arg in enumerate(args):
-    #     print(i, arg)
-
     # Save the start time of the measurement sequence
-    start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+    start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S.%f")
 
     # Save current stack into archive
     if not nosave:
         archive_stack(start_time)
 
-    result = MeasurementSequenceResult()
+    sequence_result = MeasurementSequenceResult(
+        start_time=start_time,
+        fault_profile=fault_profile,
+        cluster_type=cluster_type,
+        load_duration=load_duration,
+        locust_user_count=locust_user_count,
+        locust_spawn_rate=locust_spawn_rate,
+        comment=comment)
 
     for i in range(measurement_count):
 
         logging.info('Waiting for stable system state...')
         wait_for_stable_state()
+
+        # Initialize measurement result
+        measurement_result = MeasurementResult()
 
         # Setup Locust objects
 
@@ -104,10 +112,10 @@ def main(nosave, fault_profile, measurement_count, measurement_duration, comment
         logging.info('Generating load...')
 
         # start the test
-        env.runner.start(user_count=1, spawn_rate=1)
+        env.runner.start(user_count=locust_user_count, spawn_rate=locust_spawn_rate)
 
         # in 'duartion' seconds stop the runner
-        gevent.spawn_later(duration, lambda: env.runner.quit())
+        gevent.spawn_later(load_duration, lambda: env.runner.quit())
 
         # wait for the greenlets
         env.runner.greenlet.join()
@@ -116,9 +124,14 @@ def main(nosave, fault_profile, measurement_count, measurement_duration, comment
 
         # get dependability metrics
 
-        metrics = get_dependability_metrics(measurement_duration)
+        metrics = get_dependability_metrics(load_duration)
 
-        result.add_metric(metrics)
+        # add metrics to measurement result
+        measurement_result.backend_metrics = metrics
+        # end measurement (fill end_time attribute)
+        measurement_result.end()
+        # add measurement result to sequence result
+        sequence_result.add_measurement_result(measurement_result)
 
         # save dependability metrics
 
@@ -136,7 +149,9 @@ def main(nosave, fault_profile, measurement_count, measurement_duration, comment
         logging.info('Chaos objects deleted.')
 
     if not nosave:
-        result.save_results(f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
+        # sequence_result.save_results(
+        #     f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
+        sequence_result.save_results('results/results.csv')
 
     logging.info('Test finished')
 
@@ -200,7 +215,7 @@ def generate_load():
 def get_dependability_metrics(range_length):
     logging.info(f'"range_length" is: {range_length}')
 
-    metrics = MeasurementResult()
+    metrics = BackendMetrics()
 
     metrics.availability = query_prometheus(
         c.backend_availability_query(range_length))
