@@ -1,13 +1,33 @@
+# fault profiles target K8s objects only in the kubedepend namespace
+# fault profiles are combinations of some categories of chaos experiments
+# the mapping from fault profiles to the category combinations happens on the test framework side in python code
+# each category of chaos experiments have 3 strength levels (low, medium, high)
 
+# Categories
+# mainly concerns the DB
 ioChaos:
   enabled: false
+  strength: medium
 
 networkChaos:
   enabled: false
+  strength: medium
 
-podChaos:
+# rescheduling 
+podKillChaos:
   enabled: false
+  strength: medium
+
+# application fault
+podFailureChaos:
+  enabled: false
+  strength: medium
 
 stressChaos:
   enabled: false
+  strength: medium
 
+# IoT?
+dnsChaos:
+  enabled: false
+  strength: medium
