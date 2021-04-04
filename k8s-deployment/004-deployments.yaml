@@ -93,8 +93,8 @@ spec:
         stdin: true
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "100m"
+            memory: "2048Mi"
+            cpu: "1000m"
         ports:
         - containerPort: 3000
           name: frontend-port
@@ -130,8 +130,8 @@ spec:
                   name: worker-config
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "1000m"
         ports:
         - containerPort: 5000
           name: worker-port
