@@ -1,0 +1,31 @@
+{{- if .Values.stressCpuChaos.enabled -}}
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: burn-cpu
+spec:
+  mode: fixed-percent
+  {{- if .Values.stressCpuChaos.strength == "low" }}
+  value: {{ .Values.mode.fixPercent.low }}
+  {{- else if .Values.stressCpuChaos.strength == "high" }}
+  value: {{ .Values.mode.fixPercent.high }}
+  {{- else .Values.stressCpuChaos.strength == "medium" }}
+  value: {{ .Values.mode.fixPercent.medium }}
+  {{- end }}
+  selector:
+    namespaces:
+      - kubedepend
+  stressors:
+    cpu:
+      workers: 4
+      {{- if .Values.stressCpuChaos.strength == "low" }}
+      load: 20
+      {{- else if .Values.stressCpuChaos.strength == "high" }}
+      load: 80
+      {{- else .Values.stressCpuChaos.strength == "medium" }}
+      load: 50
+      {{- end }}
+  duration: "60s"
+  scheduler:
+    cron: "@every 2m"
+{{- end }}

@@ -1,0 +1,33 @@
+{{- if .Values.networkDelayChaos.enabled -}}
+{{/*
+Network Partition action separates pods into several independent subnets by blocking communication between them.
+*/}}
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay
+spec:
+  action: delay
+  mode: fixed-percent
+  {{- if .Values.networkDelayChaos.strength == "low" }}
+  value: {{ .Values.mode.fixPercent.low }}
+  {{- else if .Values.networkDelayChaos.strength == "high" }}
+  value: {{ .Values.mode.fixPercent.high }}
+  {{- else .Values.networkDelayChaos.strength == "medium" }}
+  value: {{ .Values.mode.fixPercent.medium }}
+  {{- end }}
+  selector:
+    namespace:
+      - kubedepend
+  delay:
+    {{- if .Values.networkDelayChaos.strength == "low" }}
+    latency: "500ms"
+    {{- else if .Values.networkDelayChaos.strength == "high" }}
+    latency: "2000ms"
+    {{- else .Values.networkDelayChaos.strength == "medium" }}
+    latency: "1000ms"
+    {{- end }}
+  duration: "60s"
+  scheduler:
+    cron: "@every 60s"
+{{- end }}

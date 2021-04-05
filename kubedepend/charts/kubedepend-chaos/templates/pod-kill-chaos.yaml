@@ -1,0 +1,26 @@
+
+{{- /*
+Pod Kill action kills the specified pod (ReplicaSet or something similar might be needed to ensure the pod will be restarted).
+*/}}
+{{- if .Values.podKillChaos.enabled -}}
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-failure-worker
+spec:
+  action: pod-failure
+  mode: fixed-percent
+  {{- if .Values.podFailureChaos.strength == "low" }}
+  value: {{ .Values.mode.fixPercent.low }}
+  {{- else if .Values.podFailureChaos.strength == "high" }}
+  value: {{ .Values.mode.fixPercent.high }}
+  {{- else .Values.podFailureChaos.strength == "medium" }}
+  value: {{ .Values.mode.fixPercent.medium }}
+  {{- end }}
+  selector:
+    namespaces:
+      - kubedepend
+  duration: "60s"
+  scheduler:
+    cron: "@every 2m"
+{{- end }}

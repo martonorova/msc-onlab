@@ -4,12 +4,22 @@
 # each category of chaos experiments have 3 strength levels (low, medium, high)
 
 # Categories
-# mainly concerns the DB
+
+# only concerns the DB
 ioChaos:
   enabled: false
   strength: medium
 
-networkChaos:
+networkPartitionChaos:
+  enabled: false
+  strength: medium
+
+networkDelayChaos:
+  enabled: false
+  strength: medium
+
+  # application fault
+podFailureChaos:
   enabled: false
   strength: medium
 
@@ -18,16 +28,17 @@ podKillChaos:
   enabled: false
   strength: medium
 
-# application fault
-podFailureChaos:
+stressCpuChaos:
   enabled: false
   strength: medium
 
-stressChaos:
+stressMemChaos:
   enabled: false
   strength: medium
 
-# IoT?
-dnsChaos:
-  enabled: false
-  strength: medium
+# chaos action modes and values to use with them
+mode:
+  fixPercent:
+    low: 20
+    medium: 35
+    high: 50
