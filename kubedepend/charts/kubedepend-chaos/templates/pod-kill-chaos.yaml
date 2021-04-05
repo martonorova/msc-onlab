@@ -22,5 +22,5 @@ spec:
       - kubedepend
   duration: "60s"
   scheduler:
-    cron: "@every 2m"
+    cron: "@every 3m"
 {{- end }}
