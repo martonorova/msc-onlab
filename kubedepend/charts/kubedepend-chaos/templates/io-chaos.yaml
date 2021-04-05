@@ -10,7 +10,7 @@ spec:
   action: latency
   mode: one
   selector:
-    namespace:
+    namespaces:
       - kubedepend
     labelSelectors:
       app: kubedepend-db-app

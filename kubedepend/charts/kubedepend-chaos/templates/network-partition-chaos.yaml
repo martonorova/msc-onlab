@@ -17,7 +17,7 @@ spec:
   value: {{ .Values.mode.fixPercent.medium | quote }}
   {{- end }}
   selector:
-    namespace:
+    namespaces:
       - kubedepend
   direction: both
   target:
