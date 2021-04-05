@@ -14,6 +14,7 @@ import sys
 from datetime import datetime
 import tarfile
 import pathlib
+import subprocess
 
 import constants as c
 from model import MeasurementResult
@@ -45,6 +46,7 @@ class User(HttpUser):
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
+
 FAULT_PROFILES = [
     'custom',
     'io',
@@ -55,6 +57,17 @@ FAULT_PROFILES = [
     'stress-cpu',
     'stress-mem'
 ]
+
+HELM_COMMAND_FIX_PART = [
+    'helm',
+    'upgrade',
+    '--install',
+    '--namespace',
+    'chaos-testing',
+    'kubedepend-chaos',
+    '../charts/kubedepend-chaos'
+]
+
 
 @click.command()
 @click.option('--nosave', is_flag=True)
@@ -72,8 +85,29 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
     # Save the start time of the measurement sequence
     start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S.%f")
 
+    # lint helm chart
+    try:
+        logging.info('Linting Helm chart...')
+        subprocess.check_output(['helm', 'lint', '../charts/kubedepend-chaos'])
+        logging.info('Linting Helm chart finished OK')
+    except subprocess.CalledProcessError as error:
+        logging.error('Helm lint failed, exiting...')
+        exit()
+
+    # assembling helm options TODO with fault profile to chaos objects mapping
+    helm_value_sets = [
+        '--set',
+        f'ioChaos.enabled=true',
+        '--set',
+        f'podFailureChaos.enabled=true'
+    ]
+
+    # SAVE HELM CHART
+    helm_command = [x for x in HELM_COMMAND_FIX_PART + helm_value_sets if x]
+
     # Save current stack into archive
     if not nosave:
+        save_helm_chart(helm_command=helm_command)
         archive_stack(start_time)
 
     sequence_result = MeasurementSequenceResult(
@@ -86,6 +120,8 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
         comment=comment)
 
     for i in range(measurement_count):
+
+        logging.info(f'Start measurement #{i + 1}')
 
         logging.info('Waiting for stable system state...')
         wait_for_stable_state()
@@ -107,22 +143,15 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
 
         logging.info('Creating chaos objects...')
 
-        os.system('''
-        helm upgrade \
-            --install \
-            --namespace chaos-testing \
-            -f ../charts/kubedepend-chaos/values.yaml \
-            kubedepend-chaos \
-            ../charts/kubedepend-chaos \
-            --set networkChaos.enabled=true
-        ''')
+        subprocess.run(helm_command)
 
         logging.info('Chaos objects applied.')
 
         logging.info('Generating load...')
 
         # start the test
-        env.runner.start(user_count=locust_user_count, spawn_rate=locust_spawn_rate)
+        env.runner.start(user_count=locust_user_count,
+                         spawn_rate=locust_spawn_rate)
 
         # in 'duartion' seconds stop the runner
         gevent.spawn_later(load_duration, lambda: env.runner.quit())
@@ -145,23 +174,16 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
 
         # save dependability metrics
 
-        # save chaos configuration
-        # os.system('''
-        #     helm get manifest kubedepend-chaos -n chaos-testing
-        # ''')
-
         logging.info('Deleting chaos objects...')
 
-        os.system('''
-            helm delete kubedepend-chaos -n chaos-testing
-        ''')
+        subprocess.run(['helm', 'delete', 'kubedepend-chaos', '-n', 'chaos-testing'])
 
         logging.info('Chaos objects deleted.')
 
     if not nosave:
-        # sequence_result.save_results(
-        #     f'results/results-{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.csv')
         sequence_result.save_results('results/results.csv')
+
+    # TODO stop running greenlets (stats)
 
     logging.info('Test finished')
 
@@ -246,7 +268,6 @@ def check_working_dir():
 
 
 def archive_stack(datestring):
-
     with tarfile.open(f'archives/archive-{datestring}.tgz', 'w:gz') as tar:
         tar.add('../../', arcname=os.path.basename('../../'),
                 filter=archive_filter)
@@ -259,6 +280,19 @@ def archive_filter(tarinfo):
     if any(item in file_path for item in EXCLUDES):
         return None
     return tarinfo
+
+
+def save_helm_chart(helm_command):
+    chaos_objects = subprocess.check_output(
+        helm_command + ['--dry-run']
+    ).decode('ascii').strip()
+
+    last_chaos_file = pathlib.Path('last-chaos-objects/chaos_manifest.txt')
+    if last_chaos_file.exists():
+        last_chaos_file.unlink()
+
+    with open(last_chaos_file, mode='w') as chaos_file:
+        chaos_file.write(chaos_objects)
 
 
 if __name__ == "__main__":
