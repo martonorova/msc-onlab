@@ -16,11 +16,11 @@ spec:
       app: kubedepend-db-app
   volumePath: /var/lib/mysql
   path: "/var/lib/mysql/**/*"
-  {{- if .Values.ioChaos.strength == "low"}}
+  {{- if eq .Values.ioChaos.strength "low"}}
   delay: "1000ms"
-  {{- else if .Values.ioChaos.strength == "high" }}
+  {{- else if eq .Values.ioChaos.strength "high" }}
   delay: "5000ms"
-  {{- else .Values.ioChaos.strength == "medium" }}
+  {{- else }}
   delay: "2500ms"
   {{- else end }}
   percent: 100

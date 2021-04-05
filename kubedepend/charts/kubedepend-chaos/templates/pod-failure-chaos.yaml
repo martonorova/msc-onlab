@@ -12,11 +12,11 @@ metadata:
 spec:
   action: pod-failure
   mode: fixed-percent
-  {{- if .Values.podFailureChaos.strength == "low" }}
+  {{- if eq .Values.podFailureChaos.strength "low" }}
   value: {{ .Values.mode.fixPercent.low }}
-  {{- else if .Values.podFailureChaos.strength == "high" }}
+  {{- else if eq .Values.podFailureChaos.strength "high" }}
   value: {{ .Values.mode.fixPercent.high }}
-  {{- else .Values.podFailureChaos.strength == "medium" }}
+  {{- else }}
   value: {{ .Values.mode.fixPercent.medium }}
   {{- end }}
   selector:

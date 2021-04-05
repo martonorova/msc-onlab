@@ -5,11 +5,11 @@ metadata:
   name: burn-memory
 spec:
   mode: fixed-percent
-  {{- if .Values.stressMemChaos.strength == "low" }}
+  {{- if eq .Values.stressMemChaos.strength "low" }}
   value: {{ .Values.mode.fixPercent.low }}
-  {{- else if .Values.stressMemChaos.strength == "high" }}
+  {{- else if eq .Values.stressMemChaos.strength "high" }}
   value: {{ .Values.mode.fixPercent.high }}
-  {{- else .Values.stressMemChaos.strength == "medium" }}
+  {{- else }}
   value: {{ .Values.mode.fixPercent.medium }}
   {{- end }}
   selector:
@@ -17,11 +17,11 @@ spec:
       - kubedepend
   stressors:
     memory:
-      {{- if .Values.stressMemChaos.strength == "low" }}
+      {{- if eq .Values.stressMemChaos.strength "low" }}
       workers: 1
-      {{- else if .Values.stressMemChaos.strength == "high" }}
+      {{- else if eq .Values.stressMemChaos.strength "high" }}
       workers: 3
-      {{- else .Values.stressMemChaos.strength == "medium" }}
+      {{- else }}
       workers: 2
       {{- end }}
   duration: "60s"
