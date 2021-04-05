@@ -45,10 +45,20 @@ class User(HttpUser):
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
+FAULT_PROFILES = [
+    'custom',
+    'io',
+    'network-delay',
+    'network-partition',
+    'pod-failure',
+    'pod-kill',
+    'stress-cpu',
+    'stress-mem'
+]
 
 @click.command()
 @click.option('--nosave', is_flag=True)
-@click.option('--fault-profile', type=click.Choice(['custom', 'slow-network']), default='custom', help='Name of the fault profile')
+@click.option('--fault-profile', type=click.Choice(FAULT_PROFILES), default='custom', help='Name of the fault profile')
 @click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
 @click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
 @click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
