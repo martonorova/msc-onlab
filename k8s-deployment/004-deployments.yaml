@@ -18,8 +18,11 @@ spec:
         image: morova/kubedepend-proxy:1.0
         imagePullPolicy: Always
         resources:
-          limits:
+          requests:
             memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
             cpu: "500m"
         ports:
         - containerPort: 80
@@ -59,9 +62,12 @@ spec:
             - configMapRef:
                   name: backend-config
         resources:
+          requests:
+            memory: "1024Mi"
+            cpu: "1000m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "2048Mi"
+            cpu: "2000m"
         ports:
         - containerPort: 8000
           name: backend-port
@@ -92,9 +98,12 @@ spec:
                   name: frontend-config
         stdin: true
         resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
           limits:
-            memory: "2048Mi"
-            cpu: "1000m"
+            memory: "1024Mi"
+            cpu: "500m"
         ports:
         - containerPort: 3000
           name: frontend-port
@@ -126,12 +135,15 @@ spec:
         image: morova/kubedepend-worker:1.0-java
         imagePullPolicy: Always
         envFrom:
-            - configMapRef:
-                  name: worker-config
+        - configMapRef:
+              name: worker-config
         resources:
-          limits:
+          requests:
             memory: "512Mi"
-            cpu: "1000m"
+            cpu: "500m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1500m"
         ports:
         - containerPort: 5000
           name: worker-port
@@ -161,9 +173,12 @@ spec:
             - configMapRef:
                   name: mysql-config
         resources:
+          requests:
+            memory: "512"
+            cpu: "200m"
           limits:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "1024Mi"
+            cpu: "500m"
         ports:
         - containerPort: 3306
           name: db-port
@@ -219,9 +234,12 @@ spec:
       - name: kubedepend-activemq
         image: bwolf/activemq-prometheus
         resources:
-          limits:
-            memory: "128Mi"
+          requests:
+            memory: "256Mi"
             cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
         ports:
         - containerPort: 61616
           name: amq-broker
