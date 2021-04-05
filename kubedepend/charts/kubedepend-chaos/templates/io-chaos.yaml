@@ -22,7 +22,7 @@ spec:
   delay: "5000ms"
   {{- else }}
   delay: "2500ms"
-  {{- else end }}
+  {{- end }}
   percent: 100
   duration: "60s"
   scheduler:

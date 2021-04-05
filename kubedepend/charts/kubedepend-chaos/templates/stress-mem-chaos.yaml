@@ -6,11 +6,11 @@ metadata:
 spec:
   mode: fixed-percent
   {{- if eq .Values.stressMemChaos.strength "low" }}
-  value: {{ .Values.mode.fixPercent.low }}
+  value: {{ .Values.mode.fixPercent.low | quote }}
   {{- else if eq .Values.stressMemChaos.strength "high" }}
-  value: {{ .Values.mode.fixPercent.high }}
+  value: {{ .Values.mode.fixPercent.high | quote }}
   {{- else }}
-  value: {{ .Values.mode.fixPercent.medium }}
+  value: {{ .Values.mode.fixPercent.medium | quote }}
   {{- end }}
   selector:
     namespaces:
