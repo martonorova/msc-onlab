@@ -96,4 +96,17 @@ spec:
     targetPort: amq-metrics
     name: amq-metrics
 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: measurement-proxy
+  namespace: measurement-proxy
+spec:
+  selector:
+    app: measurement-proxy-app
+  ports:
+  - port: 80
+    targetPort: proxy-port
 
