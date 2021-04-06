@@ -19,11 +19,11 @@ spec:
     cpu:
       workers: 4
       {{- if eq .Values.stressCpuChaos.strength "low" }}
-      load: 20
+      load: "20"
       {{- else if eq .Values.stressCpuChaos.strength "high" }}
-      load: 80
+      load: "80"
       {{- else }}
-      load: 50
+      load: "50"
       {{- end }}
   duration: "60s"
   scheduler:

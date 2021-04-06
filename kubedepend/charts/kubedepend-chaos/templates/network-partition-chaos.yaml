@@ -26,11 +26,11 @@ spec:
         - kubedepend
     mode: fixed-percent
     {{- if eq .Values.networkPartitionChaos.strength "low" }}
-    value: 20
+    value: {{ .Values.mode.fixPercent.low | quote }}
     {{- else if eq .Values.networkPartitionChaos.strength "high" }}
-    value: 35
+    value: {{ .Values.mode.fixPercent.high | quote }}
     {{- else }}
-    value: 50
+    value: {{ .Values.mode.fixPercent.medium | quote }}
     {{- end }}
   duration: "5s"
   scheduler:
