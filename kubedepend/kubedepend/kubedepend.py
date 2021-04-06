@@ -286,8 +286,6 @@ def assemble_helm_set_options(fault_profile):
         helm_value_sets.extend(['--set', f'{chaos_object["chaos"]}.enabled=true'])
         # set level of strength
         helm_value_sets.extend(['--set', f'{chaos_object["chaos"]}.strength={chaos_object["strength"]}'])
-    
-    print(helm_value_sets)
 
     return helm_value_sets
 
