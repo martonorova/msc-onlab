@@ -1,0 +1,112 @@
+########################################
+# Create EKS cluster
+########################################
+
+aws eks create-cluster \
+   --profile rm-dev \
+   --region us-east-2 \
+   --name morova-eks-cluster \
+   --kubernetes-version 1.19 \
+   --role-arn arn:aws:iam::651489313060:role/morovaEksClusterRole \
+   --resources-vpc-config subnetIds=subnet-02a01156cf6140c46,subnet-0c2502bd81b65183b,subnet-0a337e1ebe03c64f7,securityGroupIds=sg-0402bdc1712b4cd7b
+
+########################################
+# Query EKS cluster status
+########################################
+
+aws eks --profile rm-dev --region us-east-2 describe-cluster --name morova-eks-cluster --query "cluster.status"
+
+########################################
+# Update kubeconfig
+########################################
+
+aws eks update-kubeconfig \
+     --profile rm-dev \
+     --region us-east-2 \
+     --name morova-eks-cluster
+
+########################################
+# Create EKS managed nodegroup
+########################################
+
+## THIS IS NOT WORKING --> use: https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html
+eksctl create nodegroup \
+  --profile rm-dev \
+  --cluster morova-eks-cluster \
+  --region us-east-2 \
+  --name morova-nodegroup \
+  --node-type t3.medium \
+  --nodes 5 \
+  --nodes-min 3 \
+  --nodes-max 6 \
+  --ssh-access \
+  --ssh-public-key ~/.ssh/id_rsa.pub \
+  --managed
+
+########################################
+# Deploy stack
+########################################
+
+k apply -f 000-namespaces.yaml && \
+k apply -f 001-configmaps.yaml && \
+k apply -f 001-configmaps.yaml && \
+k apply -f 005-services.yaml && \
+k apply -f metrics-server.yaml && \
+k apply -f 400-hpa.yaml
+
+helm upgrade --install prometheus prometheus-community/prometheus -n monitoring -f helm/prometheus/values.yaml
+helm upgrade --install prometheus-blackbox-exporter prometheus-community/prometheus-blackbox-exporter -n monitoring -f helm/blackbox-exporter/values.yaml
+helm upgrade --install prometheus-adapter prometheus-community/prometheus-adapter -n monitoring -f helm/prometheus-adapter/values.yaml
+helm upgrade --install grafana grafana/grafana -n monitoring -f helm/grafana/values.yaml
+
+### TODO automatic admin password setting
+k -n monitoring exec grafana-7cf7f9b67f-rz5s4 -- grafana-cli admin reset-admin-password admin
+
+### TODO auto data source configuration
+
+### TODO script to install grafana dashboard
+
+
+### k apply -f helm/chaos-mesh/chaos-mesh-crd.yaml
+k apply -f helm/chaos-mesh/crds/
+helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml
+
+
+########################################
+# Open ports
+########################################
+
+k -n monitoring port-forward service/prometheus-server 9090:80
+k -n monitoring port-forward service/grafana 3000:80
+k -n chaos-testing port-forward service/chaos-dashboard 2333:2333
+k -n measurement-proxy port-forward service/measurement-proxy 8000:80
+
+
+########################################
+# CLEANUP
+########################################
+
+https://docs.aws.amazon.com/eks/latest/userguide/delete-cluster.html
+
+########################################
+# Delete Nodegroup
+########################################
+
+# list nodegroups associated with the EKS cluster
+aws eks list-nodegroups --profile rm-dev --cluster-name morova-eks-cluster
+# delete nodegroup
+aws eks delete-nodegroup --profile rm-dev --cluster-name morova-eks-cluster --nodegroup-name morova-eks-cluster-ng
+
+########################################
+# Delete EKS cluster
+########################################
+
+aws eks delete-cluster --profile rm-dev --name morova-eks-cluster
+
+########################################
+# Delete from kubeconfig
+########################################
+
+k config delete-context arn:aws:eks:us-east-2:651489313060:cluster/morova-eks-cluster
+k config delete-cluster arn:aws:eks:us-east-2:651489313060:cluster/morova-eks-cluster
+# manually delete user section --- use k config unset users.<name>
