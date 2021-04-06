@@ -46,18 +46,6 @@ class User(HttpUser):
         }
         self.client.post('/api/v1/jobs', json=data, headers=headers)
 
-
-FAULT_PROFILES = [
-    'custom',
-    'io',
-    'network-delay',
-    'network-partition',
-    'pod-failure',
-    'pod-kill',
-    'stress-cpu',
-    'stress-mem'
-]
-
 HELM_COMMAND_FIX_PART = [
     'helm',
     'upgrade',
@@ -71,7 +59,7 @@ HELM_COMMAND_FIX_PART = [
 
 @click.command()
 @click.option('--nosave', is_flag=True)
-@click.option('--fault-profile', type=click.Choice(FAULT_PROFILES), default='custom', help='Name of the fault profile')
+@click.option('--fault-profile', type=click.Choice(list(c.FAULT_PROFILES.keys())), default='custom', help='Name of the fault profile')
 @click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
 @click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
 @click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
@@ -94,15 +82,10 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
         logging.error('Helm lint failed, exiting...')
         exit()
 
-    # assembling helm options TODO with fault profile to chaos objects mapping
-    helm_value_sets = [
-        '--set',
-        f'ioChaos.enabled=true',
-        '--set',
-        f'podFailureChaos.enabled=true'
-    ]
+    # assembling helm value options according to fault profile
+    helm_value_sets = assemble_helm_set_options(fault_profile)
 
-    # SAVE HELM CHART
+    # filter out emtpy strings
     helm_command = [x for x in HELM_COMMAND_FIX_PART + helm_value_sets if x]
 
     # Save current stack into archive
@@ -275,7 +258,7 @@ def archive_stack(datestring):
 
 def archive_filter(tarinfo):
     file_path = tarinfo.name.split('/')
-    EXCLUDES = ['node_modules', '.gradle', 'build', 'archives']
+    EXCLUDES = ['node_modules', '.gradle', 'build', 'archives', '.git', '.vscode']
 
     if any(item in file_path for item in EXCLUDES):
         return None
@@ -293,6 +276,20 @@ def save_helm_chart(helm_command):
 
     with open(last_chaos_file, mode='w') as chaos_file:
         chaos_file.write(chaos_objects)
+
+def assemble_helm_set_options(fault_profile):
+
+    helm_value_sets = []
+
+    for chaos_object in c.FAULT_PROFILES[fault_profile]:
+        # enable chaos object
+        helm_value_sets.extend(['--set', f'{chaos_object["chaos"]}.enabled=true'])
+        # set level of strength
+        helm_value_sets.extend(['--set', f'{chaos_object["chaos"]}.strength={chaos_object["strength"]}'])
+    
+    print(helm_value_sets)
+
+    return helm_value_sets
 
 
 if __name__ == "__main__":
