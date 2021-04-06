@@ -1,9 +1,9 @@
-Release "kubedepend-chaos" has been upgraded. Happy Helming!
+Release "kubedepend-chaos" does not exist. Installing it now.
 NAME: kubedepend-chaos
-LAST DEPLOYED: Tue Apr  6 20:53:16 2021
+LAST DEPLOYED: Wed Apr  7 00:04:24 2021
 NAMESPACE: chaos-testing
-STATUS: pending-upgrade
-REVISION: 2
+STATUS: pending-install
+REVISION: 1
 TEST SUITE: None
 HOOKS:
 MANIFEST:
