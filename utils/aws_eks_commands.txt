@@ -95,7 +95,7 @@ https://docs.aws.amazon.com/eks/latest/userguide/delete-cluster.html
 # list nodegroups associated with the EKS cluster
 aws eks list-nodegroups --profile rm-dev --cluster-name morova-eks-cluster
 # delete nodegroup
-aws eks delete-nodegroup --profile rm-dev --cluster-name morova-eks-cluster --nodegroup-name morova-eks-cluster-ng
+aws eks delete-nodegroup --profile rm-dev --cluster-name morova-eks-cluster --nodegroup-name morova-nodegroup
 
 ########################################
 # Delete EKS cluster
