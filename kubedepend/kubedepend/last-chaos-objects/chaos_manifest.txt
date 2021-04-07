@@ -1,32 +1,27 @@
-Release "kubedepend-chaos" has been upgraded. Happy Helming!
+Release "kubedepend-chaos" does not exist. Installing it now.
 NAME: kubedepend-chaos
-LAST DEPLOYED: Wed Apr  7 00:28:45 2021
+LAST DEPLOYED: Wed Apr  7 11:49:05 2021
 NAMESPACE: chaos-testing
-STATUS: pending-upgrade
-REVISION: 2
+STATUS: pending-install
+REVISION: 1
 TEST SUITE: None
 HOOKS:
 MANIFEST:
 ---
-# Source: kubedepend-chaos/templates/network-partition-chaos.yaml
+# Source: kubedepend-chaos/templates/network-delay-chaos.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: network-partition
+  name: network-delay
 spec:
-  action: partition
+  action: delay
   mode: fixed-percent
   value: "35"
   selector:
     namespaces:
       - kubedepend
-  direction: both
-  target:
-    selector:
-      namespaces:
-        - kubedepend
-    mode: fixed-percent
-    value: "35"
-  duration: "5s"
+  delay:
+    latency: "1000ms"
+  duration: "60s"
   scheduler:
-    cron: "@every 15s"
+    cron: "@every 60s"
