@@ -49,7 +49,7 @@ eksctl create nodegroup \
 
 k apply -f 000-namespaces.yaml && \
 k apply -f 001-configmaps.yaml && \
-k apply -f 001-configmaps.yaml && \
+k apply -f 004-deployments.yaml && \
 k apply -f 005-services.yaml && \
 k apply -f metrics-server.yaml && \
 k apply -f 400-hpa.yaml
