@@ -47,12 +47,12 @@ eksctl create nodegroup \
 # Deploy stack
 ########################################
 
-k apply -f 000-namespaces.yaml && \
-k apply -f 001-configmaps.yaml && \
-k apply -f 004-deployments.yaml && \
-k apply -f 005-services.yaml && \
-k apply -f metrics-server.yaml && \
-k apply -f 400-hpa.yaml
+k apply -f k8s-deployment/000-namespaces.yaml && \
+k apply -f k8s-deployment/001-configmaps.yaml && \
+k apply -f k8s-deployment/004-deployments.yaml && \
+k apply -f k8s-deployment/005-services.yaml && \
+k apply -f k8s-deployment/metrics-server.yaml && \
+k apply -f k8s-deployment/400-hpa.yaml
 
 helm upgrade --install prometheus prometheus-community/prometheus -n monitoring -f helm/prometheus/values.yaml
 helm upgrade --install prometheus-blackbox-exporter prometheus-community/prometheus-blackbox-exporter -n monitoring -f helm/blackbox-exporter/values.yaml
