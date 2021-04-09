@@ -1,14 +1,14 @@
-Release "kubedepend-chaos" has been upgraded. Happy Helming!
+Release "kubedepend-chaos" does not exist. Installing it now.
 NAME: kubedepend-chaos
-LAST DEPLOYED: Fri Apr  9 19:32:01 2021
+LAST DEPLOYED: Fri Apr  9 22:02:18 2021
 NAMESPACE: chaos-testing
-STATUS: pending-upgrade
-REVISION: 3
+STATUS: pending-install
+REVISION: 1
 TEST SUITE: None
 HOOKS:
 MANIFEST:
 ---
-# Source: kubedepend-chaos/templates/pod-failure-chaos.yaml
+# Source: kubedepend-chaos/templates/pod-kill-chaos.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
