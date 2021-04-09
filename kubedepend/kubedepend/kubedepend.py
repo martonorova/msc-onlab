@@ -176,7 +176,15 @@ def query_prometheus(query, trycount=0):
     # assemble url
     url = f'{c.PROMETHEUS_HOST}{c.PROMETHEUS_QUERY_ENDPOINT}?query={urllib.parse.quote(query)}'
     # get data
-    res = requests.get(url=url)
+    try:
+        res = requests.get(url=url)
+    except requests.exceptions.ConnectionError:
+        if trycount >= 10:
+            raise ValueError('Connection ERROR')
+        # wait 1 sec with next attempt
+        time.sleep(1)
+        return query_prometheus(query, trycount=trycount + 1)
+
     # print(res.json())
     value = None
     try:
