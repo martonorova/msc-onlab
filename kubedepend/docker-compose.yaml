@@ -8,6 +8,4 @@ services:
     - 8888:8888
     volumes:
     - ./kubedepend/results:/home/jovyan/results
-    - notebook-vol:/home/jovyan/work
-volumes:
-  notebook-vol:
+    - ./notebook:/home/jovyan/work
