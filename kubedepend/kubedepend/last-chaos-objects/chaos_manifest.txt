@@ -1,6 +1,6 @@
 Release "kubedepend-chaos" does not exist. Installing it now.
 NAME: kubedepend-chaos
-LAST DEPLOYED: Sat Apr 10 13:47:01 2021
+LAST DEPLOYED: Sat Apr 10 16:12:41 2021
 NAMESPACE: chaos-testing
 STATUS: pending-install
 REVISION: 1
@@ -8,11 +8,11 @@ TEST SUITE: None
 HOOKS:
 MANIFEST:
 ---
-# Source: kubedepend-chaos/templates/stress-cpu-chaos.yaml
+# Source: kubedepend-chaos/templates/stress-mem-chaos.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
-  name: burn-cpu
+  name: burn-memory
 spec:
   mode: fixed-percent
   value: "35"
@@ -20,9 +20,8 @@ spec:
     namespaces:
       - kubedepend
   stressors:
-    cpu:
-      workers: 4
-      load: 50
+    memory:
+      workers: 2
   duration: "60s"
   scheduler:
     cron: "@every 2m"
