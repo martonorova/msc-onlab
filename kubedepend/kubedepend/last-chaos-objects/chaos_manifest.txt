@@ -1,6 +1,6 @@
 Release "kubedepend-chaos" does not exist. Installing it now.
 NAME: kubedepend-chaos
-LAST DEPLOYED: Fri Apr  9 22:02:18 2021
+LAST DEPLOYED: Sat Apr 10 13:47:01 2021
 NAMESPACE: chaos-testing
 STATUS: pending-install
 REVISION: 1
@@ -8,18 +8,21 @@ TEST SUITE: None
 HOOKS:
 MANIFEST:
 ---
-# Source: kubedepend-chaos/templates/pod-kill-chaos.yaml
+# Source: kubedepend-chaos/templates/stress-cpu-chaos.yaml
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: StressChaos
 metadata:
-  name: pod-failure-worker
+  name: burn-cpu
 spec:
-  action: pod-failure
   mode: fixed-percent
   value: "35"
   selector:
     namespaces:
       - kubedepend
+  stressors:
+    cpu:
+      workers: 4
+      load: 50
   duration: "60s"
   scheduler:
-    cron: "@every 3m"
+    cron: "@every 2m"
