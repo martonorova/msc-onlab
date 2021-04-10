@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+
+  notebook:
+    image: jupyter/scipy-notebook
+    ports:
+    - 8888:8888
+    volumes:
+    - ./kubedepend/results:/home/jovyan/results
+    - notebook-vol:/home/jovyan/work
+volumes:
+  notebook-vol:
