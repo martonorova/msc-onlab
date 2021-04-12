@@ -1,9 +1,0 @@
-Release "kubedepend-chaos" has been upgraded. Happy Helming!
-NAME: kubedepend-chaos
-LAST DEPLOYED: Sat Apr 10 19:09:52 2021
-NAMESPACE: chaos-testing
-STATUS: pending-upgrade
-REVISION: 2
-TEST SUITE: None
-HOOKS:
-MANIFEST:
