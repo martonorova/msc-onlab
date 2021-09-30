@@ -27,7 +27,7 @@ pipeline {
         stage('Set up AWS CLI') {
             steps {
                 echo "Setup AWS CLI"
-                sh "env"
+                sh "docker run hello-world"
             }
         }
 
