@@ -39,12 +39,14 @@ pipeline {
                             variable: 'AWS_SESSION_TOKEN'
                         )
                     ]
-                )
-                sh "/usr/bin/docker run amazon/aws-cli \
-                    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                    --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                    cloudformation list-stacks --region ${env.AWS_REGION}"
+                ) {
+                    sh "/usr/bin/docker run amazon/aws-cli \
+                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                        cloudformation list-stacks --region ${env.AWS_REGION}"
+                }
+                
             }
         }
 
