@@ -1,0 +1,57 @@
+def someVar = "test"
+
+pipeline { 
+    agent any 
+    options {
+        skipStagesAfterUnstable()
+        skipDefaultCheckout()
+/*        checkoutToSubdirectory('k8s') */
+        timeout(time: 15, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+    }
+
+
+
+    environment {
+        AWS_REGION="us-east-2"
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Set up AWS CLI') {
+            steps {
+                echo "Setup AWS CLI"
+            }
+        }
+
+        stage('Create CF stack') {
+            steps {
+                echo "Create CF stack"
+            }
+        }
+
+        stage('Deployment') {
+            steps {
+                echo "Deployment"
+            }
+        }
+
+        stage('Running tests') {
+            steps {
+                echo "Running tests"
+            }
+        }
+
+        stage('Clean up') {
+            steps {
+                echo "Clean up"
+            }
+        }
+    }
+}
