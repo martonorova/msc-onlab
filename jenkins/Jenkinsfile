@@ -20,7 +20,7 @@ pipeline {
         stage('Prepare build') {
             steps {
                 checkout scm
-                sh "source ~/.bashrc"
+                sh "source /var/jenkins_home/.bashrc"
             }
         }
 
