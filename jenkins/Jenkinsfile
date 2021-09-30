@@ -8,7 +8,6 @@ pipeline {
 /*        checkoutToSubdirectory('k8s') */
         timeout(time: 15, unit: 'MINUTES')
         timestamps()
-        ansiColor('xterm')
     }
 
 
