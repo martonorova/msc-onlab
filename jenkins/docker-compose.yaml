@@ -2,6 +2,8 @@ version: "3.9"
 services:
   jenkins:
     image: jenkins/jenkins:lts-jdk11
+    # a bit ugly
+    user: root
     ports:
       - "8080:8080"
     # environment:
