@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Amazon EKS Sample VPC'
+Description: 'Public Amazon EKS Cluster with NodeGroup and SSH access'
 
 Parameters:
 
@@ -32,19 +32,14 @@ Parameters:
   EKSVersion:
     Description: The version of the EKS cluster
     Type: String
-    Default: '1.21.2'
+    Default: '1.21'
     AllowedValues:
-      - '1.21.2'
-      - '1.20.7'
-      - '1.19.8'
-      - '1.18.16'
-      - '1.17.17'
-      - '1.16.15'
-  
-  WorkerNodeAMIId:
-    Description: The AMI Id to start, choose according to the deployment region
-    Type: AWS::EC2::Image::Id
-    Default: ami-0bf2eefa92a02a84f
+      - '1.21'
+      - '1.20'
+      - '1.19'
+      - '1.18'
+      - '1.17'
+      - '1.16'
 
   WorkerNodeInstanceType:
     Description: EC2 instance type for the primary node instances
@@ -154,17 +149,38 @@ Parameters:
     Type: Number
     Default: 6
 
+  WorkerNodeEc2SshKey:
+    Description: SSH key name to allow secure remote access to your nodes
+    Type: String
+    Default: morova-eks-keypair
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Worker Network Configuration"
         Parameters:
           - VpcBlock
           - Subnet01Block
           - Subnet02Block
           - Subnet03Block
+      - Label:
+          default: "EKS Configuration"
+        Parameters:
+          - ClusterName
+          - EKSVersion
+      - Label:
+          default: "Worker Node Configuration"
+        Parameters:
+          - WorkerNodeInstanceType
+          - WorkerNodeVolumeSize
+      - Label:
+          default: "Worker Node Auto Scaling Group Configuration"
+        Parameters:
+          - WorkerNodeAutoScalingGroupMinSize
+          - WorkerNodeAutoScalingGroupDesiredCapacity
+          - WorkerNodeAutoScalingGroupMaxSize
+        
 
 Resources:
   VPC:
@@ -224,6 +240,7 @@ Resources:
             Ref: AWS::Region
       CidrBlock:
         Ref: Subnet01Block
+      MapPublicIpOnLaunch: true
       VpcId:
         Ref: VPC
       Tags:
@@ -244,6 +261,7 @@ Resources:
             Ref: AWS::Region
       CidrBlock:
         Ref: Subnet02Block
+      MapPublicIpOnLaunch: true
       VpcId:
         Ref: VPC
       Tags:
@@ -264,6 +282,7 @@ Resources:
             Ref: AWS::Region
       CidrBlock:
         Ref: Subnet03Block
+      MapPublicIpOnLaunch: true
       VpcId:
         Ref: VPC
       Tags:
@@ -388,32 +407,6 @@ Resources:
             Resource: '*'
       Roles:
         - !Ref WorkerNodeInstanceRole
-
-  WorkerNodeSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupName: !Sub '${CustomerID}-Worker-sg'
-      GroupDescription: Security group for all nodes in the cluster
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub '${CustomerID}-Worker-sg'
-        - Key: Customer
-          Value: !Ref CustomerID
-        - Key: Cost Center
-          Value: !Sub '${CustomerID}'
-        - Key: !Sub 'kubernetes.io/cluster/${ClusterName}'
-          Value: owned
-  
-  WorkerNodeSecurityGroupIngress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
-    Properties:
-      Description: Allow node to communicate with each other
-      GroupId: !Ref WorkerNodeSecurityGroup
-      SourceSecurityGroupId: !Ref WorkerNodeSecurityGroup
-      IpProtocol: -1
-      FromPort: 0
-      ToPort: 65535
   
   EKSNodegroup:
     Type: 'AWS::EKS::Nodegroup'
@@ -431,9 +424,7 @@ Resources:
       CapacityType: ON_DEMAND
       NodeRole: !GetAtt WorkerNodeInstanceRole.Arn
       RemoteAccess: 
-        Ec2SshKey: SaaSEks
-        SourceSecurityGroups: 
-          - !Ref WorkerNodeSecurityGroup
+        Ec2SshKey: !Ref WorkerNodeEc2SshKey
       ScalingConfig:
         MinSize: !Ref WorkerNodeAutoScalingGroupMinSize
         DesiredSize: !Ref WorkerNodeAutoScalingGroupDesiredCapacity
@@ -448,20 +439,14 @@ Resources:
         - !Ref Subnet02
         - !Ref Subnet03
       Tags:
-        - Key: Name
-          Value: 'morova-EKSNodegroup-Workers'
-        - Key: Cost Center
-          Value: 'DDOS'
+        Name: 'morova-EKSNodegroup-Workers'
+        'Cost Center': 'DDOS'
 
 Outputs:
 
   SubnetIds:
     Description: All subnets in the VPC
-    Value:
-      Fn::If:
-      - HasMoreThan2Azs
-      - !Join [ ",", [ !Ref Subnet01, !Ref Subnet02, !Ref Subnet03 ] ]
-      - !Join [ ",", [ !Ref Subnet01, !Ref Subnet02 ] ]
+    Value: !Join [ ",", [ !Ref Subnet01, !Ref Subnet02, !Ref Subnet03 ] ]
 
   SecurityGroups:
     Description: Security group for the cluster control plane communication with worker nodes
