@@ -1,4 +1,8 @@
-def someVar = "test"
+def awsCliEnvVars = [
+    "--env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID",
+    "--env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY",
+    "--env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN"
+]
 
 pipeline { 
     agent any 
@@ -24,7 +28,7 @@ pipeline {
             }
         }
 
-        stage('Set up AWS CLI') {
+        stage('Infrastructure') {
             steps {
                 echo "Setup AWS CLI"
                 withCredentials(
@@ -41,9 +45,7 @@ pipeline {
                     ]
                 ) {
                     sh "/usr/bin/docker run \
-                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                        ${awsCliEnvVars.join(' ')} \
                         amazon/aws-cli cloudformation list-stacks --region ${env.AWS_REGION}"
                 }
                 
@@ -53,6 +55,23 @@ pipeline {
         stage('Create CF stack') {
             steps {
                 echo "Create CF stack"
+                withCredentials(
+                    [
+                        usernamePassword(
+                            credentialsId: 'aws-key',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ),
+                        string(
+                            credentialsId: 'aws-session-token',
+                            variable: 'AWS_SESSION_TOKEN'
+                        )
+                    ]
+                ) {
+                    sh "/usr/bin/docker run \
+                        ${awsCliEnvVars.join(' ')} \
+                        amazon/aws-cli cloudformation list-stacks --region ${env.AWS_REGION}"
+                }
             }
         }
 
