@@ -17,9 +17,10 @@ pipeline {
     }
 
     stages {
-        stage('Checkout SCM') {
+        stage('Prepare build') {
             steps {
                 checkout scm
+                sh "source ~/.bashrc"
             }
         }
 
