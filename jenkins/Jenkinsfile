@@ -26,6 +26,7 @@ pipeline {
         stage('Set up AWS CLI') {
             steps {
                 echo "Setup AWS CLI"
+                sh "env"
             }
         }
 
