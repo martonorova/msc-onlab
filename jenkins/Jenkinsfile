@@ -1,4 +1,4 @@
-import groovy.json
+import groovy.json.JsonSlurper
 
 def awsCliImage = "amazon/aws-cli"
 def awsCFBaseCommand = "${awsCliImage} cloudformation"
