@@ -57,7 +57,7 @@ pipeline {
                                 --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                                 --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                                 --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == "morova-eks-cluster")) | .[].StackId'",
+                                ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\")) | .[].StackId'",
                             returnStdout: true
                         ).trim() != ""
 
