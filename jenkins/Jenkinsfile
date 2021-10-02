@@ -70,7 +70,7 @@ pipeline {
                         ).trim()
                         def jsonSlurper = new JsonSlurper()
                         def stacksResultParsed = jsonSlurper.parseText(stacksResult)
-                        echo stacksResultParsed
+                        println stacksResultParsed
 
 
                         // echo "cfStackExists = ${cfStackExists}"
