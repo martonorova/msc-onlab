@@ -5,17 +5,14 @@ import groovy.json.JsonSlurper
 def awsCliImage = "amazon/aws-cli"
 def awsCFBaseCommand = "${awsCliImage} cloudformation"
 def cloudformationStackArn = ""
-// def cfStackStatusFilters = [
-//     "CREATE_IN_PROGRESS",
-//     "CREATE_FAILED",
-//     "CREATE_COMPLETE",
-//     "ROLLBACK_IN_PROGRESS",
-//     "ROLLBACK_FAILED",
-//     "ROLLBACK_COMPLETE",
-//     "DELETE_IN_PROGRESS"
-// ]
 def cfStackStatusFilters = [
-    "DELETE_COMPLETE"
+    "CREATE_IN_PROGRESS",
+    "CREATE_FAILED",
+    "CREATE_COMPLETE",
+    "ROLLBACK_IN_PROGRESS",
+    "ROLLBACK_FAILED",
+    "ROLLBACK_COMPLETE",
+    "DELETE_IN_PROGRESS"
 ]
 
 def cfStackExists = null
