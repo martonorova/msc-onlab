@@ -15,7 +15,7 @@ def cfStackStatusFilters = [
     "DELETE_IN_PROGRESS"
 ]
 
-def cfStackExists = null
+def createCfStack = null
 
 pipeline { 
     agent any
@@ -51,7 +51,7 @@ pipeline {
 
         stage('INFR - check') {
             steps {
-                echo "Setup AWS CLI"
+                echo "Check if CloudFormation stack exists"
                 withCredentials(
                     [
                         usernamePassword(
@@ -81,10 +81,10 @@ pipeline {
 
                         if (stacksResultParsed.size() == 0) {
                             println "CloudFormation stack(s) '${CFStackName}' does/do not exists (or has/have status DELETE_COMPLETE)"
-                            cfStackExists = false
+                            createCfStack = true
                         } else if (stacksResultParsed.size() == 1) {
                             println "CloudFormation stack '${CFStackName}' already exists"
-                            cfStackExists = true
+                            createCfStack = false
 
                             def stack = stacksResultParsed[0]
                             switch(stack.StackStatus) {
@@ -94,20 +94,74 @@ pipeline {
                                     error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
 
                             }
-                            //TODO check stack status, wait if CREATE_IN_PROGRESS, fail otherwise
                         } else {
                             error("Multiple CF stacks exist named '${CFStackName}' with status from  [${cfStackStatusFilters.join(', ')}]")
                         }
-
-
-                        // echo "cfStackExists = ${cfStackExists}"
-
-                        // if (!cfStackExists) {
-                        //     echo "Creating CloudFormation stack"
-                        // }
                     }
                 }
-                
+            }
+        }
+
+        stage('INFR - create') {
+            when {
+                    expression { createCfStack }
+                }
+            steps {
+                echo "Create CloudFormation stack"
+                withCredentials(
+                    [
+                        usernamePassword(
+                            credentialsId: 'aws-key',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ),
+                        string(
+                            credentialsId: 'aws-session-token',
+                            variable: 'AWS_SESSION_TOKEN'
+                        )
+                    ]
+                ) {
+                    script {
+                        def creationResult = sh(
+                            script: "/usr/bin/docker run \
+                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-body \"$(<$WORKSPACE/utils/infrastructure.yaml)\"",
+                            returnStdout: true
+                        ).trim()
+
+                        def jsonSlurper = new JsonSlurper()
+                        def stackId = jsonSlurper.parseText(stacksResult).StackId
+
+                        println "stackId = ${stackId}"
+
+                        waitUntil {
+                            echo "Waiting for CloudFormation stack to get ready..."
+                            def stackStatus = sh(
+                                script: "/usr/bin/docker run \
+                                    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                                    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                                    --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                                    ${awsCFBaseCommand} list-stacks --region $AWSRegion | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
+                                returnStdout: true
+                            ).trim()
+
+                            switch(stackStatus) {
+                                case "CREATE_IN_PROGRESS":
+                                    return true
+                                case "ROLLBACK_COMPLETE":
+                                    error("Failed to create CloudFormation stack - check AWS console")
+                                default:
+                                    return false
+                            }
+                        }
+
+                        
+                    }
+                    
+                }
+
             }
         }
 
