@@ -22,9 +22,9 @@ pipeline {
 
 
 
-    environment {
-        // AWS_REGION="us-east-2"
-    }
+    // environment {
+    //     // AWS_REGION="us-east-2"
+    // }
 
     stages {
         stage('Prepare build') {
