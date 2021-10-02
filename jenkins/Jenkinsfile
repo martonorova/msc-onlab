@@ -1,6 +1,6 @@
 import groovy.json.JsonSlurper
 
-def jsonSlurper = new JsonSlurper()
+
 
 def awsCliImage = "amazon/aws-cli"
 def awsCFBaseCommand = "${awsCliImage} cloudformation"
@@ -78,6 +78,7 @@ pipeline {
                                 ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
                             returnStdout: true
                         ).trim()
+                        def jsonSlurper = new JsonSlurper()
                         def stacksResultParsed = jsonSlurper.parseText(stacksResult)
                         println "Parsed result of stacks: ${stacksResultParsed}"
 
