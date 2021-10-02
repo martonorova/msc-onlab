@@ -122,13 +122,12 @@ pipeline {
                     ]
                 ) {
                     script {
-                        def templateBody = new File("$WORKSPACE/utils/infrastructure.yaml").text
                         def creationResult = sh(
-                            script: "/usr/bin/docker run \
+                            script: "cat $WORKSPACE/utils/infrastructure.yaml | /usr/bin/docker run \
                                 --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                                 --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                                 --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-body \"$templateBody\"",
+                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-body \`xargs\` ",
                             returnStdout: true
                         ).trim()
 
