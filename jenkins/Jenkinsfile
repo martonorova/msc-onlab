@@ -1,9 +1,21 @@
+def awsCliImage = "amazon/aws-cli"
+def awsCFBaseCommand = "${awsCliImage} cloudformation"
+def cloudformationStackArn = ""
+def cfStackStatusFilters = [
+    "CREATE_COMPLETE"
+]
+
 pipeline { 
-    agent any 
+    agent any
+
+    parameters {
+        string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
+        string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
+    }
+
     options {
         skipStagesAfterUnstable()
         skipDefaultCheckout()
-/*        checkoutToSubdirectory('k8s') */
         timeout(time: 15, unit: 'MINUTES')
         timestamps()
     }
@@ -11,7 +23,7 @@ pipeline {
 
 
     environment {
-        AWS_REGION="us-east-2"
+        // AWS_REGION="us-east-2"
     }
 
     stages {
@@ -22,7 +34,7 @@ pipeline {
             }
         }
 
-        stage('Infrastructure') {
+        stage('INFR - check') {
             steps {
                 echo "Setup AWS CLI"
                 withCredentials(
@@ -38,38 +50,25 @@ pipeline {
                         )
                     ]
                 ) {
-                    sh "/usr/bin/docker run \
-                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                        amazon/aws-cli cloudformation list-stacks --region ${env.AWS_REGION}"
+                    script {
+                        echo "Check if '$CFStackName' CloudFormation stack exists"
+                        def cfStackExists = sh(
+                            script: "/usr/bin/docker run \
+                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                                ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == "morova-eks-cluster")) | .[].StackId'",
+                            returnStdout: true
+                        ).trim() != ""
+
+                        echo "cfStackExists = ${cfStackExists}"
+
+                        if (!cfStackExists) {
+                            echo "Creating CloudFormation stack"
+                        }
+                    }
                 }
                 
-            }
-        }
-
-        stage('Create CF stack') {
-            steps {
-                echo "Create CF stack"
-                withCredentials(
-                    [
-                        usernamePassword(
-                            credentialsId: 'aws-key',
-                            usernameVariable: 'AWS_ACCESS_KEY_ID',
-                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                        ),
-                        string(
-                            credentialsId: 'aws-session-token',
-                            variable: 'AWS_SESSION_TOKEN'
-                        )
-                    ]
-                ) {
-                    sh "/usr/bin/docker run \
-                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                        amazon/aws-cli cloudformation list-stacks --region ${env.AWS_REGION}"
-                }
             }
         }
 
