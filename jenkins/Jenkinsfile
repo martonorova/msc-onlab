@@ -26,6 +26,7 @@ pipeline {
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         booleanParam(name: 'CleanUpCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
+        string(name: 'S3Bucket', defaultValue: 'morova-bucket' description: 'The name of the S3 bucket to store the CF template')
     }
 
     options {
@@ -106,8 +107,7 @@ pipeline {
             when {
                     expression { createCfStack }
                 }
-            steps {
-                echo "Create CloudFormation stack"
+            steps {        
                 withCredentials(
                     [
                         usernamePassword(
@@ -122,12 +122,24 @@ pipeline {
                     ]
                 ) {
                     script {
+                        echo "Upload CF template to S3"
+                        def uploadResult = sh(
+                            script: "cat $WORKSPACE/utils/infrastructure.yaml | /usr/bin/docker run \
+                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                                ${awsCliImage} s3api put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body $WORKSPACE/utils/infrastructure.yaml",
+                            returnStdout: true
+                        ).trim()
+                        println "uploadResult = ${uploadResult}"
+
+                        echo "Create CloudFormation stack"
                         def creationResult = sh(
                             script: "cat $WORKSPACE/utils/infrastructure.yaml | /usr/bin/docker run \
                                 --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                                 --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                                 --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-body \"`xargs -d \'\n\'`\" ",
+                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-url s3://morova-bucket/eks/infrastructure.yaml",
                             returnStdout: true
                         ).trim()
 
@@ -156,12 +168,8 @@ pipeline {
                                     return false
                             }
                         }
-
-
                     }
-                    
                 }
-
             }
         }
 
