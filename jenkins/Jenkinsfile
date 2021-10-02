@@ -1,3 +1,5 @@
+import groovy.json
+
 def awsCliImage = "amazon/aws-cli"
 def awsCFBaseCommand = "${awsCliImage} cloudformation"
 def cloudformationStackArn = ""
