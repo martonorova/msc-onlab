@@ -1,17 +1,24 @@
 import groovy.json.JsonSlurper
 
+def jsonSlurper = new JsonSlurper()
+
 def awsCliImage = "amazon/aws-cli"
 def awsCFBaseCommand = "${awsCliImage} cloudformation"
 def cloudformationStackArn = ""
+// def cfStackStatusFilters = [
+//     "CREATE_IN_PROGRESS",
+//     "CREATE_FAILED",
+//     "CREATE_COMPLETE",
+//     "ROLLBACK_IN_PROGRESS",
+//     "ROLLBACK_FAILED",
+//     "ROLLBACK_COMPLETE",
+//     "DELETE_IN_PROGRESS"
+// ]
 def cfStackStatusFilters = [
-    "CREATE_IN_PROGRESS",
-    "CREATE_FAILED",
-    "CREATE_COMPLETE",
-    "ROLLBACK_IN_PROGRESS",
-    "ROLLBACK_FAILED",
-    "ROLLBACK_COMPLETE",
-    "DELETE_IN_PROGRESS"
+    "DELETE_COMPLETE"
 ]
+
+def cfStackExists = null
 
 pipeline { 
     agent any
@@ -19,6 +26,9 @@ pipeline {
     parameters {
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
+        booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
+        booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
+        booleanParam(name: 'CleanUpCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
     }
 
     options {
@@ -68,9 +78,28 @@ pipeline {
                                 ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
                             returnStdout: true
                         ).trim()
-                        def jsonSlurper = new JsonSlurper()
                         def stacksResultParsed = jsonSlurper.parseText(stacksResult)
-                        println stacksResultParsed
+                        println "Parsed result of stacks: ${stacksResultParsed}"
+
+                        if (stacksResultParsed.size == 0) {
+                            println "CloudFormation stack '${CFStackName}' does not exists"
+                            cfStackExists = false
+                        } else if (stacksResultParsed.size == 1) {
+                            println "CloudFormation stack '${CFStackName}' already exists"
+                            cfStackExists = true
+
+                            def stack = stacksResultParsed[0]
+                            switch(stack.StackStatus) {
+                                case "CREATE_COMPLETE":
+                                    println "CloudFormation stack is ready!"
+                                default:
+                                    error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
+
+                            }
+                            //TODO check stack status, wait if CREATE_IN_PROGRESS, fail otherwise
+                        } else {
+                            error("Multiple CF stacks exist named '${CFStackName}' with status from  [${cfStackStatusFilters.join(', ')}]")
+                        }
 
 
                         // echo "cfStackExists = ${cfStackExists}"
