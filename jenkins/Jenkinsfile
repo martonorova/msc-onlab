@@ -79,10 +79,10 @@ pipeline {
                         def stacksResultParsed = jsonSlurper.parseText(stacksResult)
                         println "Parsed result of stacks: ${stacksResultParsed}"
 
-                        if (stacksResultParsed.size == 0) {
-                            println "CloudFormation stack '${CFStackName}' does not exists"
+                        if (stacksResultParsed.size() == 0) {
+                            println "CloudFormation stack(s) '${CFStackName}' does/do not exists (or has/have status DELETE_COMPLETE)"
                             cfStackExists = false
-                        } else if (stacksResultParsed.size == 1) {
+                        } else if (stacksResultParsed.size() == 1) {
                             println "CloudFormation stack '${CFStackName}' already exists"
                             cfStackExists = true
 
