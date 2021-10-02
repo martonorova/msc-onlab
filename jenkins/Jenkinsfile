@@ -26,7 +26,7 @@ pipeline {
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         booleanParam(name: 'CleanUpCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
-        string(name: 'S3Bucket', defaultValue: 'morova-bucket' description: 'The name of the S3 bucket to store the CF template')
+        string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
     }
 
     options {
