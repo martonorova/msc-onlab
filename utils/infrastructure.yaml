@@ -1,3 +1,4 @@
+---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Public Amazon EKS Cluster with NodeGroup and SSH access'
 
