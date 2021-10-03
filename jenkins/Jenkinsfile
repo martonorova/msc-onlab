@@ -145,7 +145,7 @@ pipeline {
                         ).trim()
 
                         def jsonSlurper = new JsonSlurper()
-                        def stackId = jsonSlurper.parseText(stacksResult).StackId
+                        def stackId = jsonSlurper.parseText(creationResult).StackId
 
                         println "stackId = ${stackId}"
 
