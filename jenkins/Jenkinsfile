@@ -128,7 +128,7 @@ pipeline {
                                 --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                                 --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                                 --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCliImage} s3api put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body utils/infrastructure.yaml",
+                                ${awsCliImage} s3api put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
                             returnStdout: true
                         ).trim()
                         println "uploadResult = ${uploadResult}"
