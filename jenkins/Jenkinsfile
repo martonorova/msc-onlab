@@ -47,6 +47,30 @@ pipeline {
             steps {
                 checkout scm
                 sh "aws --version"
+                sh "ls -la ~/.aws"
+                sh "ls -la"
+
+                echo "Setup aws credentials file"
+                // script {
+                //     withCredentials(
+                //     [
+                //         usernamePassword(
+                //             credentialsId: 'aws-key',
+                //             usernameVariable: 'AWS_ACCESS_KEY_ID',
+                //             passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                //         ),
+                //         string(
+                //             credentialsId: 'aws-session-token',
+                //             variable: 'AWS_SESSION_TOKEN'
+                //         )
+                //     ]
+                // ) {
+                //     sh """
+                //       |
+                //     """
+                // }
+                // }
+                
             }
         }
 
