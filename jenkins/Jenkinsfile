@@ -2,8 +2,6 @@ import groovy.json.JsonSlurper
 
 
 
-def awsCliImage = "amazon/aws-cli"
-def awsCFBaseCommand = "${awsCliImage} cloudformation"
 def cloudformationStackArn = ""
 def cfStackStatusFilters = [
     "CREATE_IN_PROGRESS",
@@ -47,30 +45,33 @@ pipeline {
             steps {
                 checkout scm
                 sh "aws --version"
-                sh "ls -la ~/.aws"
-                sh "ls -la"
 
-                echo "Setup aws credentials file"
-                // script {
-                //     withCredentials(
-                //     [
-                //         usernamePassword(
-                //             credentialsId: 'aws-key',
-                //             usernameVariable: 'AWS_ACCESS_KEY_ID',
-                //             passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                //         ),
-                //         string(
-                //             credentialsId: 'aws-session-token',
-                //             variable: 'AWS_SESSION_TOKEN'
-                //         )
-                //     ]
-                // ) {
-                //     sh """
-                //       |
-                //     """
-                // }
-                // }
-                
+                echo "Setup aws config"
+                script {
+                    withCredentials(
+                    [
+                        usernamePassword(
+                            credentialsId: 'aws-key',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ),
+                        string(
+                            credentialsId: 'aws-session-token',
+                            variable: 'AWS_SESSION_TOKEN'
+                        )
+                    ]
+                    ) {
+                        sh """
+                            |aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                            |aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                            |aws configure set aws_session_token $AWS_SESSION_TOKEN
+                            |aws configure set default.region $AWSRegion
+                            |aws configure set default.output json
+                        """.stripMargin('|')
+                    }
+                }
+                sh "ls -la ~/.aws && cat ~/.aws/config && cat ~/.aws/credentials"
+            
             }
         }
 
@@ -93,11 +94,7 @@ pipeline {
                     script {
                         echo "Check if '$CFStackName' CloudFormation stack exists"
                         def stacksResult = sh(
-                            script: "/usr/bin/docker run \
-                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCFBaseCommand} list-stacks --region $AWSRegion --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
+                            script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
                             returnStdout: true
                         ).trim()
                         def jsonSlurper = new JsonSlurper()
@@ -149,22 +146,14 @@ pipeline {
                         // Uploading does not work, --body parameter parse error
                         // echo "Upload CF template to S3"
                         // def uploadResult = sh(
-                        //     script: "pwd && ls -la && /usr/bin/docker run \
-                        //         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                        //         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                        //         --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                        //         ${awsCliImage}:2.0.6 s3api --debug put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
+                        //     script: "aws s3api --debug put-object --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
                         //     returnStdout: true
                         // ).trim()
                         // println "uploadResult = ${uploadResult}"
 
                         echo "Create CloudFormation stack"
                         def creationResult = sh(
-                            script: "/usr/bin/docker run \
-                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-url https://morova-bucket.s3.us-east-2.amazonaws.com/eks/infrastructure.yaml --capabilities CAPABILITY_NAMED_IAM",
+                            script: "aws cloudformation create-stack --stack-name $CFStackName --template-url https://morova-bucket.s3.us-east-2.amazonaws.com/eks/infrastructure.yaml --capabilities CAPABILITY_NAMED_IAM",
                             returnStdout: true
                         ).trim()
                         println "creationResult = ${creationResult}"
@@ -176,11 +165,7 @@ pipeline {
                         waitUntil {
                             echo "Waiting for CloudFormation stack to get ready..."
                             def stackStatus = sh(
-                                script: "/usr/bin/docker run \
-                                    --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                                    --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                                    --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                    ${awsCFBaseCommand} list-stacks --region $AWSRegion | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
+                                script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
                                 returnStdout: true
                             ).trim()
 
