@@ -122,16 +122,17 @@ pipeline {
                     ]
                 ) {
                     script {
-                        echo "Upload CF template to S3"
-                        def uploadResult = sh(
-                            script: "pwd && ls -la && /usr/bin/docker run \
-                                --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-                                --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-                                --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-                                ${awsCliImage}:2.0.6 s3api --debug put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
-                            returnStdout: true
-                        ).trim()
-                        println "uploadResult = ${uploadResult}"
+                        // Uploading does not work, --body parameter parse error
+                        // echo "Upload CF template to S3"
+                        // def uploadResult = sh(
+                        //     script: "pwd && ls -la && /usr/bin/docker run \
+                        //         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                        //         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                        //         --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+                        //         ${awsCliImage}:2.0.6 s3api --debug put-object --region $AWSRegion --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
+                        //     returnStdout: true
+                        // ).trim()
+                        // println "uploadResult = ${uploadResult}"
 
                         echo "Create CloudFormation stack"
                         def creationResult = sh(
