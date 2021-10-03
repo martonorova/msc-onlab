@@ -124,7 +124,7 @@ pipeline {
                     script {
                         echo "Upload CF template to S3"
                         def uploadResult = sh(
-                            script: "/usr/bin/docker run \
+                            script: "pwd && ls -la && /usr/bin/docker run \
                                 --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                                 --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                                 --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
