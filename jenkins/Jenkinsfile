@@ -20,6 +20,7 @@ pipeline {
 
     parameters {
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
+        string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
@@ -69,58 +70,44 @@ pipeline {
                             |aws configure set default.output json
                         """.stripMargin('|')
                     }
-                }
-                sh "ls -la ~/.aws && cat ~/.aws/config && cat ~/.aws/credentials"
-            
+                }            
             }
         }
 
         stage('INFR - check') {
             steps {
                 echo "Check if CloudFormation stack exists"
-                withCredentials(
-                    [
-                        usernamePassword(
-                            credentialsId: 'aws-key',
-                            usernameVariable: 'AWS_ACCESS_KEY_ID',
-                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                        ),
-                        string(
-                            credentialsId: 'aws-session-token',
-                            variable: 'AWS_SESSION_TOKEN'
-                        )
-                    ]
-                ) {
-                    script {
-                        echo "Check if '$CFStackName' CloudFormation stack exists"
-                        def stacksResult = sh(
-                            script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
-                            returnStdout: true
-                        ).trim()
-                        def jsonSlurper = new JsonSlurper()
-                        def stacksResultParsed = jsonSlurper.parseText(stacksResult)
-                        println "Parsed result of stacks: ${stacksResultParsed}"
+                
+                script {
+                    echo "Check if '$CFStackName' CloudFormation stack exists"
+                    def stacksResult = sh(
+                        script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
+                        returnStdout: true
+                    ).trim()
+                    def jsonSlurper = new JsonSlurper()
+                    def stacksResultParsed = jsonSlurper.parseText(stacksResult)
+                    println "Parsed result of stacks: ${stacksResultParsed}"
 
-                        if (stacksResultParsed.size() == 0) {
-                            println "CloudFormation stack(s) '${CFStackName}' does/do not exists (or has/have status DELETE_COMPLETE)"
-                            createCfStack = true
-                        } else if (stacksResultParsed.size() == 1) {
-                            println "CloudFormation stack '${CFStackName}' already exists"
-                            createCfStack = false
+                    if (stacksResultParsed.size() == 0) {
+                        println "CloudFormation stack(s) '${CFStackName}' does/do not exists (or has/have status DELETE_COMPLETE)"
+                        createCfStack = true
+                    } else if (stacksResultParsed.size() == 1) {
+                        println "CloudFormation stack '${CFStackName}' already exists"
+                        createCfStack = false
 
-                            def stack = stacksResultParsed[0]
-                            switch(stack.StackStatus) {
-                                case "CREATE_COMPLETE":
-                                    println "CloudFormation stack is ready!"
-                                default:
-                                    error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
+                        def stack = stacksResultParsed[0]
+                        switch(stack.StackStatus) {
+                            case "CREATE_COMPLETE":
+                                println "CloudFormation stack is ready!"
+                            default:
+                                error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
 
-                            }
-                        } else {
-                            error("Multiple CF stacks exist named '${CFStackName}' with status from  [${cfStackStatusFilters.join(', ')}]")
                         }
+                    } else {
+                        error("Multiple CF stacks exist named '${CFStackName}' with status from  [${cfStackStatusFilters.join(', ')}]")
                     }
                 }
+                
             }
         }
 
@@ -128,58 +115,57 @@ pipeline {
             when {
                     expression { createCfStack }
                 }
-            steps {        
-                withCredentials(
-                    [
-                        usernamePassword(
-                            credentialsId: 'aws-key',
-                            usernameVariable: 'AWS_ACCESS_KEY_ID',
-                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                        ),
-                        string(
-                            credentialsId: 'aws-session-token',
-                            variable: 'AWS_SESSION_TOKEN'
-                        )
-                    ]
-                ) {
-                    script {
-                        // Uploading does not work, --body parameter parse error
-                        // echo "Upload CF template to S3"
-                        // def uploadResult = sh(
-                        //     script: "aws s3api --debug put-object --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
-                        //     returnStdout: true
-                        // ).trim()
-                        // println "uploadResult = ${uploadResult}"
+            steps {
+                script {
+                    // Uploading does not work, --body parameter parse error
+                    // echo "Upload CF template to S3"
+                    // def uploadResult = sh(
+                    //     script: "aws s3api --debug put-object --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
+                    //     returnStdout: true
+                    // ).trim()
+                    // println "uploadResult = ${uploadResult}"
 
-                        echo "Create CloudFormation stack"
-                        def creationResult = sh(
-                            script: "aws cloudformation create-stack --stack-name $CFStackName --template-url https://morova-bucket.s3.us-east-2.amazonaws.com/eks/infrastructure.yaml --capabilities CAPABILITY_NAMED_IAM",
+                    echo "Create CloudFormation stack"
+                    def creationResult = sh(
+                        script: "aws cloudformation create-stack --stack-name $CFStackName --template-url https://morova-bucket.s3.us-east-2.amazonaws.com/eks/infrastructure.yaml --parameters ParameterKey=ClusterName,ParameterValue=$EKSClusterName --capabilities CAPABILITY_NAMED_IAM",
+                        returnStdout: true
+                    ).trim()
+                    println "creationResult = ${creationResult}"
+                    def jsonSlurper = new JsonSlurper()
+                    def stackId = jsonSlurper.parseText(creationResult).StackId
+
+                    println "stackId = ${stackId}"
+
+                    waitUntil {
+                        echo "Waiting for CloudFormation stack to get ready..."
+                        def stackStatus = sh(
+                            script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
                             returnStdout: true
                         ).trim()
-                        println "creationResult = ${creationResult}"
-                        def jsonSlurper = new JsonSlurper()
-                        def stackId = jsonSlurper.parseText(creationResult).StackId
 
-                        println "stackId = ${stackId}"
-
-                        waitUntil {
-                            echo "Waiting for CloudFormation stack to get ready..."
-                            def stackStatus = sh(
-                                script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
-                                returnStdout: true
-                            ).trim()
-
-                            switch(stackStatus) {
-                                case "CREATE_COMPLETE":
-                                    println "CF Stack ready"
-                                    return true
-                                case "ROLLBACK_COMPLETE":
-                                    error("Failed to create CloudFormation stack - check AWS console")
-                                default:
-                                    return false
-                            }
+                        switch(stackStatus) {
+                            case "CREATE_COMPLETE":
+                                println "CF Stack ready"
+                                return true
+                            case "ROLLBACK_COMPLETE":
+                                error("Failed to create CloudFormation stack - check AWS console")
+                            default:
+                                return false
                         }
                     }
+                }
+                
+            }
+        }
+
+        stage ('INFR - config kubectl') {
+            steps {
+                echo "Configuring kubectl"
+                script {
+                    sh """
+                    |kubectl version --client
+                    |aws eks update-kubeconfig --name $EKSClusterName
+                    """.stripMargin('|')
                 }
             }
         }
