@@ -81,7 +81,7 @@ pipeline {
                 script {
                     echo "Check if '$CFStackName' CloudFormation stack exists"
                     def stacksResult = sh(
-                        script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"morova-eks-cluster\"))'",
+                        script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"$CFStackName\"))'",
                         returnStdout: true
                     ).trim()
                     def jsonSlurper = new JsonSlurper()
@@ -138,20 +138,20 @@ pipeline {
 
                     waitUntil {
                         echo "Waiting for CloudFormation stack to get ready..."
-                        def stackStatus = sh(
-                            script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
-                            returnStdout: true
-                        ).trim()
+                        // def stackStatus = sh(
+                        //     script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
+                        //     returnStdout: true
+                        // ).trim()
 
-                        switch(stackStatus) {
-                            case "CREATE_COMPLETE":
-                                println "CF Stack ready"
-                                return true
-                            case "ROLLBACK_COMPLETE":
-                                error("Failed to create CloudFormation stack - check AWS console")
-                            default:
-                                return false
-                        }
+                        // switch(stackStatus) {
+                        //     case "CREATE_COMPLETE":
+                        //         println "CF Stack ready"
+                        //         return true
+                        //     case "ROLLBACK_COMPLETE":
+                        //         error("Failed to create CloudFormation stack - check AWS console")
+                        //     default:
+                        //         return false
+                        // }
                     }
                 }
                 
