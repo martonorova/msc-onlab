@@ -47,6 +47,7 @@ pipeline {
             steps {
                 checkout scm
                 // sh "source /var/jenkins_home/.bashrc"
+                sh "aws --version"
             }
         }
 
@@ -161,7 +162,8 @@ pipeline {
                             ).trim()
 
                             switch(stackStatus) {
-                                case "CREATE_IN_PROGRESS":
+                                case "CREATE_COMPLETE":
+                                    println "CF Stack ready"
                                     return true
                                 case "ROLLBACK_COMPLETE":
                                     error("Failed to create CloudFormation stack - check AWS console")
