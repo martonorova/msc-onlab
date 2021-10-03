@@ -46,7 +46,6 @@ pipeline {
         stage('Prepare build') {
             steps {
                 checkout scm
-                // sh "source /var/jenkins_home/.bashrc"
                 sh "aws --version"
             }
         }
@@ -144,7 +143,7 @@ pipeline {
                                 ${awsCFBaseCommand} create-stack --region $AWSRegion --stack-name $CFStackName --template-url https://morova-bucket.s3.us-east-2.amazonaws.com/eks/infrastructure.yaml --capabilities CAPABILITY_NAMED_IAM",
                             returnStdout: true
                         ).trim()
-
+                        println "creationResult = ${creationResult}"
                         def jsonSlurper = new JsonSlurper()
                         def stackId = jsonSlurper.parseText(creationResult).StackId
 
