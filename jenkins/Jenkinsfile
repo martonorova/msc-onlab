@@ -75,6 +75,11 @@ pipeline {
         }
 
         stage('INFR - check') {
+            // for debug
+            when {
+                expression false
+            }
+
             steps {
                 echo "Check if CloudFormation stack exists"
                 
@@ -135,6 +140,7 @@ pipeline {
                     // def stackId = jsonSlurper.parseText(creationResult).StackId
 
                     println "stackId = ${stackId}"
+                    cloudformationStackArn = stackId
 
                     waitUntil(initialRecurrencePeriod: 15000) {
                         echo "Waiting for CloudFormation stack to get ready..."
@@ -166,6 +172,7 @@ pipeline {
                     sh """
                     |kubectl version --client
                     |aws eks update-kubeconfig --name $EKSClusterName
+                    |kubectl get ns
                     """.stripMargin('|')
                 }
             }
@@ -183,9 +190,17 @@ pipeline {
             }
         }
 
-        stage('Clean up') {
+        stage('CLEAN - infrastructure') {
+            when {
+                expression false
+                // expression { CleanUpCFStack }
+            }
             steps {
-                echo "Clean up"
+                echo "Clean up CloudFormation stack"
+                sh """
+                |aws cloudformation delete-stack --stack-name $CFStackName
+                """
+
             }
         }
     }
