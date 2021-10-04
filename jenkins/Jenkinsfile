@@ -1,4 +1,4 @@
-import groovy.json.JsonSlurper
+import groovy.json.JsonSlurperClassic
 
 
 
@@ -84,7 +84,7 @@ pipeline {
                         script: "aws cloudformation list-stacks --stack-status-filter ${cfStackStatusFilters.join(' ')} | jq -r '.StackSummaries | map(select(.StackName == \"$CFStackName\"))'",
                         returnStdout: true
                     ).trim()
-                    def jsonSlurper = new JsonSlurper()
+                    def jsonSlurper = new JsonSlurperClassic()
                     def stacksResultParsed = jsonSlurper.parseText(stacksResult)
                     println "Parsed result of stacks: ${stacksResultParsed}"
 
@@ -131,7 +131,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     println "creationResult = ${creationResult}"
-                    def jsonSlurper = new JsonSlurper()
+                    def jsonSlurper = new JsonSlurperClassic()
                     def stackId = jsonSlurper.parseText(creationResult).StackId
 
                     println "stackId = ${stackId}"
@@ -143,15 +143,15 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
-                        // switch(stackStatus) {
-                        //     case "CREATE_COMPLETE":
-                        //         println "CF Stack ready"
-                        //         return true
-                        //     case "ROLLBACK_COMPLETE":
-                        //         error("Failed to create CloudFormation stack - check AWS console")
-                        //     default:
-                        //         return false
-                        // }
+                        switch(stackStatus) {
+                            case "CREATE_COMPLETE":
+                                println "CF Stack ready"
+                                return true
+                            case "ROLLBACK_COMPLETE":
+                                error("Failed to create CloudFormation stack - check AWS console")
+                            default:
+                                return false
+                        }
                     }
                 }
                 
