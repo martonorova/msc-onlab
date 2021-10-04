@@ -136,7 +136,7 @@ pipeline {
 
                     println "stackId = ${stackId}"
 
-                    waitUntil {
+                    waitUntil(initialRecurrencePeriod: 15000) {
                         echo "Waiting for CloudFormation stack to get ready..."
                         def stackStatus = sh(
                             script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
