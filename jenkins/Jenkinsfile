@@ -75,10 +75,6 @@ pipeline {
         }
 
         stage('INFR - check') {
-            // for debug
-            when {
-                expression false
-            }
 
             steps {
                 echo "Check if CloudFormation stack exists"
@@ -193,7 +189,7 @@ pipeline {
         stage('CLEAN - infrastructure') {
             when {
                 expression false
-                // expression { CleanUpCFStack }
+                expression { CleanUpCFStack }
             }
             steps {
                 echo "Clean up CloudFormation stack"
