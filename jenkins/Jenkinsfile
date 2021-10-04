@@ -150,6 +150,7 @@ pipeline {
                             case "ROLLBACK_COMPLETE":
                                 error("Failed to create CloudFormation stack - check AWS console")
                             default:
+                                println "'$CFStackName' CF stack not ready yet"
                                 return false
                         }
                     }
