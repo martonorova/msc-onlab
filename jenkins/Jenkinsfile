@@ -22,6 +22,7 @@ pipeline {
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
+        booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         booleanParam(name: 'CleanUpCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
@@ -113,9 +114,8 @@ pipeline {
         }
 
         stage('INFR - create') {
-            when {
-                    expression { createCfStack }
-                }
+            when { expression { createCfStack } }
+
             steps {
                 script {
                     // Uploading does not work, --body parameter parse error
@@ -174,6 +174,39 @@ pipeline {
             }
         }
 
+        stage ('INFR - update helm repos') {
+            when { expression { DeployTools } }
+
+            steps {
+                echo "Add helm repos"
+                script {
+                    sh """
+                    |helm version
+                    |helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    |helm repo add grafana https://grafana.github.io/helm-charts
+                    |helm repo add chaos-mesh https://charts.chaos-mesh.org
+                    |helm repo update
+                    """.stripMargin('|')
+                }
+            }
+        }
+
+        stage ('INFR - deploy tools') {
+            steps {
+                echo "Add helm repos"
+                script {
+                    sh """
+                    |helm upgrade --install prometheus prometheus-community/prometheus -n monitoring -f helm/prometheus/values.yaml
+                    |helm upgrade --install prometheus-blackbox-exporter prometheus-community/prometheus-blackbox-exporter -n monitoring -f helm/blackbox-exporter/values.yaml
+                    |helm upgrade --install prometheus-adapter prometheus-community/prometheus-adapter -n monitoring -f helm/prometheus-adapter/values.yaml
+                    |helm upgrade --install grafana grafana/grafana -n monitoring -f helm/grafana/values.yaml
+                    |helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v1.2.3
+                    """.stripMargin('|')
+                }
+            }
+        }
+
+
         stage('Deployment') {
             steps {
                 echo "Deployment"
@@ -187,14 +220,13 @@ pipeline {
         }
 
         stage('CLEAN - infrastructure') {
-            when {
-                expression { CleanUpCFStack }
-            }
+            when { expression { CleanUpCFStack } }
+            
             steps {
                 echo "Clean up CloudFormation stack"
                 sh """
                 |aws cloudformation delete-stack --stack-name $CFStackName
-                """
+                """.stripMargin('|')
 
             }
         }

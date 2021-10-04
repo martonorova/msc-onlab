@@ -68,8 +68,9 @@ k -n monitoring exec grafana-7cf7f9b67f-rz5s4 -- grafana-cli admin reset-admin-p
 
 
 ### k apply -f helm/chaos-mesh/chaos-mesh-crd.yaml
+### VERSION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 k apply -f helm/chaos-mesh/crds/
-helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml
+helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v1.2.3
 
 
 ########################################

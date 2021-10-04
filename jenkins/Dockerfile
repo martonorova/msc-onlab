@@ -15,3 +15,8 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
     kubectl version --client
+
+# Install helm
+RUN wget https://get.helm.sh/helm-v3.7.0-linux-amd64.tar.gz && \
+    tar -zxvf helm-v3.7.0-linux-amd64.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin/helm
