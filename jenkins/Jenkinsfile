@@ -188,7 +188,6 @@ pipeline {
 
         stage('CLEAN - infrastructure') {
             when {
-                expression false
                 expression { CleanUpCFStack }
             }
             steps {
