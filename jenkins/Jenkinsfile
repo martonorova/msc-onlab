@@ -138,10 +138,10 @@ pipeline {
 
                     waitUntil {
                         echo "Waiting for CloudFormation stack to get ready..."
-                        // def stackStatus = sh(
-                        //     script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
-                        //     returnStdout: true
-                        // ).trim()
+                        def stackStatus = sh(
+                            script: "aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackId == \"${stackId}\").StackStatus'",
+                            returnStdout: true
+                        ).trim()
 
                         // switch(stackStatus) {
                         //     case "CREATE_COMPLETE":
