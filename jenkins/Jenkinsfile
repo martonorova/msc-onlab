@@ -201,6 +201,8 @@ pipeline {
                     |helm upgrade --install prometheus-blackbox-exporter prometheus-community/prometheus-blackbox-exporter -n monitoring -f helm/blackbox-exporter/values.yaml
                     |helm upgrade --install prometheus-adapter prometheus-community/prometheus-adapter -n monitoring -f helm/prometheus-adapter/values.yaml
                     |helm upgrade --install grafana grafana/grafana -n monitoring -f helm/grafana/values.yaml
+                    |echo "Grafana secret is:"
+                    |kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
                     |helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v1.2.3
                     """.stripMargin('|')
                 }
