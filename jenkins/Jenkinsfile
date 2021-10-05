@@ -210,9 +210,18 @@ pipeline {
         }
 
 
-        stage('Deployment') {
+        stage('APP - deploy') {
             steps {
-                echo "Deployment"
+                echo "Deploy application"
+                script {
+                    sh """
+                    |kubectl apply -f k8s-deployment/004-deployments.yaml
+                    |kubectl apply -f k8s-deployment/001-configmaps.yaml
+                    |kubectl apply -f k8s-deployment/005-services.yaml
+                    |kubectl apply -f k8s-deployment/metrics-server.yaml
+                    |kubectl apply -f k8s-deployment/400-hpa.yaml
+                    """.stripMargin('|')
+                }
             }
         }
 
@@ -236,7 +245,7 @@ pipeline {
     }
 
     post {
-        always {
+        failure {
             sh """
             |kubectl delete -f k8s-deployment/000-namespaces.yaml
             """.stripMargin('|')
