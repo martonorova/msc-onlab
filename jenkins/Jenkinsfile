@@ -234,4 +234,12 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            sh """
+            |kubectl delete -f k8s-deployment/000-namespaces.yaml
+            """.stripMargin('|')
+        }
+    }
 }
