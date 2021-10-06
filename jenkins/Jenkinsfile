@@ -240,16 +240,32 @@ pipeline {
                 dir('kubedepend') {
                     sh """
                     |echo "TODO: Configuring"
+                    |pwd
+                    |ls -la
+                    |pipenv install
                     """.stripMargin('|')
                 }
             }
         }
 
-
-
         stage('Running tests') {
+            when { expression { RunMeasurement } }
             steps {
                 echo "Running tests"
+                dir('kubedepend/kubedepend') {
+                    sh """
+                    |pipenv shell
+                    |python kubedepend.py
+                    """.stripMargin('|')
+                }
+            }
+        }
+
+        stage('Save test results') {
+            when { expression { RunMeasurement } }
+            steps {
+                echo "Saving results TODO"
+                echo "Archiving chaos config TODO"
             }
         }
 
@@ -265,7 +281,7 @@ pipeline {
         // }
 
         stage('CLEAN - infrastructure') {
-            when { expression { DeleteCFStack == true } }
+            when { expression { DeleteCFStack } }
             
             steps {
                 echo "Clean up CloudFormation stack"
