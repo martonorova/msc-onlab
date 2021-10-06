@@ -48,7 +48,7 @@ pipeline {
             steps {
                 checkout scm
                 sh "aws --version"
-                echo "DeleteNamespaces= $DeleteNamespaces"
+                // echo "DeleteNamespaces= $DeleteNamespaces"
 
                 echo "Setup aws config"
                 script {
