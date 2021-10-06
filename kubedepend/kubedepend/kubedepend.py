@@ -267,7 +267,7 @@ def check_working_dir():
 
 
 def archive_stack(datestring):
-    with tarfile.open(f'archives/archive-{datestring}.tgz', 'w:gz') as tar:
+    with tarfile.open(f'results/archive-{datestring}.tgz', 'w:gz') as tar:
         tar.add(c.PATH_TO_STACK_REPO, arcname=os.path.basename(c.PATH_TO_STACK_REPO),
                 filter=archive_filter)
 
@@ -286,7 +286,7 @@ def save_helm_chart(helm_command):
         helm_command + ['--dry-run']
     ).decode('ascii').strip()
 
-    last_chaos_file = pathlib.Path('last-chaos-objects/chaos_manifest.txt')
+    last_chaos_file = pathlib.Path('results/chaos_manifest.txt')
     if last_chaos_file.exists():
         last_chaos_file.unlink()
 

@@ -22,12 +22,20 @@ pipeline {
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
+        string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         // booleanParam(name: 'DeleteNamespaces', defaultValue: true, description: 'Set to TRUE to delete namespaces')
         booleanParam(name: 'DeleteCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
-        string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
+        
+        choice(name: 'MEASFaultProfile', choices: ['none','podFailureChaos', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem'], description: 'Name of the fault profile')
+        string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
+        string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
+        choice(name: 'MEASClusterType', choices: ['eks', 'minikube'], description: 'Type of the K8s cluster the stack runs on')
+        string(name: 'MEASLocustUserCount', defaultValue: '1', description: 'Total number of Locust users to start')
+        string(name: 'MEASLocustSpawnRate', defaultValue: '1', description: 'Number of Locust users to spawn per second')
+        string(name: 'MEASComment', defaultValue: '', description: 'Give a comment about the measurement sequence')
     }
 
     options {
@@ -255,10 +263,8 @@ pipeline {
                     |PROM_PORT_FW_PID=\$!
                     |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
                     |MEAS_PROXY_PORT_FW_PID=\$!
-                    |sleep 15
-                    |curl -IL http://localhost:9090
                     |echo "Running tests"
-                    |pipenv run python kubedepend.py
+                    |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --measurement-count=$MEASMeasurementCount --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust_user_count=$MEASLocustUserCount --locust_spawn_rate=$MEASLocustSpawnRate --comment=$MEASComment
                     """.stripMargin('|')
                 }
             }
@@ -267,8 +273,9 @@ pipeline {
         stage('MEAS - Save test results') {
             when { expression { RunMeasurement == 'true' } }
             steps {
-                echo "Saving results TODO"
-                echo "Archiving chaos config TODO"
+                dir('kubedepend/kubedepend/results') {
+                    archiveArtifacts artifacts: '*'
+                }
             }
         }
 
