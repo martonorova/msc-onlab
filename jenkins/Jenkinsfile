@@ -248,20 +248,19 @@ pipeline {
             }
         }
 
-        stage('Running tests') {
+        stage('MEAS - Running tests') {
             when { expression { RunMeasurement } }
             steps {
                 echo "Running tests"
                 dir('kubedepend/kubedepend') {
                     sh """
-                    |pipenv shell
-                    |python kubedepend.py
+                    |pipenv run python kubedepend.py
                     """.stripMargin('|')
                 }
             }
         }
 
-        stage('Save test results') {
+        stage('MEAS - Save test results') {
             when { expression { RunMeasurement } }
             steps {
                 echo "Saving results TODO"
