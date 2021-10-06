@@ -1,3 +1,5 @@
+import os
+
 # Prometheus host
 PROMETHEUS_HOST = "http://localhost:9090"
 # Prometheus query endpoint
@@ -64,4 +66,4 @@ FAULT_PROFILES = {
     'none': []
 }
 
-PATH_TO_STACK_REPO = '../../msc-onlab'
+PATH_TO_STACK_REPO = os.getenv('WORKSPACE', '../../msc-onlab')
