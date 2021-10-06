@@ -52,6 +52,9 @@ pipeline {
 
                 echo "Setup aws config"
                 script {
+
+                    println DeployTools
+
                     withCredentials(
                     [
                         usernamePassword(
@@ -195,6 +198,7 @@ pipeline {
         }
 
         stage ('INFR - deploy tools') {
+            when { expression { DeployTools == true } }
             steps {
                 echo "Deploy Prometheus, Prometheus Blackbox Exporter, Prometheus Adapter, Grafana, Chaos Mesh"
                 script {
@@ -214,6 +218,7 @@ pipeline {
 
 
         stage('APP - deploy') {
+            when { expression { DeploySUT == true } }
             steps {
                 echo "Deploy application"
                 script {
@@ -223,6 +228,18 @@ pipeline {
                     |kubectl apply -f k8s-deployment/005-services.yaml
                     |kubectl apply -f k8s-deployment/metrics-server.yaml
                     |kubectl apply -f k8s-deployment/400-hpa.yaml
+                    """.stripMargin('|')
+                }
+            }
+        }
+
+        stage('MEAS - config') {
+            when { expression { RunMeasurement == true } }
+            steps {
+                echo "Install dependencies for kubedepend"
+                dir('kubedepend') {
+                    sh """
+                    |echo "TODO: Configuring"
                     """.stripMargin('|')
                 }
             }
