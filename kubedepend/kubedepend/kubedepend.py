@@ -199,6 +199,7 @@ def query_prometheus(query, trycount=0):
         value = res.json()['data']['result'][0]['value'][1]
     except IndexError:
         if trycount >= 10:
+            # TODO, no data can occur also, when there is no downtime of the APP
             raise ValueError('No data from Prometheus')
         # wait 1 sec with next attempt
         time.sleep(1)
