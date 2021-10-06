@@ -264,7 +264,7 @@ pipeline {
                     |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
                     |MEAS_PROXY_PORT_FW_PID=\$!
                     |echo "Running tests"
-                    |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --measurement-count=$MEASMeasurementCount --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust_user_count=$MEASLocustUserCount --locust_spawn_rate=$MEASLocustSpawnRate --comment=$MEASComment
+                    |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --measurement-count=$MEASMeasurementCount --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust_user_count=$MEASLocustUserCount --locust_spawn_rate=$MEASLocustSpawnRate --comment=\"$MEASComment\"
                     """.stripMargin('|')
                 }
             }
