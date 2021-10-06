@@ -33,7 +33,7 @@ pipeline {
     options {
         skipStagesAfterUnstable()
         skipDefaultCheckout()
-        timeout(time: 15, unit: 'MINUTES')
+        timeout(time: 6, unit: 'HOURS')
         timestamps()
     }
 
@@ -80,6 +80,7 @@ pipeline {
 
             steps {
                 echo "Check if CloudFormation stack exists"
+                // TODO use "aws cloudformation describe-stacks --stack-name morova-eks-clusterd --region us-east-2" to simplify
                 
                 script {
                     echo "Check if '$CFStackName' CloudFormation stack exists"
@@ -225,6 +226,8 @@ pipeline {
                 }
             }
         }
+
+
 
         stage('Running tests') {
             steps {
