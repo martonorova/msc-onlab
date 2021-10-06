@@ -59,7 +59,7 @@ HELM_COMMAND_FIX_PART = [
 
 @click.command()
 @click.option('--nosave', is_flag=True)
-@click.option('--fault-profile', type=click.Choice(list(c.FAULT_PROFILES.keys())), default='custom', help='Name of the fault profile')
+@click.option('--fault-profile', type=click.Choice(list(c.FAULT_PROFILES.keys())), default='none', help='Name of the fault profile')
 @click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
 @click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
 @click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
@@ -67,6 +67,14 @@ HELM_COMMAND_FIX_PART = [
 @click.option('--locust_spawn_rate', type=click.INT, default=1, help='Number of Locust users to spawn per second')
 @click.option('--comment', type=click.STRING, help='Give a comment about the measurement sequence')
 def main(nosave, fault_profile, measurement_count, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
+    click.echo(nosave)
+    click.echo(fault_profile)
+    click.echo(measurement_count)
+    click.echo(load_duration)
+    click.echo(cluster_type)
+    click.echo(locust_user_count)
+    click.echo(locust_spawn_rate)
+    click.echo(comment)
 
     check_working_dir()
 
