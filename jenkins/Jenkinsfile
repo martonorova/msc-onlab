@@ -181,7 +181,7 @@ pipeline {
         }
 
         stage ('INFR - update helm repos') {
-            when { expression { DeployTools == true } }
+            when { expression { DeployTools } }
 
             steps {
                 echo "Add helm repos"
@@ -198,7 +198,7 @@ pipeline {
         }
 
         stage ('INFR - deploy tools') {
-            when { expression { DeployTools == true } }
+            when { expression { DeployTools } }
             steps {
                 echo "Deploy Prometheus, Prometheus Blackbox Exporter, Prometheus Adapter, Grafana, Chaos Mesh"
                 script {
@@ -218,7 +218,7 @@ pipeline {
 
 
         stage('APP - deploy') {
-            when { expression { DeploySUT == true } }
+            when { expression { DeploySUT } }
             steps {
                 echo "Deploy application"
                 script {
@@ -234,7 +234,7 @@ pipeline {
         }
 
         stage('MEAS - config') {
-            when { expression { RunMeasurement == true } }
+            when { expression { RunMeasurement } }
             steps {
                 echo "Install dependencies for kubedepend"
                 dir('kubedepend') {
