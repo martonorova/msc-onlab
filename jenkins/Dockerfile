@@ -20,3 +20,11 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 RUN wget https://get.helm.sh/helm-v3.7.0-linux-amd64.tar.gz && \
     tar -zxvf helm-v3.7.0-linux-amd64.tar.gz && \
     mv linux-amd64/helm /usr/local/bin/helm
+
+# Install python and pip
+RUN apt-get install -y python3.6 python3-pip
+
+RUN pip --version
+
+# Install pipenv
+RUN pip install pipenv
