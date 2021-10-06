@@ -67,14 +67,14 @@ HELM_COMMAND_FIX_PART = [
 @click.option('--locust_spawn_rate', type=click.INT, default=1, help='Number of Locust users to spawn per second')
 @click.option('--comment', type=click.STRING, help='Give a comment about the measurement sequence')
 def main(nosave, fault_profile, measurement_count, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
-    click.echo('nosave=' + nosave)
-    click.echo('fault_profile=' + fault_profile)
-    click.echo('measurement_count=' + measurement_count)
-    click.echo('load_duration=' + load_duration)
-    click.echo('cluster_type=' + cluster_type)
-    click.echo('locust_user_count=' + locust_user_count)
-    click.echo('locust_spawn_rate=' + locust_spawn_rate)
-    click.echo('comment=' + comment)
+    click.echo('nosave=' + str(nosave))
+    click.echo('fault_profile=' + str(fault_profile))
+    click.echo('measurement_count=' + str(measurement_count))
+    click.echo('load_duration=' + str(load_duration))
+    click.echo('cluster_type=' + str(cluster_type))
+    click.echo('locust_user_count=' + str(locust_user_count))
+    click.echo('locust_spawn_rate=' + str(locust_spawn_rate))
+    click.echo('comment=' + str(comment))
 
     check_working_dir()
 
