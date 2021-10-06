@@ -181,7 +181,7 @@ pipeline {
         }
 
         stage ('INFR - update helm repos') {
-            when { expression { DeployTools } }
+            when { expression { DeployTools == 'true' } }
 
             steps {
                 echo "Add helm repos"
@@ -198,7 +198,7 @@ pipeline {
         }
 
         stage ('INFR - deploy tools') {
-            when { expression { DeployTools } }
+            when { expression { DeployTools == 'true' } }
             steps {
                 echo "Deploy Prometheus, Prometheus Blackbox Exporter, Prometheus Adapter, Grafana, Chaos Mesh"
                 script {
@@ -218,7 +218,7 @@ pipeline {
 
 
         stage('APP - deploy') {
-            when { expression { DeploySUT } }
+            when { expression { DeploySUT == 'true' } }
             steps {
                 echo "Deploy application"
                 script {
@@ -234,7 +234,7 @@ pipeline {
         }
 
         stage('MEAS - config') {
-            when { expression { RunMeasurement } }
+            when { expression { RunMeasurement == 'true' } }
             steps {
                 echo "Install dependencies for kubedepend"
                 dir('kubedepend') {
@@ -249,7 +249,7 @@ pipeline {
         }
 
         stage('MEAS - Running tests') {
-            when { expression { RunMeasurement } }
+            when { expression { RunMeasurement == 'true' } }
             steps {
                 echo "Running tests"
                 dir('kubedepend/kubedepend') {
@@ -261,7 +261,7 @@ pipeline {
         }
 
         stage('MEAS - Save test results') {
-            when { expression { RunMeasurement } }
+            when { expression { RunMeasurement == 'true' } }
             steps {
                 echo "Saving results TODO"
                 echo "Archiving chaos config TODO"
@@ -280,7 +280,7 @@ pipeline {
         // }
 
         stage('CLEAN - infrastructure') {
-            when { expression { DeleteCFStack } }
+            when { expression { DeleteCFStack == 'true' } }
             
             steps {
                 echo "Clean up CloudFormation stack"
