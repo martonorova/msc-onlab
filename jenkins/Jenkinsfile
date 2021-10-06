@@ -25,7 +25,7 @@ pipeline {
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
-        booleanParam(name: 'DeleteNamespaces', defaultValue: true, description: 'Set to TRUE to delete namespaces')
+        // booleanParam(name: 'DeleteNamespaces', defaultValue: true, description: 'Set to TRUE to delete namespaces')
         booleanParam(name: 'DeleteCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
     }
@@ -236,16 +236,16 @@ pipeline {
             }
         }
 
-        stage('CLEAN - namespaces') {
-            when { expression { DeleteNamespaces == true } }
+        // stage('CLEAN - namespaces') {
+        //     when { expression { DeleteNamespaces == true } }
 
-            steps {
-                echo "Delete namespaces"
-                sh """
-                |kubectl delete -f k8s-deployment/000-namespaces.yaml
-                """.stripMargin('|')
-            }
-        }
+        //     steps {
+        //         echo "Delete namespaces"
+        //         sh """
+        //         |kubectl delete -f k8s-deployment/000-namespaces.yaml
+        //         """.stripMargin('|')
+        //     }
+        // }
 
         stage('CLEAN - infrastructure') {
             when { expression { DeleteCFStack == true } }
