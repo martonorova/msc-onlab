@@ -252,9 +252,9 @@ pipeline {
                     sh """
                     |echo "Opening ports..."
                     |k -n monitoring port-forward service/prometheus-server 9090:80 &
-                    |PROM_PORT_FW_PID=$!
+                    |PROM_PORT_FW_PID=\$!
                     |k -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
-                    |MEAS_PROXY_PORT_FW_PID=$!
+                    |MEAS_PROXY_PORT_FW_PID=\$!
                     |echo "Running tests"
                     |pipenv run python kubedepend.py
                     """.stripMargin('|')
