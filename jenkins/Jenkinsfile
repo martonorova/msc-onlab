@@ -48,6 +48,7 @@ pipeline {
             steps {
                 checkout scm
                 sh "aws --version"
+                echo "DeleteNamespaces= $DeleteNamespaces"
 
                 echo "Setup aws config"
                 script {
@@ -177,7 +178,7 @@ pipeline {
         }
 
         stage ('INFR - update helm repos') {
-            when { expression { DeployTools } }
+            when { expression { DeployTools == true } }
 
             steps {
                 echo "Add helm repos"
@@ -236,7 +237,7 @@ pipeline {
         }
 
         stage('CLEAN - namespaces') {
-            when { expression { DeleteNamespaces } }
+            when { expression { DeleteNamespaces == true } }
 
             steps {
                 echo "Delete namespaces"
@@ -247,7 +248,7 @@ pipeline {
         }
 
         stage('CLEAN - infrastructure') {
-            when { expression { DeleteCFStack } }
+            when { expression { DeleteCFStack == true } }
             
             steps {
                 echo "Clean up CloudFormation stack"
