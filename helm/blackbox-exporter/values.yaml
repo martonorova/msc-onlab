@@ -5,6 +5,9 @@ kind: Deployment
 podDisruptionBudget: {}
   # maxUnavailable: 0
 
+## Allow automount the serviceaccount token for sidecar container (eg: oauthproxy)
+automountServiceAccountToken: false
+
 ## Additional blackbox-exporter container environment variables
 ## For instance to add a http_proxy
 ##
@@ -21,6 +24,15 @@ extraVolumes: []
   # - name: storage-volume
   #   persistentVolumeClaim:
   #     claimName: example
+
+## Additional volumes that will be attached to the blackbox-exporter container
+extraVolumeMounts:
+  # - name: ca-certs
+  #   mountPath: /etc/ssl/certs/ca-certificates.crt
+
+## Additional InitContainers to initialize the pod
+##
+extraInitContainers: []
 
 extraContainers: []
   # - name: oAuth2-proxy
@@ -46,6 +58,8 @@ extraContainers: []
 ## Enable pod security policy
 pspEnabled: true
 
+hostNetwork: false
+
 strategy:
   rollingUpdate:
     maxSurge: 1
@@ -54,7 +68,7 @@ strategy:
 
 image:
   repository: prom/blackbox-exporter
-  tag: v0.18.0
+  tag: v0.19.0
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -68,7 +82,6 @@ image:
 runAsUser: 1000
 readOnlyRootFilesystem: true
 runAsNonRoot: true
-
 
 livenessProbe:
   httpGet:
@@ -97,7 +110,11 @@ config:
       timeout: 5s
       http:
         valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
         preferred_ip_protocol: "ip4"
+
+# Set custom config path, other than default /config/blackbox.yaml. If let empty, path will be "/config/blackbox.yaml"
+# configPath: "/foo/bar"
 
 extraConfigmapMounts: []
   # - name: certs-configmap
@@ -131,7 +148,11 @@ service:
   labels: {}
   type: ClusterIP
   port: 9115
-  targetPort: 9115
+
+# Only changes container port. Application port can be changed with extraArgs (--web.listen-address=:9115)
+# https://github.com/prometheus/blackbox_exporter/blob/998037b5b40c1de5fee348ffdea8820509d85171/main.go#L55
+containerPort: 9115
+
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
   create: true
@@ -146,25 +167,35 @@ serviceAccount:
 ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: false
-  hosts: []
-     # - chart-example.local
-  path: '/'
+  className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
   tls: []
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 podAnnotations: {}
+
+# Hostaliases allow to add additional DNS entries to be injected directly into pods.
+# This will take precedence over your implemented DNS solution
+hostAliases: []
+#  - ip: 192.168.1.1
+#    hostNames:
+#      - test.example.com
+#      - another.example.net
 
 pod:
   labels: {}
 
 extraArgs: []
-#  --history.limit=1000
+  # - --history.limit=1000
 
 replicas: 1
 
@@ -172,7 +203,7 @@ serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator
   ## https://github.com/coreos/prometheus-operator
   ##
-  enabled: true
+  enabled: false
 
   # Default values that will be used for all ServiceMonitors created by `targets`
   defaults:
@@ -189,13 +220,6 @@ serviceMonitor:
   bearerTokenFile:
 
   targets: []
-  #  - name: kubedepend-proxy                    # Human readable URL that will appear in Prometheus / AlertManager
-  #    url: http://kubedepend-proxy.kubedepend.svc.cluster.local:80  # The URL that blackbox will scrape
-  #    labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
-  #    interval: 30s                    # Scraping interval. Overrides value set in `defaults`
-  #    scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
-  #    module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
-  #    additionalMetricsRelabels: {}    # Map of metric labels and values to add
 #    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
 #      url: http://example.com/healthz  # The URL that blackbox will scrape
 #      labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
@@ -217,6 +241,8 @@ networkPolicy:
   # Enable network policy and allow access from anywhere
   enabled: false
   # Limit access only from monitoring namespace
+  # Before setting this value to true, you must add the name=monitoring label to the monitoring namespace
+  # Network Policy uses label filtering
   allowMonitoringNamespace: false
 
 ## dnsPolicy and dnsConfig for Deployments and Daemonsets if you want non-default settings.
