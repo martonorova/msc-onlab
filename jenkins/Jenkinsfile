@@ -219,7 +219,7 @@ pipeline {
                     |helm upgrade --install grafana grafana/grafana -n monitoring -f helm/grafana/values.yaml
                     |echo "Grafana secret is:"
                     |kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-                    |helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v0.5.3
+                    |helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v2.0.2
                     """.stripMargin('|')
                 }
             }
