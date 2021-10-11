@@ -306,7 +306,7 @@ pipeline {
             when { expression { CleanWorkSpace == 'true' } }
 
             steps {
-                cleanWs
+                cleanWs()
             }
         }
     }
