@@ -110,7 +110,7 @@ class MeasurementSequenceResult:
                         'prev_stack_git_commit_short',
                         'comment']
 
-                print(fieldnames)
+                #print(fieldnames)
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
                 if os.path.getsize(filename) == 0:
