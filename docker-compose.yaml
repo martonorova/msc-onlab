@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   jenkins:
-    build: .
+    build: jenkins
     # a bit ugly
     user: root
     ports:
@@ -13,7 +13,14 @@ services:
       - jenkins-vol:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
-
+  notebook:
+    image: jupyter/scipy-notebook
+    ports:
+    - 8888:8888
+    volumes:
+    - ./kubedepend/kubedepend/results_old:/home/jovyan/results_old
+    - ./notebook:/home/jovyan/work
+    - ./notebook/results:/home/jovyan/results
 
 volumes:
   jenkins-vol:
