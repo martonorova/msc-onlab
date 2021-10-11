@@ -66,7 +66,7 @@ controllerManager:
     #  memory: 1024Mi
     requests:
       cpu: 25m
-      memory: 256Mi
+      memory: 512Mi
 
   nodeSelector: {}
 
@@ -98,7 +98,7 @@ controllerManager:
     retryPeriod: 2s
 
 chaosDaemon:
-  image: pingcap/chaos-daemon:latest
+  image: pingcap/chaos-daemon:v2.0.2
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -175,7 +175,7 @@ dashboard:
 
   serviceAccount: chaos-controller-manager
 
-  image: pingcap/chaos-dashboard:latest
+  image: pingcap/chaos-dashboard:v2.0.2
   imagePullPolicy: IfNotPresent
 
   securityMode: true
@@ -204,7 +204,7 @@ dashboard:
     #  memory: 1024Mi
     requests:
       cpu: 25m
-      memory: 256Mi
+      memory: 512Mi
 
   persistentVolume:
     # If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence.
