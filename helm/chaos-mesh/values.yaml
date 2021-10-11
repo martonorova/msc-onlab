@@ -40,10 +40,11 @@ controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
 
-  replicaCount: 3
+  # replicaCount: 3 # default
+  replicaCount: 1
 
   priorityClassName: ""
-  image: pingcap/chaos-mesh:latest
+  image: pingcap/chaos-mesh:v2.0.2
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
