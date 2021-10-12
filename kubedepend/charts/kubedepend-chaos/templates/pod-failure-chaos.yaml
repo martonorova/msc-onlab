@@ -14,7 +14,7 @@ spec:
   schedule: '*/3 * * * *'
   historyLimit: 2
   concurrencyPolicy: 'Allow'
-  type: 'NetworkChaos'
+  type: 'PodChaos'
   podChaos:
     action: pod-failure
     mode: fixed-percent
