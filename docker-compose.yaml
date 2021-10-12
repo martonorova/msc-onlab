@@ -5,18 +5,19 @@ services:
     # a bit ugly
     user: root
     ports:
-      - "8080:8080"
-      - "9090:9090"
-      - "3000:3000"
+      - "8080:8080" # Jenkins
     # environment:
     volumes:
       - jenkins-vol:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
   notebook:
-    image: jupyter/scipy-notebook
+    image: jupyter/scipy-notebook:notebook-6.4.4
     ports:
     - 8888:8888
+    environment:
+      JENKINS_USER: admin
+      JENKINS_PASS: adminpass
     volumes:
     - ./kubedepend/kubedepend/results_old:/home/jovyan/results_old
     - ./notebook:/home/jovyan/work
@@ -24,5 +25,3 @@ services:
 
 volumes:
   jenkins-vol:
-
-# admin/adminpass
