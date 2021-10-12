@@ -5,24 +5,28 @@ And it will cause pod creation failure for a while.
 In other words, the selected pod will be unavailable in a specified period.
 */}}
 {{- if .Values.podFailureChaos.enabled -}}
+
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: Schedule
 metadata:
-  name: pod-failure-worker
+  name: schedule-pod-failure-worker
 spec:
-  action: pod-failure
-  mode: fixed-percent
-  {{- if eq .Values.podFailureChaos.strength "low" }}
-  value: {{ .Values.mode.fixPercent.low | quote }}
-  {{- else if eq .Values.podFailureChaos.strength "high" }}
-  value: {{ .Values.mode.fixPercent.high | quote }}
-  {{- else }}
-  value: {{ .Values.mode.fixPercent.medium | quote }}
-  {{- end }}
-  selector:
-    namespaces:
-      - kubedepend
-  duration: "60s"
-  scheduler:
-    cron: "@every 3m"
+  schedule: '*/3 * * * *'
+  historyLimit: 2
+  concurrencyPolicy: 'Allow'
+  type: 'NetworkChaos'
+  podChaos:
+    action: pod-failure
+    mode: fixed-percent
+    {{- if eq .Values.podFailureChaos.strength "low" }}
+    value: {{ .Values.mode.fixPercent.low | quote }}
+    {{- else if eq .Values.podFailureChaos.strength "high" }}
+    value: {{ .Values.mode.fixPercent.high | quote }}
+    {{- else }}
+    value: {{ .Values.mode.fixPercent.medium | quote }}
+    {{- end }}
+    selector:
+      namespaces:
+        - kubedepend
+    duration: "60s"
 {{- end }}
