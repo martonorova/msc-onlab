@@ -3,27 +3,16 @@
 Network Partition action separates pods into several independent subnets by blocking communication between them.
 */}}
 apiVersion: chaos-mesh.org/v1alpha1
-kind: NetworkChaos
+kind: Schedule
 metadata:
-  name: network-partition
+  name: schedule-network-partition
 spec:
-  action: partition
-  mode: fixed-percent
-  {{- if eq .Values.networkPartitionChaos.strength "low" }}
-  value: {{ .Values.mode.fixPercent.low | quote }}
-  {{- else if eq .Values.networkPartitionChaos.strength "high" }}
-  value: {{ .Values.mode.fixPercent.high | quote }}
-  {{- else }}
-  value: {{ .Values.mode.fixPercent.medium | quote }}
-  {{- end }}
-  selector:
-    namespaces:
-      - kubedepend
-  direction: both
-  target:
-    selector:
-      namespaces:
-        - kubedepend
+  schedule: '* * * * *'
+  historyLimit: 5
+  concurrencyPolicy: 'Forbid'
+  type: 'NetworkChaos'
+  networkChaos:
+    action: partition
     mode: fixed-percent
     {{- if eq .Values.networkPartitionChaos.strength "low" }}
     value: {{ .Values.mode.fixPercent.low | quote }}
@@ -32,7 +21,21 @@ spec:
     {{- else }}
     value: {{ .Values.mode.fixPercent.medium | quote }}
     {{- end }}
-  duration: "5s"
-  scheduler:
-    cron: "@every 15s"
+    selector:
+      namespaces:
+        - kubedepend
+    direction: both
+    target:
+      selector:
+        namespaces:
+          - kubedepend
+      mode: fixed-percent
+      {{- if eq .Values.networkPartitionChaos.strength "low" }}
+      value: {{ .Values.mode.fixPercent.low | quote }}
+      {{- else if eq .Values.networkPartitionChaos.strength "high" }}
+      value: {{ .Values.mode.fixPercent.high | quote }}
+      {{- else }}
+      value: {{ .Values.mode.fixPercent.medium | quote }}
+      {{- end }}
+    duration: "20s"
 {{- end }}
