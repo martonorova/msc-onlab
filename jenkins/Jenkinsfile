@@ -184,6 +184,15 @@ pipeline {
         stage ('INFR - deploy tools') {
             when { expression { DeployTools == 'true' } }
             steps {
+                echo "Create ConfigMap for Grafana dashboard"
+                script {
+                    sh """
+                    |kubectl -n monitoring delete configmap dashboard-cm || true
+                    |kubectl -n monitoring create configmap dashboard-cm --from-file=helm/grafana/dashboard.json
+                    """.stripMargin('|')
+                }
+
+
                 echo "Deploy Prometheus, Prometheus Blackbox Exporter, Prometheus Adapter, Grafana, Chaos Mesh"
                 script {
                     sh """
