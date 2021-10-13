@@ -96,7 +96,7 @@ pipeline {
                 script {
                     echo "Check if '$CFStackName' CloudFormation stack exists"
                     def stacksResult = sh(
-                        script: "aws cloudformation describe-stacks --name ${CFStackName} | jq -r '.Stacks'",
+                        script: "aws cloudformation describe-stacks --stack-name ${CFStackName} | jq -r '.Stacks'",
                         returnStdout: true
                     ).trim()
                     // def stacksResult = sh(
