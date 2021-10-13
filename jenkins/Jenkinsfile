@@ -13,7 +13,7 @@ pipeline {
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
         booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
-        booleanParam(name: 'DeleteCFStack', defaultValue: true, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
+        booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
         
         choice(name: 'MEASFaultProfile', choices: ['none','podFailureChaos', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
