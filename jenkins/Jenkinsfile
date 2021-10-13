@@ -98,7 +98,7 @@ pipeline {
                     } catch (Exception e) {
                         echo "CF stack named '${CFStackName}' does not exist, creating..."
                         println e
-                        // createCfStack = true
+                        createCfStack = true
                     }
                     
                 }
