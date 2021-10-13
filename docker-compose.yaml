@@ -21,7 +21,6 @@ services:
     volumes:
     - ./kubedepend/kubedepend/results_old:/home/jovyan/results_old
     - ./notebook:/home/jovyan/work
-    - ./notebook/results:/home/jovyan/results
 
 volumes:
   jenkins-vol:
