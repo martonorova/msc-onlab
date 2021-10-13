@@ -104,7 +104,7 @@ pipeline {
                     //     returnStdout: true
                     // ).trim()
                     def jsonSlurper = new JsonSlurper()
-                    def stacksResultParsed = jsonSlurper.parseText(stacksResult).Stacks
+                    def stacksResultParsed = jsonSlurper.parseText(stacksResult)
                     println "Parsed result of stacks: ${stacksResultParsed}"
 
                     def stack = stacksResultParsed[0]
