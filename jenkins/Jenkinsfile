@@ -114,7 +114,7 @@ pipeline {
                         default:
                             error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
 
-
+                    }
                     // if (stacksResultParsed.size() == 0) {
                     //     println "CloudFormation stack(s) '${CFStackName}' does/do not exists (or has/have status DELETE_COMPLETE)"
                     //     createCfStack = true
