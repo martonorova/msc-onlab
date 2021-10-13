@@ -16,7 +16,7 @@ pipeline {
         booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
         
-        choice(name: 'MEASFaultProfile', choices: ['none','podFailureChaos', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
+        choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
         choice(name: 'MEASClusterType', choices: ['eks', 'minikube'], description: 'Type of the K8s cluster the stack runs on')
