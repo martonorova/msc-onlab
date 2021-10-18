@@ -1,6 +1,12 @@
 import groovy.json.JsonSlurper
 import com.cwctravel.hudson.plugins.extended_choice_parameter.ExtendedChoiceParameterDefinition
 
+def sectionHeaderStyle = """
+    text-align: center;
+    font-size: 22px;
+    padding: 4px;
+"""
+
 def multiSelect (
     String name,
     String values,
@@ -54,25 +60,25 @@ pipeline {
     agent any
 
     parameters {
-        separator(name: 'CLEAN', sectionHeader: 'Clean', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
+        separator(name: 'CLEAN', sectionHeader: 'Clean', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
 
-        separator(name: 'INFRASTRUCTURE', sectionHeader: 'Infrastructure', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
+        separator(name: 'INFRASTRUCTURE', sectionHeader: 'Infrastructure', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
         string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
 
-        separator(name: 'ENHANCEMENTS', sectionHeader: 'Enhancements', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
-        extendedChoice(name: 'EnhancementsSelect', type: 'PT_CHECKBOX' value: 'Kafka,HPA,KEDA', defaultValue: '', multiSelectDelimiter: ',', visibleItemCount: 3, description: 'Choose which enhancement(s) to use')
+        separator(name: 'ENHANCEMENTS', sectionHeader: 'Enhancements', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
+        extendedChoice(name: 'EnhancementsSelect', type: 'PT_CHECKBOX', value: 'Kafka,HPA,KEDA', defaultValue: '', multiSelectDelimiter: ',', visibleItemCount: 3, description: 'Choose which enhancement(s) to use')
 
-        separator(name: 'APPLICATION', sectionHeader: 'Application', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
+        separator(name: 'APPLICATION', sectionHeader: 'Application', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         booleanParam(name: 'DeployApp', defaultValue: true, description: 'Set to TRUE to deploy the application')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         
-        separator(name: 'MEASUREMENT', sectionHeader: 'Measurement', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
+        separator(name: 'MEASUREMENT', sectionHeader: 'Measurement', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
