@@ -1,58 +1,10 @@
 import groovy.json.JsonSlurper
-import com.cwctravel.hudson.plugins.extended_choice_parameter.ExtendedChoiceParameterDefinition
 
 def sectionHeaderStyle = """
     text-align: center;
     font-size: 22px;
     padding: 4px;
 """
-
-def multiSelect (
-    String name,
-    String values,
-    String defaultValue,
-    int visibleItemCnt=0,
-    String description='',
-    String delimiter=','
-    ) {
-    // default same as number of values
-    visibleItemCnt = visibleItemCnt ?: values.split(',').size()
-    return new ExtendedChoiceParameterDefinition(
-            name, //name,
-            "PT_MULTI_SELECT", //type
-            values, //value
-            "", //projectName
-            "", //propertyFile
-            "", //groovyScript
-            "", //groovyScriptFile
-            "", //bindings
-            "", //groovyClasspath
-            "", //propertyKey
-            defaultValue, //defaultValue
-            "", //defaultPropertyFile
-            "", //defaultGroovyScript
-            "", //defaultGroovyScriptFile
-            "", //defaultBindings
-            "", //defaultGroovyClasspath
-            "", //defaultPropertyKey
-            "", //descriptionPropertyValue
-            "", //descriptionPropertyFile
-            "", //descriptionGroovyScript
-            "", //descriptionGroovyScriptFile
-            "", //descriptionBindings
-            "", //descriptionGroovyClasspath
-            "", //descriptionPropertyKey
-            "", //javascriptFile
-            "", //javascript
-            false, //saveJSONParameterToFile
-            false, //quoteValue
-            visibleItemCnt, //visibleItemCount
-            description, //description
-            delimiter //multiSelectDelimiter
-            )
-}
-
-// def enhancementOptions = 
 
 def createCfStack = null
 
@@ -72,7 +24,9 @@ pipeline {
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
 
         separator(name: 'ENHANCEMENTS', sectionHeader: 'Enhancements', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
-        extendedChoice(name: 'EnhancementsSelect', type: 'PT_CHECKBOX', value: 'Kafka,HPA,KEDA', defaultValue: '', multiSelectDelimiter: ',', visibleItemCount: 3, description: 'Choose which enhancement(s) to use')
+        booleanParam(name: 'UseKafka', defaultValue: false, description: 'Set to TRUE, to deploy Kafka and configure the app to use it')
+        booleanParam(name: 'UseHPA', defaultValue: false, description: 'Set to TRUE, to deploy HPA with the application')
+        booleanParam(name: 'UseKEDA', defaultValue: false, description: 'Set to TRUE, to deploy KEDA')
 
         separator(name: 'APPLICATION', sectionHeader: 'Application', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         booleanParam(name: 'DeployApp', defaultValue: true, description: 'Set to TRUE to deploy the application')
@@ -273,11 +227,15 @@ pipeline {
         }
 
         stage('Enhancements') {
-            steps {
-                script {
-                    println EnhancementsSelect.getClass()
-                    println "EnhancementsSelect is ${EnhancementsSelect}"
+            when {
+                anyOf {
+                    expression { UseKafka == 'true' }
+                    expression { UseHPA == 'true' }
+                    expression { UseKEDA == 'true' }
                 }
+            }
+            steps {
+                echo "Set up enhancements"
             }
         }
 
