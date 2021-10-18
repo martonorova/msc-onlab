@@ -7,6 +7,7 @@ def sectionHeaderStyle = """
 """
 
 def createCfStack = null
+def useEnhancements = false
 
 pipeline { 
     agent any
@@ -58,7 +59,7 @@ pipeline {
                 echo "Setup aws config"
                 script {
 
-                    println DeployTools
+                    useEnhancements = UseKafka == 'true' || UseHPA == 'true' || UseKEDA == 'true'
 
                     withCredentials(
                     [
@@ -228,11 +229,7 @@ pipeline {
 
         stage('Enhancements') {
             when {
-                anyOf {
-                    expression { UseKafka == 'true' }
-                    expression { UseHPA == 'true' }
-                    expression { UseKEDA == 'true' }
-                }
+                expression { useEnhancements }
             }
             steps {
                 echo "Set up enhancements"
@@ -291,6 +288,15 @@ pipeline {
                 dir('kubedepend/kubedepend/results') {
                     archiveArtifacts artifacts: '*'
                 }
+            }
+        }
+
+        stage('CLEAN - enhancements') {
+            when {
+                expression { useEnhancements }
+            }
+            steps {
+                echo "Clean enhancements"
             }
         }
 
