@@ -54,25 +54,25 @@ pipeline {
     agent any
 
     parameters {
-        separator(name: 'Clean')
+        separator(name: 'CLEAN', sectionHeaded: 'Clean', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
         booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
 
-        separator(name: 'Infrastructure')
+        separator(name: 'INFRASTRUCTURE', sectionHeaded: 'Infrastructure', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
         string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
 
-        separator(name: 'Enhancements')
-        multiSelect(name: 'EnhancementsSelect', values: 'Kafka,HPA,KEDA', defaultValue: '', description: 'Choose which enhancement(s) to use')
+        separator(name: 'ENHANCEMENTS', sectionHeaded: 'Enhancements', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
+        extendedChoice(name: 'EnhancementsSelect', values: 'Kafka,HPA,KEDA', defaultValue: '', delimiter: ',', visibleItemCount: 3, description: 'Choose which enhancement(s) to use')
 
-        separator('Application')
+        separator('APPLICATION', sectionHeaded: 'Application', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
         booleanParam(name: 'DeployApp', defaultValue: true, description: 'Set to TRUE to deploy the application')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         
-        separator('Measurement')
+        separator('MEASUREMENT', sectionHeaded: 'Measurement', separatorStyle: 'border-width: 5', sectionHeaderStyle: '')
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
