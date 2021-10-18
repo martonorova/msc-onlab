@@ -276,7 +276,7 @@ pipeline {
             steps {
                 script {
                     println EnhancementsSelect.getClass()
-                    println EnhancementsSelect
+                    println EnhancementsSelect.getValue()
                 }
             }
         }
