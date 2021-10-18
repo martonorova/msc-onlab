@@ -1,4 +1,52 @@
 import groovy.json.JsonSlurper
+import com.cwctravel.hudson.plugins.extended_choice_parameter.ExtendedChoiceParameterDefinition
+
+def multiSelect (
+    String name,
+    String values,
+    String defaultValue,
+    int visibleItemCnt=0,
+    String description='',
+    String delimiter=','
+    ) {
+    // default same as number of values
+    visibleItemCnt = visibleItemCnt ?: values.split(',').size()
+    return new ExtendedChoiceParameterDefinition(
+            name, //name,
+            "PT_MULTI_SELECT", //type
+            values, //value
+            "", //projectName
+            "", //propertyFile
+            "", //groovyScript
+            "", //groovyScriptFile
+            "", //bindings
+            "", //groovyClasspath
+            "", //propertyKey
+            defaultValue, //defaultValue
+            "", //defaultPropertyFile
+            "", //defaultGroovyScript
+            "", //defaultGroovyScriptFile
+            "", //defaultBindings
+            "", //defaultGroovyClasspath
+            "", //defaultPropertyKey
+            "", //descriptionPropertyValue
+            "", //descriptionPropertyFile
+            "", //descriptionGroovyScript
+            "", //descriptionGroovyScriptFile
+            "", //descriptionBindings
+            "", //descriptionGroovyClasspath
+            "", //descriptionPropertyKey
+            "", //javascriptFile
+            "", //javascript
+            false, //saveJSONParameterToFile
+            false, //quoteValue
+            visibleItemCnt, //visibleItemCount
+            description, //description
+            delimiter //multiSelectDelimiter
+            )
+}
+
+// def enhancementOptions = 
 
 def createCfStack = null
 
@@ -6,16 +54,25 @@ pipeline {
     agent any
 
     parameters {
+        separator(name: 'Clean')
+        booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
+        booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
+
+        separator(name: 'Infrastructure')
         string(name: 'CFStackName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS CF stack to use / create')
         string(name: 'EKSClusterName', defaultValue: 'morova-eks-cluster', description: 'The name of the AWS EKS cluster')
         string(name: 'AWSRegion', defaultValue: 'us-east-2', description: 'The AWS region to use')
         string(name: 'S3Bucket', defaultValue: 'morova-bucket', description: 'The name of the S3 bucket to store the CF template')
         booleanParam(name: 'DeployTools', defaultValue: true, description: 'Set to TRUE to deploy Grafana, Chaos Mesh, Prometheus, etc.')
-        booleanParam(name: 'DeploySUT', defaultValue: true, description: 'Set to TRUE to deploy the SUT')
+
+        separator(name: 'Enhancements')
+        multiSelect(name: 'EnhancementsSelect', values: 'Kafka,HPA,KEDA', defaultValue: '', description: 'Choose which enhancement(s) to use')
+
+        separator('Application')
+        booleanParam(name: 'DeployApp', defaultValue: true, description: 'Set to TRUE to deploy the application')
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
-        booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
-        booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
         
+        separator('Measurement')
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
@@ -151,7 +208,7 @@ pipeline {
         }
 
         stage ('INFR - config kubectl') {
-            when { expression { DeployTools == 'true' || DeploySUT == 'true' || RunMeasurement == 'true' } }
+            when { expression { DeployTools == 'true' || DeployApp == 'true' || RunMeasurement == 'true' } }
             steps {
                 echo "Configuring kubectl"
                 script {
@@ -209,9 +266,18 @@ pipeline {
             }
         }
 
+        stage('Enhancements') {
+            steps {
+                script {
+                    println EnhancementsSelect.getClass()
+                    println EnhancementsSelect
+                }
+            }
+        }
+
 
         stage('APP - deploy') {
-            when { expression { DeploySUT == 'true' } }
+            when { expression { DeployApp == 'true' } }
             steps {
                 echo "Deploy application"
                 script {
