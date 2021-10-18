@@ -227,7 +227,7 @@ pipeline {
             }
         }
 
-        stage('Enhancements') {
+        stage('ENHNC - set up') {
             when {
                 expression { useEnhancements }
             }
@@ -291,7 +291,7 @@ pipeline {
             }
         }
 
-        stage('CLEAN - enhancements') {
+        stage('CLEAN - ENHNC') {
             when {
                 expression { useEnhancements }
             }
@@ -300,7 +300,7 @@ pipeline {
             }
         }
 
-        stage('CLEAN - infrastructure') {
+        stage('CLEAN - INFR') {
             when { expression { DeleteCFStack == 'true' } }
             
             steps {
@@ -311,7 +311,7 @@ pipeline {
             }
         }
 
-        stage('CLEAN - workspace') {
+        stage('CLEAN - WS') {
             when { expression { CleanWorkSpace == 'true' } }
 
             steps {
