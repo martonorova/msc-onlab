@@ -31,9 +31,9 @@ pipeline {
 
         separator(name: 'APPLICATION', sectionHeader: 'Application', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         booleanParam(name: 'DeployApp', defaultValue: true, description: 'Set to TRUE to deploy the application')
-        booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         
         separator(name: 'MEASUREMENT', sectionHeader: 'Measurement', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
+        booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
