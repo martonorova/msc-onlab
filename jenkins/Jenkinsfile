@@ -237,7 +237,8 @@ pipeline {
                     if (UseKafka == 'true') {
                         echo "Deploy Kafka"
                         sh """
-                        |helm upgrade --install kafka ./helm/kafka
+                        |kubectl create ns kafka
+                        |helm upgrade --install kafka ./helm/kafka -n kafka
                         """.stripMargin('|')
                     }
                 }

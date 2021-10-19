@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
       containers:
         - name: kafka
-          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.kafka.image.repository }}"
           ports:
             - containerPort: 9092
               name: tcp-kafka
@@ -63,7 +63,7 @@ spec:
       serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
       containers:
         - name: kafka
-          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.kafka.image.repository }}"
           ports:
             - containerPort: 9093
               name: tcp-kafka
@@ -106,7 +106,7 @@ spec:
       serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
       containers:
         - name: kafka
-          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.kafka.image.repository }}:"
           ports:
             - containerPort: 9094
               name: tcp-kafka
