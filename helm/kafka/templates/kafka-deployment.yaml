@@ -37,8 +37,6 @@ spec:
               value: "kafka-service-0.{{ .Release.Namespace }}.svc.cluster.local"
             - name: KAFKA_ADVERTISED_PORT
               value: "9092"
-            - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: LISTENER
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
 ---
@@ -80,8 +78,6 @@ spec:
               value: "kafka-service-1.{{ .Release.Namespace }}.svc.cluster.local"
             - name: KAFKA_ADVERTISED_PORT
               value: "9093"
-            - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: LISTENER
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
 ---
@@ -106,7 +102,7 @@ spec:
       serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
       containers:
         - name: kafka
-          image: "{{ .Values.kafka.image.repository }}:"
+          image: "{{ .Values.kafka.image.repository }}"
           ports:
             - containerPort: 9094
               name: tcp-kafka
@@ -123,7 +119,5 @@ spec:
               value: "kafka-service-2.{{ .Release.Namespace }}.svc.cluster.local"
             - name: KAFKA_ADVERTISED_PORT
               value: "9094"
-            - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: LISTENER
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
