@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper1
+  labels:
+    app: zookeeper
+    id: "1"
+spec:
+  ports:
+    - name: tcp-client
+      targetPort: tcp-client
+      port: 2181
+      protocol: TCP
+    - name: tcp-follower
+      targetPort: tcp-follower
+      port: 2888
+      protocol: TCP
+    - name: tcp-leader
+      targetPort: tcp-leader
+      port: 3888
+      protocol: TCP
+  selector:
+    app: zookeeper
+    id: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper2
+  labels:
+    app: zookeeper
+    id: "2"
+spec:
+  ports:
+    - name: tcp-client
+      targetPort: tcp-client
+      port: 2181
+      protocol: TCP
+    - name: tcp-follower
+      targetPort: tcp-follower
+      port: 2888
+      protocol: TCP
+    - name: tcp-leader
+      targetPort: tcp-leader
+      port: 3888
+      protocol: TCP
+  selector:
+    app: zookeeper
+    id: "2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper3
+  labels:
+    app: zookeeper
+    id: "3"
+spec:
+  ports:
+    - name: tcp-client
+      targetPort: tcp-client
+      port: 2181
+      protocol: TCP
+    - name: tcp-follower
+      targetPort: tcp-follower
+      port: 2888
+      protocol: TCP
+    - name: tcp-leader
+      targetPort: tcp-leader
+      port: 3888
+      protocol: TCP
+  selector:
+    app: zookeeper
+    id: "3"

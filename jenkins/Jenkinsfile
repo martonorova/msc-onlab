@@ -233,6 +233,14 @@ pipeline {
             }
             steps {
                 echo "Set up enhancements"
+                script {
+                    if (UseKafka == 'true') {
+                        echo "Deploy Kafka"
+                        sh """
+                        |helm upgrade --install kafka ./helm/kafka
+                        """.stripMargin('|')
+                    }
+                }
             }
         }
 
