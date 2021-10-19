@@ -169,7 +169,7 @@ pipeline {
         }
 
         stage ('INFR - config kubectl') {
-            when { expression { DeployTools == 'true' || DeployApp == 'true' || RunMeasurement == 'true' } }
+            when { expression { DeployTools == 'true' || useEnhancements || DeployApp == 'true' || RunMeasurement == 'true' } }
             steps {
                 echo "Configuring kubectl"
                 script {
