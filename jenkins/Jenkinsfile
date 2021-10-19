@@ -14,6 +14,7 @@ pipeline {
 
     parameters {
         separator(name: 'CLEAN', sectionHeader: 'Clean', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
+        booleanParam(name: 'CleanEnhancements', defaultValue: false, description: 'Set to TRUE to delete enhancements at the end of the pipeline')
         booleanParam(name: 'DeleteCFStack', defaultValue: false, description: 'Set to TRUE to delete the CloudFormation stack at the end of the pipeline')
         booleanParam(name: 'CleanWorkSpace', defaultValue: true, description: 'Set to TRUE to delete workspace at the end of the pipeline')
 
@@ -199,13 +200,28 @@ pipeline {
             }
         }
 
+        stage('INFR - create namespaces') {
+            when {
+                anyOf {
+                    expression { DeployTools == 'true' }
+                    expression { useEnhancements }
+                    expression { DeployApp == 'true' }
+                }
+            }
+            steps {
+                echo "Create namespaces"
+                sh """
+                |kubectl apply -f k8s-deployment/000-namespaces.yaml
+                """.stripMargin('|')
+            }
+        }
+
         stage ('INFR - deploy tools') {
             when { expression { DeployTools == 'true' } }
             steps {
                 echo "Create ConfigMap for Grafana dashboard"
                 script {
                     sh """
-                    |kubectl apply -f k8s-deployment/000-namespaces.yaml
                     |kubectl -n monitoring delete configmap dashboard-cm || true
                     |kubectl -n monitoring create configmap dashboard-cm --from-file=helm/grafana/dashboard.json
                     """.stripMargin('|')
@@ -237,7 +253,6 @@ pipeline {
                     if (UseKafka == 'true') {
                         echo "Deploy Kafka"
                         sh """
-                        |kubectl create ns kafka
                         |helm upgrade --install kafka ./helm/kafka -n kafka
                         """.stripMargin('|')
                     }
@@ -302,7 +317,7 @@ pipeline {
 
         stage('CLEAN - ENHNC') {
             when {
-                expression { useEnhancements }
+                expression { CleanEnhancements == 'true' }
             }
             steps {
                 echo "Clean enhancements"
