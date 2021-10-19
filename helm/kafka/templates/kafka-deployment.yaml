@@ -126,4 +126,4 @@ spec:
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: LISTENER
           resources:
-            {{- toYaml .Values.kafka.resources | nindent 12 }
+            {{- toYaml .Values.kafka.resources | nindent 12 }}
