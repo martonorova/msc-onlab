@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
       - name: kubedepend-backend
-        image: morova/kubedepend-backend:1.0
+        image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
         imagePullPolicy: Always
         envFrom:
             - configMapRef:
@@ -132,7 +132,7 @@ spec:
     spec:
       containers:
       - name: kubedepend-worker
-        image: morova/kubedepend-worker:1.0-java
+        image: {{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
