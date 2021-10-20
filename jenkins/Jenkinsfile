@@ -103,7 +103,7 @@ pipeline {
                         ]
                     ) {
                         sh '''#!/bin/bash
-                            export AUTH="$DOCKER_USER:$DOCKER_PASSWD" && \
+                            export AUTH="$DOCKER_USER:$DOCKER_PASS" && \
                             mkdir -p $WORKSPACE/.docker && \
                             echo "{ \\"auths\\": { \\"https://index.docker.io/v1/\\": { \\"auth\\": \\"$(echo -n $AUTH|base64 -w 0)\\" }}}" > "$WORKSPACE/.docker/config.json"
                         '''
