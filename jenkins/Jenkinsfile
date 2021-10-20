@@ -67,10 +67,8 @@ pipeline {
                 script {
                     useEnhancements = UseKafka == 'true' || UseHPA == 'true' || UseKEDA == 'true'
 
-                    env.DOCKER_TAG = env.TIMESTAMP
-                    DOCKER_TAG = env.TIMESTAMP
-                    println "${DOCKER_TAG}"
-                    sh "env"
+                    env.DOCKER_TAG = env.BUILD_NUMBER
+                    DOCKER_TAG = env.BUILD_NUMBER
 
                     echo "Setup aws config"
                     withCredentials(
