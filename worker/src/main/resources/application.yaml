@@ -1,10 +1,19 @@
-server.port=${WORKER_PORT:5000}
+server:
+  port: ${WORKER_PORT:5000}
 
-management.endpoints.web.exposure.include=health,info,prometheus
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 
 
 # ActiveMQ
 
-activemq.broker.url=tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch=1
-activemq.worker.queue=${ACTIVEMQ_WORKER_QUEUE:jobWorkerQueue}
-activemq.backend.queue=${ACTIVEMQ_BACKEND_QUEUE:jobBackendQueue}
+activemq:
+  broker:
+    url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch: 1"
+  worker:
+    queue: ${ACTIVEMQ_WORKER_QUEUE:jobWorkerQueue}
+  backend:
+    queue: ${ACTIVEMQ_BACKEND_QUEUE:jobBackendQueue}
