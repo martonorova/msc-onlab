@@ -91,11 +91,11 @@ kafka:
     name: kafka-sa
   resources:
     requests:
-      memory: "2G"
-      cpu: "1"
+      memory: "500M"
+      cpu: "0.5"
     limits:
-      memory: "3G"
-      cpu: "2"
+      memory: "1G"
+      cpu: "1"
 
 zookeeper:
   image:
@@ -105,8 +105,8 @@ zookeeper:
     name: zookeeper-sa
   resources:
     requests:
+      memory: "250M"
+      cpu: "0.25"
+    limits:
       memory: "500M"
       cpu: "0.5"
-    limits:
-      memory: "1G"
-      cpu: "1"
