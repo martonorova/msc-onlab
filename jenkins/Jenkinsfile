@@ -311,9 +311,9 @@ pipeline {
                 echo "Deploy application"
                 script {
                     sh "helm upgrade --install kubedepend ./helm/kubedepend -n kubedepend \
-                       --set backend.image.repository=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME} \
+                       --set backend.image.repository=${REGISTRY_PREFIX}/${BACKEND_DOCKER_IMAGE_NAME} \
                        --set backend.image.tag=${DOCKER_TAG} \
-                       --set worker.image.repository=${REGISTRY_PREFIX}/${BACKEND_DOCKER_IMAGE_NAME} \
+                       --set worker.image.repository=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME} \
                        --set worker.image.tag=${DOCKER_TAG}"
                     sh "kubectl apply -f k8s-deployment/measurement-proxy.yaml"
                 }
