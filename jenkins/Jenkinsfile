@@ -292,12 +292,14 @@ pipeline {
                 dir('backend') {
                     sh "./gradlew bootBuildImage --imageName=${REGISTRY_PREFIX}/${BACKEND_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                     sh "docker --config $WORKSPACE/.docker push ${REGISTRY_PREFIX}/${BACKEND_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker rmi ${REGISTRY_PREFIX}/${BACKEND_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                 }
 
                 echo "Build and push worker"
                 dir('worker') {
                     sh "./gradlew bootBuildImage --imageName=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                     sh "docker --config $WORKSPACE/.docker push ${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker rmi ${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                 }
 
             }
