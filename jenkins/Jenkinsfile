@@ -70,6 +70,7 @@ pipeline {
                     env.DOCKER_TAG = env.TIMESTAMP
                     DOCKER_TAG = env.TIMESTAMP
                     println "${DOCKER_TAG}"
+                    sh "env"
 
                     echo "Setup aws config"
                     withCredentials(
