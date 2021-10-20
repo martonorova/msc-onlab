@@ -1,7 +1,7 @@
 package com.morova.onlab.backend.controller;
 
 import com.morova.onlab.backend.exception.JobNotFoundException;
-import com.morova.onlab.backend.messaging.JMSProducer;
+import com.morova.onlab.backend.messaging.Producer;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +27,11 @@ public class JobController {
     private JobRepository jobRepository;
 
     @Autowired
-    private JMSProducer jmsProducer;
+    private Producer producer;
 
     private final RestTemplate restTemplate;
     @Value("http://${worker.host}:${worker.port}/api/jobs")
     private String workerUrl;
-//    private final String workerUrl = "http://worker:5000/api/jobs";
 
     public JobController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
@@ -62,16 +61,8 @@ public class JobController {
 
         Job uncompleted = jobRepository.save(job);
 
-        jmsProducer.sendJob(job);
+        producer.sendJob(job);
 
-//        Job result = sendJob(uncompleted);
-//
-//        Job resultToUpdate = jobRepository
-//                            .findById(uncompleted.getId())
-//                            .orElseThrow(() -> new JobNotFoundException(uncompleted.getId()));
-//        resultToUpdate.setResult(result.getResult());
-//        Job savedResult = jobRepository.save(resultToUpdate);
-//
         return ResponseEntity.ok().body(uncompleted);
     }
 
@@ -81,16 +72,6 @@ public class JobController {
         jobRepository.deleteAll();
 
         return ResponseEntity.noContent().build();
-    }
-
-    private Job sendJob(Job job) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-        HttpEntity<Job> entity = new HttpEntity<>(job, headers);
-
-        return restTemplate.postForObject(workerUrl, entity, Job.class);
     }
 
 

@@ -1,6 +1,6 @@
 package com.morova.onlab.backend.controller;
 
-import com.morova.onlab.backend.messaging.JMSProducer;
+import com.morova.onlab.backend.messaging.activemq.JMSProducer;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.model.TestObject;
 import com.morova.onlab.backend.repository.TestObjectRepository;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.jms.*;
+import java.lang.IllegalStateException;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -29,9 +26,6 @@ public class HealthController {
 
     @Autowired
     private TestObjectRepository testObjectRepository;
-
-    @Autowired
-    JmsTemplate jmsTemplate;
 
     @Autowired
     ConnectionFactory connectionFactory;
@@ -45,6 +39,9 @@ public class HealthController {
 
     @Value("http://${worker.host}:${worker.port}/api/health")
     private String workerHealthEndpoint;
+
+    @Value("${messaging}")
+    private String messagingTech;
 
     public HealthController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
@@ -81,76 +78,24 @@ public class HealthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
         }
 
-        // check activeMQ connection
-        System.out.println("[HEALTH CHECK] Checking ActiveMQ connection...");
-
-        // Produce test message
-        try {
-            // Create Connection
-            Connection connection = connectionFactory.createConnection();
-            connection.start();
-            //Create Session
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            // Create Destination
-            Destination destination = session.createQueue("testQueue");
-            // Create MessageProducer
-            MessageProducer messageProducer = session.createProducer(destination);
-            messageProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-            // Create a message
-            String text = "testMessage";
-            TextMessage message = session.createTextMessage(text);
-            // Send message
-            messageProducer.send(message);
-            // Clean up
-            session.close();
-            connection.close();
-
-        } catch (JMSException e) {
-            e.printStackTrace();
-        }
-
-        // Consume test message
-        try {
-            // Create Connection
-            Connection connection = connectionFactory.createConnection();
-            connection.start();
-            // Create Session
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            // Create Destination
-            Destination destination = session.createQueue("testQueue");
-            // Create a MessageConsumer from the Session to the Topic or Queue
-            MessageConsumer consumer = session.createConsumer(destination);
-            // Wait for a message
-            Message message = consumer.receive(10000);
-
-            if (message instanceof TextMessage) {
-                TextMessage textMessage = (TextMessage) message;
-                String text = textMessage.getText();
-                if (text.equals("testMessage")) {
-                    System.out.println("[HEALTH CHECK] ActiveMQ connection OK");
-                } else {
-                    errorMsg = "ActiveMQ connection FAILURE";
-                    System.out.println("[HEALTH CHECK] " + errorMsg);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
-                }
-//                System.out.println("Received: " + text);
-            } else {
-//                System.out.println("Received: " + message);
+        if (messagingTech.equals("activemq")) {
+            try {
+                testActiveMqConnection();
+            } catch (JMSException ex) {
                 errorMsg = "ActiveMQ connection FAILURE";
-                System.out.println("[HEALTH CHECK] " + errorMsg);
+                ex.printStackTrace();
+                System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
+            } catch (IllegalStateException ex) {
+                errorMsg = "ActiveMQ connection FAILURE - wrong text message";
+                ex.printStackTrace();
+                System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             }
-
-            consumer.close();
-            session.close();
-            connection.close();
-
-        } catch (JMSException ex) {
-            errorMsg = "ActiveMQ connection FAILURE";
-            ex.printStackTrace();
-            System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
+        } else if (messagingTech.equals("kafka")) {
+            testKafkaConnection();
         }
+
 
 
         // test workflow with sample input (if last success is older than 90)
@@ -184,5 +129,66 @@ public class HealthController {
 
     public void setLastSuccessfulExecutionTime(LocalDateTime lastSuccessfulExecutionTime) {
         this.lastSuccessfulExecutionTime = lastSuccessfulExecutionTime;
+    }
+
+    private void testActiveMqConnection() throws JMSException {
+        // check activeMQ connection
+        System.out.println("[HEALTH CHECK] Checking ActiveMQ connection...");
+
+        // Produce test message
+
+        // Create Connection
+        Connection connection = connectionFactory.createConnection();
+        connection.start();
+        //Create Session
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        // Create Destination
+        Destination destination = session.createQueue("testQueue");
+        // Create MessageProducer
+        MessageProducer messageProducer = session.createProducer(destination);
+        messageProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        // Create a message
+        String text = "testMessage";
+        TextMessage message = session.createTextMessage(text);
+        // Send message
+        messageProducer.send(message);
+        // Clean up
+        session.close();
+        connection.close();
+
+
+        // Consume test message
+
+        // Create Connection
+        connection = connectionFactory.createConnection();
+        connection.start();
+        // Create Session
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        // Create Destination
+        destination = session.createQueue("testQueue");
+        // Create a MessageConsumer from the Session to the Topic or Queue
+        MessageConsumer consumer = session.createConsumer(destination);
+        // Wait for a message
+        Message messageReceived = consumer.receive(10000);
+
+        if (messageReceived instanceof TextMessage) {
+            TextMessage textMessage = (TextMessage) messageReceived;
+            text = textMessage.getText();
+            if (text.equals("testMessage")) {
+                System.out.println("[HEALTH CHECK] ActiveMQ connection OK");
+            } else {
+                throw new IllegalStateException("Text was " + text);
+            }
+        } else {
+            throw new IllegalStateException("messageReceived was not of type TextMessage");
+        }
+
+        consumer.close();
+        session.close();
+        connection.close();
+    }
+
+    private void testKafkaConnection() {
+
     }
 }

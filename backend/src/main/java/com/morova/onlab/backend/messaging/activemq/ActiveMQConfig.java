@@ -1,7 +1,8 @@
-package com.morova.onlab.backend.messaging;
+package com.morova.onlab.backend.messaging.activemq;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Configuration
+@ConditionalOnExpression("'${messaging}'.equals('activemq')")
 public class ActiveMQConfig {
 
     @Value("${activemq.broker.url}")
