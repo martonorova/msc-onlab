@@ -12,7 +12,7 @@ management:
 
 activemq:
   broker:
-    url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch: 1"
+    url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch=1"
   worker:
     queue: ${ACTIVEMQ_WORKER_QUEUE:jobWorkerQueue}
   backend:
