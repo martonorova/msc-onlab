@@ -268,11 +268,8 @@ pipeline {
                 echo "Deploy application"
                 script {
                     sh """
-                    |kubectl apply -f k8s-deployment/004-deployments.yaml
-                    |kubectl apply -f k8s-deployment/001-configmaps.yaml
-                    |kubectl apply -f k8s-deployment/005-services.yaml
-                    |kubectl apply -f k8s-deployment/metrics-server.yaml
-                    |kubectl apply -f k8s-deployment/400-hpa.yaml
+                    |helm upgrade --install kubedepend ./helm/kubedepend -n kubedepend
+                    |kubectl apply -f k8s-deployment/measurement-proxy.yaml
                     """.stripMargin('|')
                 }
             }

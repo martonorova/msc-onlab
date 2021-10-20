@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: measurement-proxy-config
+  namespace: measurement-proxy
+data:
+  nginx.conf: |
+    worker_processes  1;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+      # include /etc/nginx/mime.types;
+
+      # include /etc/nginx/common/http_head.conf;
+
+      # resolver need in case of variable sub in locations -- replace value in initContainer
+      resolver NAMESERVER valid=30s;
+
+      # resolver need in case of variable sub in locations -- replace value in initContainer
+      # resolver NAMESERVER valid=30s;
+
+       server {
+        listen 80;
+        server_name    127.0.0.1 localhost;
+
+        set $backend_service http://kubedepend-backend.kubedepend.svc.cluster.local:8000;
+
+        location / {
+
+          proxy_set_header Host               $http_host;
+          proxy_set_header X-Forwarded-Proto  $scheme;
+          proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Host   $http_host;
+          proxy_set_header X-Forwarded-Server $host;
+          proxy_set_header X-Forwarded-Port   $server_port;
+
+          proxy_pass $backend_service;
+        }
+      }
+    }
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: measurement-proxy-depl
+  namespace: measurement-proxy
+spec:
+  selector:
+    matchLabels:
+      app: measurement-proxy-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: measurement-proxy-app
+    spec:
+      containers:
+      - name: proxy
+        image: nginx:1.19
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+          name: proxy-port
+        volumeMounts:
+          - name: fixed-proxy-config-vol
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf # mount single file
+      initContainers:
+        - name: nameserver-config
+          image: busybox
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - sed "s/NAMESERVER/$(grep nameserver /etc/resolv.conf |cut -d ' ' -f2)/g" /workdir-src/nginx.conf > /workdir-dest/nginx.conf;
+          volumeMounts:
+            - name: proxy-config-volume
+              mountPath: /workdir-src
+            - name: fixed-proxy-config-vol # the fixed config is written here, this volume is used by the proxy too
+              mountPath: /workdir-dest
+      volumes:
+          - name: proxy-config-volume
+            configMap:
+              name: measurement-proxy-config
+          - name: fixed-proxy-config-vol # an emptyDir is needed to be able to overwrite configfile from configMap
+            emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: measurement-proxy
+  namespace: measurement-proxy
+spec:
+  selector:
+    app: measurement-proxy-app
+  ports:
+  - port: 80
+    targetPort: proxy-port
