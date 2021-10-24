@@ -55,7 +55,7 @@ def backend_mtbf_query(range_length):
 BACKEND_HOST = "http://localhost:8000"
 
 # Database host
-DB_HOST = "http://localhost:3306"
+DB_HOST = "localhost"
 DB_USER = "jobsuser"
 DB_PASS = "userpass"
 DB_NAME = "jobs"

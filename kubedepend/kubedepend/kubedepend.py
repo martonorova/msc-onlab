@@ -239,6 +239,8 @@ def is_stable_state():
         logging.info(f'There are multiple worker pods ({worker_pods_count})')
         return False
 
+    # TODO check if backend and db are running
+
     return True
 
 
