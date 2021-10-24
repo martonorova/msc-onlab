@@ -29,7 +29,7 @@ data:
   ACTIVEMQ_BROKER_PORT: "61616"
   ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
-  KAFKA_BROKER: kafka-service-0.kafka.svc.cluster.local:9092
+  KAFKA_BROKER: {{ .Values.kafka.address }}
   MESSAGING: {{ .Values.messaging }}
 
 ---
@@ -44,7 +44,7 @@ data:
   ACTIVEMQ_BROKER_PORT: "61616"
   ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
-  KAFKA_BROKER: kafka-service-0.kafka.svc.cluster.local:9092
+  KAFKA_BROKER: {{ .Values.kafka.address }}
   MESSAGING: {{ .Values.messaging }}
 
 
