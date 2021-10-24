@@ -28,6 +28,10 @@ class MeasurementResult:
         self.start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S.%f")
         # End time of this single measurement
         self.end_time = None
+        # Number of submitted jobs
+        self.submitted_jobs = None
+        # Number of succesfully executed and saved jobs
+        self.finished_jobs = None
 
     def asdict(self):
         return {
@@ -36,7 +40,9 @@ class MeasurementResult:
             'mdt': self.backend_metrics.mdt,
             'mtbf': self.backend_metrics.mtbf,
             'measurement_start_time': self.start_time,
-            'measurement_end_time': self.end_time
+            'measurement_end_time': self.end_time,
+            'submitted_jobs': self.submitted_jobs,
+            'finished_jobs': self.finished_jobs,
         }
 
     def end(self):
@@ -49,7 +55,9 @@ class MeasurementResult:
             f'Mean Down Time={self.backend_metrics.mdt}, '
             f'Mean Time Between Failures={self.backend_metrics.mtbf} '
             f'Start Time of Measurement={self.start_time} '
-            f'End Time of Measurement={self.end_time} )'
+            f'End Time of Measurement={self.end_time} '
+            f'Submitted Jobs={self.submitted_jobs} '
+            f'Finished Jobs={self.finished_jobs} )'
         )
 
 

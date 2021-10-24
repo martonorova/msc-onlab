@@ -5,6 +5,7 @@ from locust.stats import stats_history, stats_printer
 from locust.log import setup_logging
 import gevent
 import click
+from mysql.connector import connect, Error
 
 import logging
 import urllib.parse
@@ -160,8 +161,7 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
         measurement_result.backend_metrics = metrics
         # end measurement (fill end_time attribute)
         measurement_result.end()
-        # add measurement result to sequence result
-        sequence_result.add_measurement_result(measurement_result)
+        
 
         # save dependability metrics
 
@@ -170,6 +170,15 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
         subprocess.run(['helm', 'delete', 'kubedepend-chaos', '-n', 'chaos-testing'])
 
         logging.info('Chaos objects deleted.')
+
+        logging.info('Waiting for stable system state (end)...')
+        wait_for_stable_state()
+
+        # get finished jobs in database
+        (measurement_result.submitted_jobs, measurement_result.finished_jobs) = get_jobs_summary()
+
+        # add measurement result to sequence result
+        sequence_result.add_measurement_result(measurement_result)
 
     if not nosave:
         sequence_result.save_results('results/results.csv')
@@ -306,6 +315,31 @@ def assemble_helm_set_options(fault_profile):
 
     return helm_value_sets
 
+def get_jobs_summary():
+
+    count_submitted_jobs_query = "SELECT COUNT(id) from job;"
+    count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
+
+    try:
+        with connect(
+            host=c.DB_HOST,
+            user=c.DB_USER,
+            password=c.DB_PASS,
+            database=c.DB_NAME
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(count_submitted_jobs_query)
+                for row in cursor.fetchall():
+                    print(row)
+                    print(type(row))
+
+                cursor.execute(count_finished_jobs_query)
+                for row in cursor.fetchall():
+                    print(row)
+                    print(type(row))
+
+    except Error as e:
+        print(e)
 
 if __name__ == "__main__":
     main()

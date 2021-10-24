@@ -54,6 +54,12 @@ def backend_mtbf_query(range_length):
 # Backend host
 BACKEND_HOST = "http://localhost:8000"
 
+# Database host
+DB_HOST = "http://localhost:3306"
+DB_USER = "jobsuser"
+DB_PASS = "userpass"
+DB_NAME = "jobs"
+
 FAULT_PROFILES = {
     'custom': [{'chaos': 'ioChaos', 'strength': 'medium'}, {'chaos': 'podFailureChaos', 'strength': 'medium'}],
     'io': [{'chaos': 'ioChaos', 'strength': 'medium'}],
