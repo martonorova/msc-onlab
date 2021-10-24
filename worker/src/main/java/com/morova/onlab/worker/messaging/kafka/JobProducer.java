@@ -22,6 +22,7 @@ public class JobProducer implements Producer {
 
     @Override
     public void sendJob(JobSubmitRequestDTO job) {
+        System.out.println("Attempting Send message to Topic: " + topicName + "job: " + job.toString());
         JSONObject jsonObject = new JSONObject(job);
         kafkaTemplate.send(topicName, jsonObject.toString());
     }
