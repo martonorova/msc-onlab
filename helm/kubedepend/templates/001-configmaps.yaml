@@ -29,6 +29,8 @@ data:
   ACTIVEMQ_BROKER_PORT: "61616"
   ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
+  KAFKA_BROKER: kafka-service-0.kafka.svc.cluster.local:9092
+  MESSAGING: {{ .Values.messaging }}
 
 ---
 
@@ -42,6 +44,8 @@ data:
   ACTIVEMQ_BROKER_PORT: "61616"
   ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
+  KAFKA_BROKER: kafka-service-0.kafka.svc.cluster.local:9092
+  MESSAGING: {{ .Values.messaging }}
 
 
 ---
@@ -111,48 +115,4 @@ data:
     }
 
 ---
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: measurement-proxy-config
-  namespace: measurement-proxy
-data:
-  nginx.conf: |
-    worker_processes  1;
-
-    events {
-        worker_connections  1024;
-    }
-
-    http {
-      # include /etc/nginx/mime.types;
-
-      # include /etc/nginx/common/http_head.conf;
-
-      # resolver need in case of variable sub in locations -- replace value in initContainer
-      resolver NAMESERVER valid=30s;
-
-      # resolver need in case of variable sub in locations -- replace value in initContainer
-      # resolver NAMESERVER valid=30s;
-
-       server {
-        listen 80;
-        server_name    127.0.0.1 localhost;
-
-        set $backend_service http://kubedepend-backend.kubedepend.svc.cluster.local:8000;
-
-        location / {
-
-          proxy_set_header Host               $http_host;
-          proxy_set_header X-Forwarded-Proto  $scheme;
-          proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Host   $http_host;
-          proxy_set_header X-Forwarded-Server $host;
-          proxy_set_header X-Forwarded-Port   $server_port;
-
-          proxy_pass $backend_service;
-        }
-      }
-    }
 

@@ -18,7 +18,7 @@ spring:
     url: "jdbc:mysql://${database.host}:${database.port}/${database.db}?useSSl=false"
     username: jobsuser
     password: userpass
-# Hibarnate ddl auto (create, create-drop, validate, update)
+# Hibernate ddl auto (create, create-drop, validate, update)
   jpa:
     hibernate:
       ddl-auto: update
@@ -41,3 +41,5 @@ kafka:
   topics:
     worker: jobWorkerTopic
     backend: jobBackendTopic
+  consumer:
+    group-id: backend

@@ -215,6 +215,8 @@ spec:
 
 ---
 
+{{-- if eq .Values.messaging "activemq" -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -248,5 +250,5 @@ spec:
         - containerPort: 8080
           name: amq-metrics
 
----
+{{- end -}}
 
