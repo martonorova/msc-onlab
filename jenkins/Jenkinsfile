@@ -315,7 +315,7 @@ pipeline {
                        --set backend.image.tag=${DOCKER_TAG} \
                        --set worker.image.repository=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME} \
                        --set worker.image.tag=${DOCKER_TAG} \
-                       --set messaging=${UseKafka ? 'kafka' : 'activemq'}"
+                       --set messaging=${UseKafka == 'true' ? 'kafka' : 'activemq'}"
                     sh "kubectl apply -f k8s-deployment/measurement-proxy.yaml"
                 }
             }
