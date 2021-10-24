@@ -47,8 +47,10 @@ public class HealthController {
 
     @Autowired
     private ConsumerFactory<String, String> consumerFactory;
+
     private Consumer<String, String> testConsumer;
 
+    @Autowired
     public HealthController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
 
