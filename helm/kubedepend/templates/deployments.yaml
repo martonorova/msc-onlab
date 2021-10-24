@@ -182,6 +182,15 @@ spec:
         ports:
         - containerPort: 3306
           name: db-port
+        volumeMounts:
+          - name: kubedepend-db-vol
+            mountPath: /var/lib/mysql
+            subPath: mysql
+      volumes:
+        - name: kubedepend-db-vol
+          persistentVolumeClaim:
+            claimName: kubedepend-db-pvc
+
 
 # ---
 
