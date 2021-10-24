@@ -37,7 +37,7 @@ activemq:
 
 # Kafka
 kafka:
-  bootstrap-server: ${KAFKA_BROKER}
+  bootstrap-servers: ${KAFKA_BROKER}
   topics:
     worker: jobWorkerTopic
     backend: jobBackendTopic

@@ -1,6 +1,6 @@
 package com.morova.onlab.backend.controller;
 
-import com.morova.onlab.backend.messaging.activemq.JMSProducer;
+import com.morova.onlab.backend.messaging.Producer;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.model.TestObject;
 import com.morova.onlab.backend.repository.TestObjectRepository;
@@ -31,7 +31,7 @@ public class HealthController {
     ConnectionFactory connectionFactory;
 
     @Autowired
-    JMSProducer jmsProducer;
+    Producer producer;
 
     private final RestTemplate restTemplate;
 
@@ -109,7 +109,7 @@ public class HealthController {
         if (lastSuccessfulExecutionTime == null
                 || LocalDateTime.now().minusSeconds(90).isAfter(lastSuccessfulExecutionTime)) {
 
-            jmsProducer.sendJob(new Job(-1L, 1, -1L));
+            producer.sendJob(new Job(-1L, 1, -1L));
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
