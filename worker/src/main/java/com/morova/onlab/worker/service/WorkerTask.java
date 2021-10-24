@@ -1,19 +1,19 @@
 package com.morova.onlab.worker.service;
 
 import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
-import com.morova.onlab.worker.messaging.JMSProducer;
+import com.morova.onlab.worker.messaging.Producer;
 
 import java.util.concurrent.CountDownLatch;
 
 public class WorkerTask implements Runnable{
 
     private final JobSubmitRequestDTO job;
-    private final JMSProducer jmsProducer;
+    private final Producer producer;
     private final CountDownLatch countDownLatch;
 
-    public WorkerTask(JobSubmitRequestDTO job, JMSProducer jmsProducer, CountDownLatch countDownLatch) {
+    public WorkerTask(JobSubmitRequestDTO job, Producer producer, CountDownLatch countDownLatch) {
         this.job = job;
-        this.jmsProducer = jmsProducer;
+        this.producer = producer;
         this.countDownLatch = countDownLatch;
     }
 
@@ -24,7 +24,7 @@ public class WorkerTask implements Runnable{
         job.setResult(result);
 
         // send result to ActiveMQ broker
-        jmsProducer.sendJob(job);
+        producer.sendJob(job);
 
         countDownLatch.countDown();
     }

@@ -1,10 +1,11 @@
-package com.morova.onlab.worker.messaging;
+package com.morova.onlab.worker.messaging.activemq;
 
 import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
 import com.morova.onlab.worker.service.WorkerService;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import javax.jms.MessageListener;
 import java.util.concurrent.CountDownLatch;
 
 @Component
+@ConditionalOnExpression("'${messaging}'.equals('activemq')")
 public class JMSListener implements MessageListener {
 
     @Autowired
