@@ -53,8 +53,6 @@ public class HealthController {
     @Autowired
     public HealthController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
-
-        testConsumer = consumerFactory.createConsumer();
     }
 
     @GetMapping
@@ -210,6 +208,8 @@ public class HealthController {
     private void testKafkaConnection() {
         // check Kafka connection
         System.out.println("[HEALTH CHECK] Checking Kafka connection...");
+
+        testConsumer = consumerFactory.createConsumer();
 
         testConsumer.listTopics();
     }
