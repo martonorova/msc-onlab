@@ -4,11 +4,13 @@ import com.morova.onlab.backend.messaging.Producer;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.model.TestObject;
 import com.morova.onlab.backend.repository.TestObjectRepository;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,8 +45,14 @@ public class HealthController {
     @Value("${messaging}")
     private String messagingTech;
 
+    @Autowired
+    private ConsumerFactory<String, String> consumerFactory;
+    private Consumer<String, String> testConsumer;
+
     public HealthController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
+
+        testConsumer = consumerFactory.createConsumer();
     }
 
     @GetMapping
@@ -92,8 +100,17 @@ public class HealthController {
                 System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             }
+            System.out.println("[HEALTH CHECK] ActiveMQ connection OK");
         } else if (messagingTech.equals("kafka")) {
-            testKafkaConnection();
+            try {
+                testKafkaConnection();
+            } catch (Exception ex) {
+                errorMsg = "Kafka connection FAILURE";
+                ex.printStackTrace();
+                System.out.println("[HEALTH CHECK] " + errorMsg);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
+            }
+            System.out.println("[HEALTH CHECK] Kafka connection OK");
         }
 
 
@@ -189,6 +206,9 @@ public class HealthController {
     }
 
     private void testKafkaConnection() {
+        // check Kafka connection
+        System.out.println("[HEALTH CHECK] Checking Kafka connection...");
 
+        testConsumer.listTopics();
     }
 }
