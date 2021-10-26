@@ -319,8 +319,12 @@ def assemble_helm_set_options(fault_profile):
 
 def get_jobs_summary():
 
+    proc = subprocess.Popen(['kubectl', '-n', 'kubedepend', 'port-forward', 'service/kubedepend-db', '3306:3306'])
+
     count_submitted_jobs_query = "SELECT COUNT(id) from job;"
     count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
+
+    result = (None, None)
 
     try:
         with connect(
@@ -334,14 +338,22 @@ def get_jobs_summary():
                 for row in cursor.fetchall():
                     print(row)
                     print(type(row))
+                    # submitted jobs
+                    result[0] = row[0]
 
                 cursor.execute(count_finished_jobs_query)
                 for row in cursor.fetchall():
                     print(row)
                     print(type(row))
+                    # finished jobs
+                    result[1] = row[0]
 
     except Error as e:
         print(e)
+
+    proc.terminate()
+
+    return result
 
 if __name__ == "__main__":
     main()

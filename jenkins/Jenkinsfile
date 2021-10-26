@@ -343,8 +343,6 @@ pipeline {
                     |PROM_PORT_FW_PID=\$!
                     |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
                     |MEAS_PROXY_PORT_FW_PID=\$!
-                    |kubectl -n kubedepend port-forward service/kubedepend-db 3306:3306 &
-                    |DB_PORT_FW_PID=\$!
                     |echo "Running tests"
                     |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --measurement-count=$MEASMeasurementCount --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust_user_count=$MEASLocustUserCount --locust_spawn_rate=$MEASLocustSpawnRate --comment=\"$MEASComment\"
                     """.stripMargin('|')
