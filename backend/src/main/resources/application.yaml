@@ -21,10 +21,10 @@ spring:
 # Hibernate ddl auto (create, create-drop, validate, update)
   jpa:
     hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        dialect: "org.hibernate.dialect.MySQLDialect"
+      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: "org.hibernate.dialect.MySQLDialect"
 
 
 messaging: activemq
