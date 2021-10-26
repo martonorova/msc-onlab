@@ -320,6 +320,7 @@ def assemble_helm_set_options(fault_profile):
 def get_jobs_summary():
 
     proc = subprocess.Popen(['kubectl -n kubedepend port-forward service/kubedepend-db 3306:3306'], shell=True)
+    time.sleep(5)
 
     count_submitted_jobs_query = "SELECT COUNT(id) from job;"
     count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
@@ -350,6 +351,7 @@ def get_jobs_summary():
 
     except Error as e:
         print(e)
+        print("Could not get Job summary from database")
 
     proc.terminate()
 
