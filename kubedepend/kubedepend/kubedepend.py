@@ -319,7 +319,7 @@ def assemble_helm_set_options(fault_profile):
 
 def get_jobs_summary():
 
-    proc = subprocess.Popen(['kubectl', '-n', 'kubedepend', 'port-forward', 'service/kubedepend-db', '3306:3306'])
+    proc = subprocess.Popen(['kubectl -n kubedepend port-forward service/kubedepend-db 3306:3306'], shell=True)
 
     count_submitted_jobs_query = "SELECT COUNT(id) from job;"
     count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
