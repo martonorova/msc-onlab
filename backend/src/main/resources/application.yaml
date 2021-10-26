@@ -21,7 +21,7 @@ spring:
 # Hibernate ddl auto (create, create-drop, validate, update)
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: "org.hibernate.dialect.MySQLDialect"
