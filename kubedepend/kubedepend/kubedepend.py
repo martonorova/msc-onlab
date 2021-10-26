@@ -324,8 +324,10 @@ def get_jobs_summary():
 
     count_submitted_jobs_query = "SELECT COUNT(id) from job;"
     count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
+    clear_table_jobs_query = "DELETE FROM job;"
 
-    result = (None, None)
+    submitted_jobs = None
+    finished_jobs = None
 
     try:
         with connect(
@@ -337,17 +339,13 @@ def get_jobs_summary():
             with connection.cursor() as cursor:
                 cursor.execute(count_submitted_jobs_query)
                 for row in cursor.fetchall():
-                    print(row)
-                    print(type(row))
-                    # submitted jobs
-                    result[0] = row[0]
+                    submitted_jobs = row[0]
 
                 cursor.execute(count_finished_jobs_query)
                 for row in cursor.fetchall():
-                    print(row)
-                    print(type(row))
-                    # finished jobs
-                    result[1] = row[0]
+                    finished_jobs = row[0]
+
+                cursor.execute(clear_table_jobs_query)
 
     except Error as e:
         print(e)
@@ -355,7 +353,7 @@ def get_jobs_summary():
 
     proc.terminate()
 
-    return result
+    return (submitted_jobs, finished_jobs)
 
 if __name__ == "__main__":
     main()
