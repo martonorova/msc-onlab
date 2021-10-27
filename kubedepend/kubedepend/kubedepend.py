@@ -332,6 +332,7 @@ def get_jobs_summary():
     try:
         with connect(
             host=c.DB_HOST,
+            port=c.DB_PORT,
             user=c.DB_USER,
             password=c.DB_PASS,
             database=c.DB_NAME
