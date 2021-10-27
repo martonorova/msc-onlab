@@ -338,19 +338,22 @@ def get_jobs_summary():
             database=c.DB_NAME
         ) as connection:
             with connection.cursor() as cursor:
+                logging.info('Get submitted jobs')
                 cursor.execute(count_submitted_jobs_query)
                 for row in cursor.fetchall():
                     submitted_jobs = row[0]
-
+            with connection.cursor() as cursor:
+                logging.info('Get finished jobs')
                 cursor.execute(count_finished_jobs_query)
                 for row in cursor.fetchall():
                     finished_jobs = row[0]
-
+            with connection.cursor() as cursor:
+                logging.info('Clear jobs table')
                 cursor.execute(clear_table_jobs_query)
 
     except Error as e:
-        print(e)
-        print("Could not get Job summary from database")
+        logging.error(str(e))
+        logging.error("Could not get Job summary from database")
 
     proc.terminate()
 
