@@ -7,9 +7,16 @@ PROMETHEUS_QUERY_ENDPOINT = "/api/v1/query"
 
 # Prometheus queries
 WORKER_BUSY_THREADS_QUERY = "sum(worker_busy_threads{job='kubernetes-service-endpoints'}) or absent(sum(worker_busy_threads{job='kubernetes-service-endpoints'})) - 1"
+
 WORKER_PODS_COUNT_QUERY = "kube_deployment_status_replicas{deployment='kubedepend-worker-depl'}"
+
 NEEDED_WORKER_RATIO_QUERY = "(1 + (org_apache_activemq_Broker_QueueSize{destinationName='jobWorkerQueue', job='activemq'} or absent(org_apache_activemq_Broker_QueueSize{destinationName='jobWorkerQueue', job='activemq', namespace='kubedepend'}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job='worker-pods'} )) or label_replace(vector(0), 'namespace', 'kubedepend', '', ''))) / on(namespace) (kube_deployment_status_replicas{deployment='kubedepend-worker-depl'})"
+
 QUEUE_SIZE_QUERY = "org_apache_activemq_Broker_QueueSized{destinationName=~'jobWorker.*', job='activemq'} or absent(org_apache_activemq_Broker_QueueSized{destinationName=~'jobWorker.*', job='activemq'}) - 1"
+
+DATABASE_DEPLOYMENT_READY_REPLICAS_QUERY = "kube_deployment_status_replicas_ready{namespace='kubedepend', deployment='kubedepend-db-depl'}"
+
+BACKEND_DEPLOYMENT_READY_REPLICAS_QUERY = "kube_deployment_status_replicas_ready{namespace='kubedepend', deployment='kubedepend-backend-depl'}"
 
 
 def backend_availability_query(range_length):

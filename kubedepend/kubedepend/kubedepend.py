@@ -225,21 +225,28 @@ def is_stable_state():
     queue_size = query_prometheus(c.QUEUE_SIZE_QUERY)
     worker_pods_count = query_prometheus(c.WORKER_PODS_COUNT_QUERY)
     needed_worker_ratio = query_prometheus(c.NEEDED_WORKER_RATIO_QUERY)
+    database_ready_replicas = query_prometheus(c.DATABASE_DEPLOYMENT_READY_REPLICAS_QUERY)
+    backend_ready_replicas = query_prometheus(c.BACKEND_DEPLOYMENT_READY_REPLICAS_QUERY)
 
     if worker_busy_threads_count != 0:
-        logging.info(
+        logging.warn(
             f'There are still busy worker threads ({worker_busy_threads_count})')
         return False
 
     if queue_size != 0:
-        logging.info(f'Queue is not empty ({queue_size} jobs waiting)')
+        logging.warn(f'Queue is not empty ({queue_size} jobs waiting)')
         return False
 
     if worker_pods_count != 1:
-        logging.info(f'There are multiple worker pods ({worker_pods_count})')
+        logging.warn(f'There are multiple worker pods ({worker_pods_count})')
         return False
-
-    # TODO check if backend and db are running
+    
+    if database_ready_replicas < 1:
+        logging.warn('Database not ready')
+        return False
+    if backend_ready_replicas < 1:
+        logging.warn('Backend not ready')
+        return False
 
     return True
 
@@ -350,6 +357,8 @@ def get_jobs_summary():
             with connection.cursor() as cursor:
                 logging.info('Clear jobs table')
                 cursor.execute(clear_table_jobs_query)
+            
+            connection.commit()
 
     except Error as e:
         logging.error(str(e))
