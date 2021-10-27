@@ -323,7 +323,7 @@ def get_jobs_summary():
     time.sleep(5)
 
     count_submitted_jobs_query = "SELECT COUNT(id) from job;"
-    count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result = NULL;"
+    count_finished_jobs_query = "SELECT COUNT(id) from job WHERE result IS NOT NULL;"
     clear_table_jobs_query = "DELETE FROM job;"
 
     submitted_jobs = None
