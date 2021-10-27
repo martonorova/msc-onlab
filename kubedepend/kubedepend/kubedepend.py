@@ -198,8 +198,8 @@ def query_prometheus(query, trycount=0):
     except requests.exceptions.ConnectionError:
         if trycount >= 10:
             raise ValueError('Connection ERROR')
-        # wait 1 sec with next attempt
-        time.sleep(1)
+        # wait 5 + trycount sec with next attempt
+        time.sleep(5 + trycount)
         return query_prometheus(query, trycount=trycount + 1)
 
     # print(res.json())
