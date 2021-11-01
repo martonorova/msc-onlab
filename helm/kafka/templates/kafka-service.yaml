@@ -9,6 +9,9 @@ spec:
     - port: 9092
       name: tcp-kafka
       protocol: TCP
+    - port: 7071
+      name: tcp-jmx
+      protocol: TCP
   selector:
     app: kafka
     id: "0"
@@ -24,6 +27,9 @@ spec:
     - port: 9093
       name: tcp-kafka
       protocol: TCP
+    - port: 7071
+      name: tcp-jmx
+      protocol: TCP
   selector:
     app: kafka
     id: "1"
@@ -38,6 +44,9 @@ spec:
   ports:
     - port: 9094
       name: tcp-kafka
+      protocol: TCP
+    - port: 7071
+      name: tcp-jmx
       protocol: TCP
   selector:
     app: kafka

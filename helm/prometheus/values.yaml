@@ -1606,6 +1606,16 @@ extraScrapeConfigs: |
         labels:
           namespace: kubedepend
   
+  - job_name: kafka
+    
+    static_configs:
+      - targets:
+        - kafka-service-0.kafka.svc.cluster.local:7071
+        - kafka-service-1.kafka.svc.cluster.local:7071
+        - kafka-service-2.kafka.svc.cluster.local:7071
+        labels:
+          namespace: kafka
+  
   - job_name: worker-pods
     kubernetes_sd_configs:
     - role: pod

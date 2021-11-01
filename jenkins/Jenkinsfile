@@ -56,6 +56,7 @@ pipeline {
         REGISTRY_PREFIX='morova'
         BACKEND_DOCKER_IMAGE_NAME='kubedepend-backend'
         WORKER_DOCKER_IMAGE_NAME='kubedepend-worker'
+        KAFKA_DOCKER_IMAGE_NAME='kubedepend-kafka'
     }
 
     stages {
@@ -276,10 +277,17 @@ pipeline {
                 echo "Set up enhancements"
                 script {
                     if (UseKafka == 'true') {
+                        echo "Build custom Kafka image with JMX Prometheus exporter"
+                        dir('kafka') {
+                            sh "docker build -t ${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG} ."
+                            sh "docker --config $WORKSPACE/.docker push ${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                            sh "docker rmi ${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                        }
+
+
                         echo "Deploy Kafka"
-                        sh """
-                        |helm upgrade --install kafka ./helm/kafka -n kafka
-                        """.stripMargin('|')
+                        sh "helm upgrade --install kafka ./helm/kafka -n kafka \
+                            --set kafka.image.repository=${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                     }
                 }
             }
