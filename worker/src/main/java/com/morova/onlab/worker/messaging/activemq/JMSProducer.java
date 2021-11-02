@@ -3,6 +3,8 @@ package com.morova.onlab.worker.messaging.activemq;
 import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
 import com.morova.onlab.worker.messaging.Producer;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -19,10 +21,12 @@ public class JMSProducer implements Producer {
     @Value("${activemq.backend.queue}")
     private String queue;
 
+    Logger logger = LoggerFactory.getLogger(JMSProducer.class);
+
     @Override
     public void sendJob(JobSubmitRequestDTO job){
         try {
-            System.out.println("Attempting Send message to Queue: " + queue + "job: " + job.toString());
+            logger.info("Attempting Send message to Queue: " + queue + "job: " + job.toString());
             JSONObject jsonObject = new JSONObject(job);
             jmsTemplate.convertAndSend(queue, jsonObject.toString());
         } catch(Exception e){
