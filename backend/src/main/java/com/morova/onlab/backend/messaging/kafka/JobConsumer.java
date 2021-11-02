@@ -4,6 +4,8 @@ import com.morova.onlab.backend.controller.HealthController;
 import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.repository.JobRepository;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,6 +23,8 @@ public class JobConsumer {
     @Autowired
     HealthController healthController;
 
+    Logger logger = LoggerFactory.getLogger(JobConsumer.class);
+
     @KafkaListener(topics = "${kafka.topics.backend}", groupId = "${kafka.consumer.group-id}")
     public void consumeJob(String jobJson) {
 
@@ -32,7 +36,7 @@ public class JobConsumer {
                 jsonObject.getLong("result")
         );
 
-        System.out.println("Received job: " + job.toString());
+        logger.info("Received job: " + job.toString());
 
         // negative ID means a test job
         if (job.getId() > 0) {

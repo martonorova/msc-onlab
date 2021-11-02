@@ -5,6 +5,8 @@ import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.repository.JobRepository;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.jms.annotation.JmsListener;
@@ -24,6 +26,8 @@ public class JMSListener implements MessageListener {
     @Autowired
     HealthController healthController;
 
+    Logger logger = LoggerFactory.getLogger(JMSListener.class);
+
     @Override
     @JmsListener(destination = "${activemq.backend.queue}")
     public void onMessage(Message message) {
@@ -37,7 +41,7 @@ public class JMSListener implements MessageListener {
                     jsonObject.getLong("result")
             );
             //do additional processing
-            System.out.println("Received Message from Queue: " + job.toString());
+            logger.info("Received Message from Queue: " + job.toString());
 
             // negative ID means a test job
             if (job.getId() > 0) {

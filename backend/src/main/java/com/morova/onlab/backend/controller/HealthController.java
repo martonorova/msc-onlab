@@ -5,6 +5,8 @@ import com.morova.onlab.backend.model.Job;
 import com.morova.onlab.backend.model.TestObject;
 import com.morova.onlab.backend.repository.TestObjectRepository;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -50,6 +52,8 @@ public class HealthController {
 
     private Consumer<String, String> testConsumer;
 
+    Logger logger = LoggerFactory.getLogger(HealthController.class);
+
     @Autowired
     public HealthController(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
@@ -62,27 +66,27 @@ public class HealthController {
 
         // test DB connection
         try {
-            System.out.println("[HEALTH CHECK] Checking DB connection...");
+            logger.info("[HEALTH CHECK] Checking DB connection...");
             TestObject to = testObjectRepository.save(new TestObject("Test Data", LocalDateTime.now()));
             testObjectRepository.findById(to.getId());
-            System.out.println("[HEALTH CHECK] DB connection OK");
+            logger.info("[HEALTH CHECK] DB connection OK");
         } catch (Exception ex) {
             errorMsg = "DB connection FAILURE";
-            System.out.println("[HEALTH CHECK] " + errorMsg);
+            logger.info("[HEALTH CHECK] " + errorMsg);
             ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
         }
 
         // check if a worker is running
-        System.out.println("[HEALTH CHECK] Checking Worker connection...");
+        logger.info("[HEALTH CHECK] Checking Worker connection...");
         ResponseEntity<String> response
                 = restTemplate.getForEntity(workerHealthEndpoint, String.class);
 
         if (response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("[HEALTH CHECK] Worker connection OK");
+            logger.info("[HEALTH CHECK] Worker connection OK");
         } else {
             errorMsg = "Worker connection FAILURE";
-            System.out.println("[HEALTH CHECK] " + errorMsg);
+            logger.info("[HEALTH CHECK] " + errorMsg);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
         }
 
@@ -92,25 +96,25 @@ public class HealthController {
             } catch (JMSException ex) {
                 errorMsg = "ActiveMQ connection FAILURE";
                 ex.printStackTrace();
-                System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
+                logger.info("[HEALTH CHECK] ActiveMQ connection FAILURE");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             } catch (IllegalStateException ex) {
                 errorMsg = "ActiveMQ connection FAILURE - wrong text message";
                 ex.printStackTrace();
-                System.out.println("[HEALTH CHECK] ActiveMQ connection FAILURE");
+                logger.info("[HEALTH CHECK] ActiveMQ connection FAILURE");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             }
-            System.out.println("[HEALTH CHECK] ActiveMQ connection OK");
+            logger.info("[HEALTH CHECK] ActiveMQ connection OK");
         } else if (messagingTech.equals("kafka")) {
             try {
                 testKafkaConnection();
             } catch (Exception ex) {
                 errorMsg = "Kafka connection FAILURE";
                 ex.printStackTrace();
-                System.out.println("[HEALTH CHECK] " + errorMsg);
+                logger.info("[HEALTH CHECK] " + errorMsg);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             }
-            System.out.println("[HEALTH CHECK] Kafka connection OK");
+            logger.info("[HEALTH CHECK] Kafka connection OK");
         }
 
 
@@ -119,7 +123,7 @@ public class HealthController {
         // if there is a not too old execution, return true
         if (lastSuccessfulExecutionTime != null
                 && LocalDateTime.now().minusSeconds(90).isBefore(lastSuccessfulExecutionTime)) {
-            System.out.println("[HEALTH CHECK] " + "Last successful execution OK");
+            logger.info("[HEALTH CHECK] " + "Last successful execution OK");
         }
 
         // if there is not any new successful execution, run it
@@ -136,7 +140,7 @@ public class HealthController {
             if (lastSuccessfulExecutionTime == null
                     || LocalDateTime.now().minusSeconds(90).isAfter(lastSuccessfulExecutionTime)) {
                 errorMsg = "Last successful execution FAILURE";
-                System.out.println("[HEALTH CHECK] " + errorMsg);
+                logger.info("[HEALTH CHECK] " + errorMsg);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMsg);
             }
         }
@@ -150,7 +154,7 @@ public class HealthController {
 
     private void testActiveMqConnection() throws JMSException {
         // check activeMQ connection
-        System.out.println("[HEALTH CHECK] Checking ActiveMQ connection...");
+        logger.info("[HEALTH CHECK] Checking ActiveMQ connection...");
 
         // Produce test message
 
@@ -192,7 +196,7 @@ public class HealthController {
             TextMessage textMessage = (TextMessage) messageReceived;
             text = textMessage.getText();
             if (text.equals("testMessage")) {
-                System.out.println("[HEALTH CHECK] ActiveMQ connection OK");
+                logger.info("[HEALTH CHECK] ActiveMQ connection OK");
             } else {
                 throw new IllegalStateException("Text was " + text);
             }
@@ -207,7 +211,7 @@ public class HealthController {
 
     private void testKafkaConnection() {
         // check Kafka connection
-        System.out.println("[HEALTH CHECK] Checking Kafka connection...");
+        logger.info("[HEALTH CHECK] Checking Kafka connection...");
 
         testConsumer = consumerFactory.createConsumer();
 
