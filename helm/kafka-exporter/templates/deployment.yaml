@@ -37,7 +37,7 @@ spec:
             {{- if .Values.kafkaExporter.kafka.version }}
             - --kafka.version={{ .Values.kafkaExporter.kafka.version }}
             {{- end }}
-            {{- end}}
+            {{- end }}
             {{- if .Values.kafkaExporter.sasl.enabled }}
             - --sasl.enabled
             {{- if not .Values.kafkaExporter.sasl.handshake }}
@@ -59,6 +59,7 @@ spec:
             {{- end }}
             {{- if .Values.kafkaExporter.log }}
             - --verbosity={{ .Values.kafkaExporter.log.verbosity }}
+            {{- end }}
             {{- if .Values.kafkaExporter.log.enableSarama }}
             - --log.enable-sarama
             {{- end }}
@@ -96,7 +97,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
-
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
