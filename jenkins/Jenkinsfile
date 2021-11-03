@@ -71,6 +71,11 @@ pipeline {
                     env.DOCKER_TAG = env.BUILD_NUMBER
                     DOCKER_TAG = env.BUILD_NUMBER
 
+                    if (UseKafka == 'true') {
+                        // for the python script
+                        env.USE_KAFKA = 'true'
+                    }
+
                     echo "Setup aws config"
                     withCredentials(
                         [
