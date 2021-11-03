@@ -30,4 +30,9 @@ public class JobProducer implements Producer {
         JSONObject jsonObject = new JSONObject(job);
         kafkaTemplate.send(topicName, jsonObject.toString());
     }
+
+    @Override
+    public void sendHeartBeat(Long jobId) {
+        logger.warn("Not implemented");
+    }
 }
