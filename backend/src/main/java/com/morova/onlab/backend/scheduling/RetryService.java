@@ -47,6 +47,11 @@ public class RetryService {
                 if (lastHeartBeatTimestamp + 60 * 1000 < System.currentTimeMillis()) {
                     producer.sendJob(job);
                     logger.info("[RESUBMIT] Job resubmitted: " + job.toString());
+
+                    // remove Job id from map to avoid multiple resubmitting
+                    // when resubmitting, the Job enters the queue and it can take time for a worker to pick it up
+                    // so in the meantime, as no heartbeat is received, to Job gets resubmitted again
+                    jobHeartBeats.remove(job.getId());
                 }
 
             } else {
