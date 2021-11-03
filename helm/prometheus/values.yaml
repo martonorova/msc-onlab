@@ -1620,6 +1620,8 @@ extraScrapeConfigs: |
     static_configs:
       - targets:
         - kafka-exporter.monitoring.svc.cluster.local:9308
+        labels:
+          namespace: kubedepend # needed, so needed_worker_ratio_kafka custom metric has value
   
   - job_name: worker-pods
     kubernetes_sd_configs:
