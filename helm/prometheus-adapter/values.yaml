@@ -73,6 +73,18 @@ rules:
         as: "needed_worker_ratio"
       # metricsQuery: sum(1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / sum(kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
       metricsQuery: (1 + (org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue", job="activemq"} or absent(org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue", job="activemq", namespace="kubedepend"}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job="worker-pods"} )) or label_replace(vector(0), "namespace", "kubedepend", "", ""))) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+    
+    - seriesQuery: 'kube_deployment_status_replicas'
+      resources:
+        template: <<.Resource>>
+        # overrides:
+        #   namespace: {resource: "namespace"}
+        #   deployment: {group: "apps", resource: "deployment"}
+      name:
+        matches: ".*"
+        as: "needed_worker_ratio_kafka"
+      # metricsQuery: sum(1 + org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue"}) / sum(kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
+      metricsQuery: (1 + (kafka_consumergroup_lag_sum{consumergroup="worker",topic="jobWorkerTopic"} or absent(kafka_consumergroup_lag_sum{consumergroup="worker",topic="jobWorkerTopic"}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job="worker-pods"} )) or label_replace(vector(0), "namespace", "kubedepend", "", ""))) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
 
 
 # (1 + sum by (namespace)(worker_busy_threads{job="worker-pods"})) / on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})
