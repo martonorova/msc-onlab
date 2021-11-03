@@ -22,6 +22,8 @@ public class WorkerService {
 
     private Long currentJobId;
 
+    private CountDownLatch currentLatch;
+
     Logger logger = LoggerFactory.getLogger(WorkerService.class);
 
     public WorkerService() {
@@ -30,6 +32,7 @@ public class WorkerService {
 
     public void submitJob(JobSubmitRequestDTO job, CountDownLatch countDownLatch) {
         currentJobId = job.getId();
+        currentLatch = countDownLatch;
 
         executor.execute(new WorkerTask(job, producer, countDownLatch));
     }
@@ -40,9 +43,10 @@ public class WorkerService {
 
     @Scheduled(fixedDelay = 5_000)
     public void sendHeartbeat() {
-        if (currentJobId != null) {
-            producer.sendHeartBeat(currentJobId);
+        if (currentJobId != null && currentLatch != null) {
+            if (currentLatch.getCount() != 0) {
+                producer.sendHeartBeat(currentJobId);
+            }
         }
-
     }
 }
