@@ -331,7 +331,7 @@ pipeline {
                        --set worker.image.repository=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME} \
                        --set worker.image.tag=${DOCKER_TAG} \
                        --set messaging=${UseKafka == 'true' ? 'kafka' : 'activemq'} \
-                       --set hpa.metricName=${UseKafka == 'true' ? 'needed_worker_ratio_kafka' : 'needed_worker_ratio'}
+                       --set hpa.metricName=${UseKafka == 'true' ? 'needed_worker_ratio_kafka' : 'needed_worker_ratio'} \
                        --set useHeartbeats=${UseHeartbeats == 'true' ? true : false}"
                     sh "kubectl apply -f k8s-deployment/measurement-proxy.yaml"
                 }
