@@ -37,6 +37,8 @@ activemq:
     queue: ${ACTIVEMQ_WORKER_QUEUE:jobWorkerQueue}
   backend:
     queue: ${ACTIVEMQ_BACKEND_QUEUE:jobBackendQueue}
+  jobstatus:
+    queue: ${ACTIVEMQ_JOBSTATUS_QUEUE:jobStatus}
 
 # Kafka
 kafka:
@@ -46,3 +48,7 @@ kafka:
     backend: jobBackendTopic
   consumer:
     group-id: backend
+
+# Scheduling
+scheduler:
+  enabled: false
