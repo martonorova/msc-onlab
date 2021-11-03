@@ -19,18 +19,31 @@ public class JMSProducer implements Producer {
     JmsTemplate jmsTemplate;
 
     @Value("${activemq.backend.queue}")
-    private String queue;
+    private String jobBackendQueue;
+
+    @Value("${activemq.jobstatus.queue}")
+    private String heartbeatQueue;
 
     Logger logger = LoggerFactory.getLogger(JMSProducer.class);
 
     @Override
     public void sendJob(JobSubmitRequestDTO job){
         try {
-            logger.info("Attempting Send message to Queue: " + queue + "job: " + job.toString());
+            logger.info("Attempting Send message to Queue: " + jobBackendQueue + "job: " + job.toString());
             JSONObject jsonObject = new JSONObject(job);
-            jmsTemplate.convertAndSend(queue, jsonObject.toString());
+            jmsTemplate.convertAndSend(jobBackendQueue, jsonObject.toString());
         } catch(Exception e){
-            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendHeartBeat(Long jobId) {
+        try {
+            logger.info("[HEARTBEAT] Send heartbeat for Job: " + jobId.toString());
+            jmsTemplate.convertAndSend(heartbeatQueue, jobId.toString());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 }

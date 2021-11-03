@@ -4,4 +4,5 @@ import com.morova.onlab.worker.dto.JobSubmitRequestDTO;
 
 public interface Producer {
     void sendJob(JobSubmitRequestDTO job);
+    void sendHeartBeat(Long jobId);
 }
