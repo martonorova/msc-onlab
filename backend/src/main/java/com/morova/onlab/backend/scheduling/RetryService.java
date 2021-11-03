@@ -46,8 +46,9 @@ public class RetryService {
                 // if last heartbeat older than 1 minute --> assume job is lost, have to resubmit
                 if (lastHeartBeatTimestamp + 60 * 1000 < System.currentTimeMillis()) {
                     producer.sendJob(job);
+                    logger.info("[RESUBMIT] Job resubmitted: " + job.toString());
                 }
-                logger.info("[RESUBMIT] Job resubmitted: " + job.toString());
+
             } else {
                 logger.info("[NO HEARTBEAT INFO] No heartbeat info for Job: " + job.toString());
             }
@@ -74,7 +75,7 @@ public class RetryService {
         try{
             String messageText = ((ActiveMQTextMessage) message).getText();
 
-            logger.info("[JOBSTATUS] Received Job id from JOBSTATUS: " + messageText);
+            logger.info("[JOBSTATUS] Received heartbeat Job id: " + messageText);
 
             // update Job timestamp in map
             Long jobId = Long.parseLong(messageText);
