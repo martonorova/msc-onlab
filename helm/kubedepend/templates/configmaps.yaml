@@ -31,6 +31,7 @@ data:
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
   KAFKA_BROKER: {{ .Values.kafka.address }}
   MESSAGING: {{ .Values.messaging }}
+  HEARTBEATS_ENABLED: {{ .Values.useHeartbeats }}
 
 ---
 
@@ -46,6 +47,7 @@ data:
   ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
   KAFKA_BROKER: {{ .Values.kafka.address }}
   MESSAGING: {{ .Values.messaging }}
+  HEARTBEATS_ENABLED: {{ .Values.useHeartbeats }}
 
 
 ---

@@ -20,7 +20,7 @@ import java.util.Map;
 
 
 @Service
-@ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = false)
+@ConditionalOnProperty(name = "heartbeats.enabled", matchIfMissing = false)
 public class RetryService {
 
     @Autowired
@@ -60,7 +60,7 @@ public class RetryService {
     public void cleanUpOldHeartBeats() {
         logger.info("[CLEAN UP HEARTBEATS] Started");
         List<Job> finishedJobs = jobRepository.findFinishedJobs();
-        
+
         finishedJobs.forEach(job -> {
             jobHeartBeats.remove(job.getId());
         });

@@ -1,6 +1,8 @@
 
 messaging: activemq
 
+useHeartbeats: false
+
 kafka:
   address: kafka-service-0.kafka.svc.cluster.local:9092
 

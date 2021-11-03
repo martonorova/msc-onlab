@@ -49,6 +49,6 @@ kafka:
   consumer:
     group-id: backend
 
-# Scheduling
-scheduler:
+# Heartbeat service
+heartbeats:
   enabled: false

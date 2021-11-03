@@ -6,6 +6,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = false)
+@ConditionalOnProperty(name = "heartbeats.enabled", matchIfMissing = false)
 public class SchedulerConfig {
 }
