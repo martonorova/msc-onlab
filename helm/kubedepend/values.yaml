@@ -4,6 +4,9 @@ messaging: activemq
 kafka:
   address: kafka-service-0.kafka.svc.cluster.local:9092
 
+hpa:
+  metricName: needed-worker-ratio
+
 backend:
   image:
     repository: morova/kubedepend-backend

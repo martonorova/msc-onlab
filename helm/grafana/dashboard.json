@@ -15,7 +15,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "panels": [
     {
@@ -67,16 +66,17 @@
       "targets": [
         {
           "expr": "(1 + (org_apache_activemq_Broker_QueueSize{destinationName=\"jobWorkerQueue\", job=\"activemq\"} or absent(org_apache_activemq_Broker_QueueSize{destinationName=\"jobWorkerQueue\", job=\"activemq\", namespace=\"kubedepend\"}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job=\"worker-pods\"} )) or label_replace(vector(0), \"namespace\", \"kubedepend\", \"\", \"\"))) / on(namespace) (kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"})",
+          "hide": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "needed_worker_ratio",
           "refId": "A"
         },
         {
-          "expr": "kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"}",
-          "hide": true,
+          "expr": "(1 + (kafka_consumergroup_lag_sum{consumergroup=\"worker\",topic=\"jobWorkerTopic\",namespace=\"kubedepend\"} or absent(kafka_consumergroup_lag_sum{consumergroup=\"worker\",topic=\"jobWorkerTopic\",namespace=\"kubedepend\"}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job=\"worker-pods\"} )) or label_replace(vector(0), \"namespace\", \"kubedepend\", \"\", \"\"))) / on(namespace) (kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"})",
+          "hide": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "needed_worker_ratio_kafka",
           "refId": "B"
         }
       ],
@@ -1065,12 +1065,12 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "K8S Dependability",
   "uid": "yVlYZShGk",
-  "version": 22
+  "version": 1
 }

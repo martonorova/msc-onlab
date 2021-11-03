@@ -15,3 +15,5 @@ None of the results returned by when fetching metric deployments/needed_worker_r
 NEW METRIC
 
 kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/*/metrics/needed_worker_ratio | jq .
+
+kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/*/metrics/needed_worker_ratio_kafka | jq .

@@ -263,6 +263,8 @@ pipeline {
                     |helm upgrade --install grafana grafana/grafana -n monitoring -f helm/grafana/values.yaml
                     |echo "Grafana secret is:"
                     |kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+                    |kubectl -n monitoring scale deployment grafana --replicas=0
+                    |kubectl -n monitoring scale deployment grafana --replicas=1
                     |helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v2.0.2
                     |helm upgrade --install kafka-exporter ./helm/kafka-exporter -n monitoring
                     """.stripMargin('|')
@@ -324,7 +326,8 @@ pipeline {
                        --set backend.image.tag=${DOCKER_TAG} \
                        --set worker.image.repository=${REGISTRY_PREFIX}/${WORKER_DOCKER_IMAGE_NAME} \
                        --set worker.image.tag=${DOCKER_TAG} \
-                       --set messaging=${UseKafka == 'true' ? 'kafka' : 'activemq'}"
+                       --set messaging=${UseKafka == 'true' ? 'kafka' : 'activemq'} \
+                       --set hpa.metricName=${UseKafka == 'true' ? 'needed_worker_ratio_kafka' : 'needed_worker_ratio'}"
                     sh "kubectl apply -f k8s-deployment/measurement-proxy.yaml"
                 }
             }

@@ -14,7 +14,7 @@ spec:
       - type: Object
         object:
           metric:
-              name: needed_worker_ratio
+              name: {{ .Values.hpa.metricName }}
           describedObject:
               apiVersion: /v1
               kind: Namespace
