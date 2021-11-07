@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -89,5 +90,15 @@ public class RetryService {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @ConditionalOnExpression("'${messaging}'.equals('kafka')")
+    @KafkaListener(topics = "${kafka.topics.jobstatus}", groupId = "${kafka.consumer.group-id}")
+    public void onKafkaMessage(String message) {
+        logger.info("[JOBSTATUS] Received heartbeat Job id: " + message);
+
+        // update Job timestamp in map
+        Long jobId = Long.parseLong(message);
+        jobHeartBeats.put(jobId, System.currentTimeMillis());
     }
 }

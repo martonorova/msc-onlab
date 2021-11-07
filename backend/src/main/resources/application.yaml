@@ -46,6 +46,7 @@ kafka:
   topics:
     worker: jobWorkerTopic
     backend: jobBackendTopic
+    jobstatus: jobStatus
   consumer:
     group-id: backend
 

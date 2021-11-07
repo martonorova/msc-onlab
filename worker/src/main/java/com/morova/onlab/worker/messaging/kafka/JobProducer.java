@@ -17,7 +17,10 @@ public class JobProducer implements Producer {
 
     // sends back finished jobs to the backend
     @Value(value = "${kafka.topics.backend}")
-    private String topicName;
+    private String backendTopicName;
+
+    @Value(value = "${kafka.topics.jobstatus}")
+    private String heartbeatTopic;
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -26,13 +29,14 @@ public class JobProducer implements Producer {
 
     @Override
     public void sendJob(JobSubmitRequestDTO job) {
-        logger.info("Attempting Send message to Topic: " + topicName + "job: " + job.toString());
+        logger.info("Attempting Send message to Topic: " + backendTopicName + "job: " + job.toString());
         JSONObject jsonObject = new JSONObject(job);
-        kafkaTemplate.send(topicName, jsonObject.toString());
+        kafkaTemplate.send(backendTopicName, jsonObject.toString());
     }
 
     @Override
     public void sendHeartBeat(Long jobId) {
-        logger.warn("Not implemented");
+        logger.info("[HEARTBEAT] Send heartbeat for Job: " + jobId.toString());
+        kafkaTemplate.send(heartbeatTopic, jobId.toString());
     }
 }
