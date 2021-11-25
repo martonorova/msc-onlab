@@ -9,24 +9,64 @@
 
 \end{itemize}
 
+This chapter presents the design and implementation of the sample application which will act as a case-study the showcase the features of the test framework. 
+
 
 %----------------------------------------------------------------------------
 \section{Design}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
+\subsection{Requirements}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item objectives
+	\begin{itemize}
+		\item microservices architecture
+		\item have a system with different components bases on state-fullness (stateful, stateless, )
+		\item have component(s) that can be scaled based on some application specific workload requirements (e.g. increased load on the system, fault tolerant redundancy)
+		\item observable and collectible application specific metrics
+	\end{itemize}
+\end{itemize}
+
+%----------------------------------------------------------------------------
 \subsection{Architecture}
 %----------------------------------------------------------------------------
 
-architecture diagram
+TODO: architecture diagram
+
+\begin{itemize}
+	\item master-worker architecture
+	\item REST API interfaces
+	\item use-case
+	\begin{itemize}
+		\item submiting computation jobs
+		\item distributing jobs among worker nodes
+		\item persisting job results
+		\item querying job results
+	\end{itemize}
+	
+\end{itemize}
+
 
 %----------------------------------------------------------------------------
 \subsection{Components}
 %----------------------------------------------------------------------------
 
+In the following sections I present each component and their responsibilities.
+
 %----------------------------------------------------------------------------
 \subsubsection{Backend}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item provides a REST API interface for submitting new jobs and querying their result
+	\item forward submitted jobs to worker nodes
+	\item stores the result of finished jobs in a database
+	\item exposes a metrics endpoint for external monitoring solutions
+	\item exposes health endpoint that can be consumed to verify that the system works in a functionally correct way
+\end{itemize}
 
 responsibilites + API + health endpoint
 
