@@ -25,7 +25,7 @@ This chapter presents the design and implementation of the sample application wh
 	\begin{itemize}
 		\item microservices architecture
 		\item have a system with different components bases on state-fullness (stateful, stateless, )
-		\item have component(s) that can be scaled based on some application specific workload requirements (e.g. increased load on the system, fault tolerant redundancy)
+		\item have component(s) that can be scaled based on some application specific workload requirements (e.g. increased load on the system, fault tolerant redundancy) - stateless components can be scaled more easily
 		\item observable and collectible application specific metrics
 	\end{itemize}
 \end{itemize}
@@ -41,7 +41,7 @@ TODO: architecture diagram
 	\item REST API interfaces
 	\item use-case
 	\begin{itemize}
-		\item submiting computation jobs
+		\item submitting computation jobs
 		\item distributing jobs among worker nodes
 		\item persisting job results
 		\item querying job results
@@ -74,17 +74,75 @@ responsibilites + API + health endpoint
 \subsubsection{Worker}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item provides a REST API interface to accept jobs from the backend to execute
+	\item exposes a metrics endpoint for external monitoring solutions
+	\item exposes health endpoint
+\end{itemize}
+
 responsibilites + API + health endpoint
 
 %----------------------------------------------------------------------------
 \subsubsection{Message Queue}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item connects the backend with the worker nodes
+	\item as the number of worker nodes is dynamic, it would be not feasible for the backend to try to keep record of all the running workers
+	\item the backend sends the jobs to the workers via this message queue
+	\item the the workers also use this to send back the finished jobs (at the moment, we could skip the message queue on the way back, but this way we do not need much modification if there would be more than one backend in order to \eg be able to handle a bigger load)
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsubsection{Database}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item stores the jobs with their result 
+	\item serves queries made by the backend component
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \section{Implementation}
 %----------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------
+\subsection{Backend}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item Spring Boot Java
+	\item introduce Job model
+	\item introduce REST API
+	\item introduce health check
+	\item introduce Message Queue integration
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{Worker}
+%----------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------
+\subsection{Message Queue}
+%----------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------
+\subsection{Database}
+%----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
