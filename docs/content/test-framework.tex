@@ -7,9 +7,13 @@
 %----------------------------------------------------------------------------
 
 \begin{itemize}
+	\item why is a framework needed
+	\item test framework architecture
+	\item what is the test objective?
+	\item what to test? - dependability metrics! - which ones?, how?
+	\item need to monitor the application metrics, state --> need for monitoring system
 	\item Test environment locally or in cloud
 	\item how does running tests affect the result
-	\item industry standard
 \end{itemize}
 
 %----------------------------------------------------------------------------
@@ -27,6 +31,16 @@
 		\item Collect metrics
 		\item Store results
 	\end{enumerate}
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{Architecture}
+%----------------------------------------------------------------------------
+
+
+\begin{itemize}
+	\item architecture DIAGRAM
+	\item describe what each component does
 \end{itemize}
 
 
@@ -57,9 +71,17 @@
 	\item list fault profiles and justification
 \end{itemize}
 
+
+%----------------------------------------------------------------------------
+\subsection{Monitoring / Measurement}
+%----------------------------------------------------------------------------
+
+
 %----------------------------------------------------------------------------
 \subsection{Measurement Sequence}
 %----------------------------------------------------------------------------
+
+is it rather an implementation only section?
 
 \begin{itemize}
 	\item what is the purpose of this
@@ -75,15 +97,6 @@
 \end{itemize}
 
 %----------------------------------------------------------------------------
-\subsection{Kubedepend}
-%----------------------------------------------------------------------------
-
-\begin{itemize}
-	\item what it is used for?
-	\item 
-\end{itemize}
-
-%----------------------------------------------------------------------------
 \subsection{Load generation}
 %----------------------------------------------------------------------------
 
@@ -93,6 +106,37 @@
 	\item parameterization
 \end{itemize}
 
+%----------------------------------------------------------------------------
+\subsection{Fault Injection}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item deploy Chaos Mesh
+	\item define chaos experiments according to fault profiles (show one as example)
+	\item describe the usage of helm to deploy faults
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{Measurement}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item Deploy tools \begin{itemize}
+		\item Prometheus
+		\item Prometheus Adapter
+		\item Promethues Blackbox Exporter
+		\item Grafana
+	\end{itemize}
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsubsection{Metrics}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	
+	\item dependability metrics in PromQL
+\end{itemize}
 
 
 
@@ -100,8 +144,18 @@
 
 
 
+%----------------------------------------------------------------------------
+\subsection{Kubedepend}
+%----------------------------------------------------------------------------
 
-
+\begin{itemize}
+	\item what it is used for?
+	\item facilitates automatic load generation, fault injection, collecting results
+	\item describe its workflow
+	\item purpose of waiting for stable system state
+	\item prometheus metrics
+	\item parameters (click)
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Continuous Delivery}
@@ -110,5 +164,5 @@
 \begin{itemize}
 	\item Steps and what do they do
 	\item image about jenkins pipeline steps
-	\item parameters - in general - explain each further (excluding general ones like clean up)
+	\item parameters - passed to kubedepend
 \end{itemize}
