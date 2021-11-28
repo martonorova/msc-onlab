@@ -6,6 +6,12 @@
 \section{Design}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item Test environment locally or in cloud
+	\item how does running tests affect the result
+	\item industry standard
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsection{Requirements}
 %----------------------------------------------------------------------------
@@ -28,10 +34,19 @@
 \subsection{Load generation}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item send HTTP requests to the backend according to pattern (uniform distribution)
+\end{itemize}
+
 
 %----------------------------------------------------------------------------
 \subsection{Fault Injection}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item inject faults on different levels (Pod, Network, CPU, Memory)
+	\item periodic fault injection
+\end{itemize}
 
 
 %----------------------------------------------------------------------------
@@ -46,10 +61,54 @@
 \subsection{Measurement Sequence}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item what is the purpose of this
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \section{Implementation}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item AWS infrastructure
+	\item CF template
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{Kubedepend}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item what it is used for?
+	\item 
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{Load generation}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item locust
+	\item usermodel
+	\item parameterization
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
 %----------------------------------------------------------------------------
 \subsection{Continuous Delivery}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item Steps and what do they do
+	\item image about jenkins pipeline steps
+	\item parameters - in general - explain each further (excluding general ones like clean up)
+\end{itemize}

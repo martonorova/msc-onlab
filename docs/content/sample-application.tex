@@ -24,6 +24,7 @@ This chapter presents the design and implementation of the sample application wh
 	\item objectives
 	\begin{itemize}
 		\item microservices architecture
+		\item containerization - facilitates easy deployment and scalability
 		\item have a system with different components bases on state-fullness (stateful, stateless, )
 		\item have component(s) that can be scaled based on some application specific workload requirements (e.g. increased load on the system, fault tolerant redundancy) - stateless components can be scaled more easily
 		\item observable and collectible application specific metrics
@@ -106,6 +107,11 @@ responsibilites + API + health endpoint
 \section{Implementation}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item Docker
+	\item K8s deployment Pod, Depl, Service for each , example for each
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsection{Backend}
 %----------------------------------------------------------------------------
@@ -122,13 +128,28 @@ responsibilites + API + health endpoint
 \subsection{Worker}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item Spring Boot Java
+	\item introduce REST API
+	\item introduce health check
+	\item introduce Message Queue integration
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsection{Message Queue}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item configuration? image?
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsection{Database}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item configuration? image?
+\end{itemize}
 
 
 
