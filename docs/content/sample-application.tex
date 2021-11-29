@@ -2,14 +2,7 @@
 \chapter{Sample application}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Why need a case-study?
-	\item Introduce the general problem it solves (naive implementation of Fibonacci)
-	\item introduce the general master-job-worker pattern it is based upon
-
-\end{itemize}
-
-This chapter presents the design and implementation of the sample application which will act as a case-study the showcase the features of the test framework. 
+This chapter presents the design and implementation of the sample application which will act as a case-study to showcase the features of the test framework and to serve as a basis for future enhancements. 
 
 
 %----------------------------------------------------------------------------
@@ -25,11 +18,19 @@ This chapter presents the design and implementation of the sample application wh
 	\begin{itemize}
 		\item microservices architecture
 		\item containerization - facilitates easy deployment and scalability
-		\item have a system with different components bases on state-fullness (stateful, stateless, )
+		\item have a system with different components based on state-fullness (stateful, stateless, )
 		\item have component(s) that can be scaled based on some application specific workload requirements (e.g. increased load on the system, fault tolerant redundancy) - stateless components can be scaled more easily
 		\item observable and collectible application specific metrics
 	\end{itemize}
 \end{itemize}
+
+The design of the sample application was driven by several requirements to create a system that can be easily used for our purposes.
+
+\paragraph{Microservices architecture}As the application needs to be deployed and function in a Kubernetes-based environment, it was evident that a microservice architecture was the right choice for starting the design of the system. This notion implicitly means that there will be multiple, independent components that have to communicate with each other in order to create a whole system.
+
+\paragraph{Containerization}The ease of deployment and scalability is one of the cardinal goals of designing and maintaining a microservice application. Containerization provides the fundamentals for achieving this as all the dependencies and configuration needed for a component can be put in a container. This leads to the conclusion that each component should be packaged and deployed into separate and independent containers.
+
+\paragraph{Stateful and stateless components}
 
 %----------------------------------------------------------------------------
 \subsection{Architecture}
@@ -108,6 +109,7 @@ responsibilites + API + health endpoint
 %----------------------------------------------------------------------------
 
 \begin{itemize}
+	\item Introduce the general problem it solves (naive implementation of Fibonacci - this is implementation)
 	\item Docker
 \end{itemize}
 
