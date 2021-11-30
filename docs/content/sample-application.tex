@@ -54,7 +54,7 @@ TODO: activity diagram?
 	\item \emph{Submit tasks } A client submits input parameters to the master component.
 	\item \emph{Distribute tasks} The master component creates a task definition based on the input parameters and then forwards it to one of the worker components.
 	\item \emph{Task execution} The worker components executes the received task and sends back the result to the master.
-	\item \emph{Persist results} The master persists the result of the completed task.
+	\item \emph{Persist results} The master persists the result of the completed task so it can be queried by clients.
 \end{enumerate}
 
 The designed architecture of the sample application can be seen in Figure \ref{fig:sample_app_arch}
@@ -65,12 +65,12 @@ The designed architecture of the sample application can be seen in Figure \ref{f
 	\caption{Sample application architecture}
 	\label{fig:sample_app_arch}
 \end{figure}
-
-%----------------------------------------------------------------------------
-\subsection{Communication}
-%----------------------------------------------------------------------------
-
-Before commencing with the design of each component, it is important to specify how the components in the system will communicate with each other as this can affect their construction. Considering that the sample application tries to resemble implementations that are widely used in the industry, the components to be created in this project will expose REST API endpoints and will communicate over HTTP protocol. This provides the right degree of customizability on the component level while allowing loose-coupling on the system level. 
+%
+%%----------------------------------------------------------------------------
+%\subsection{Communication}
+%%----------------------------------------------------------------------------
+%
+%Before commencing with the design of each component, it is important to specify how the components in the system will communicate with each other as this can affect their construction. Considering that the sample application tries to resemble implementations that are widely used in the industry, the components to be created in this project will expose REST API endpoints and will communicate over HTTP protocol. This provides the right degree of customizability on the component level while allowing loose-coupling on the system level. 
 
 
 %\begin{itemize}
@@ -97,27 +97,48 @@ In the following sections, each component and their responsibilities are present
 \subsubsection{Backend}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item provides a REST API interface for submitting new jobs and querying their result
-	\item forward submitted jobs to worker nodes
-	\item stores the result of finished jobs in a database
-	\item exposes a metrics endpoint for external monitoring solutions
-	\item exposes health endpoint that can be consumed to verify that the system works in a functionally correct way
-\end{itemize}
+%\begin{itemize}
+%	\item provides a REST API interface for submitting new jobs and querying their result
+%	\item forward submitted jobs to worker nodes
+%	\item stores the result of finished jobs in a database
+%	\item exposes a metrics endpoint for external monitoring solutions
+%	\item exposes health endpoint that can be consumed to verify that the system works in a functionally correct way
+%\end{itemize}
+%
+%responsibilites + API + health endpoint
 
-responsibilites + API + health endpoint
+The backend is responsible for handling task inputs from clients and creating task definitions based on them that it will forward to worker components. Upon receiving a task result from a worker, the backend persists the result in a database and makes it possible for clients to query it.
+
+In order to be able to monitor the behavior and state of the backend component, it should be able to expose different kinds of metrics about itself. From an operations point of view it is quite important that each component have a so called health endpoint that can be used to tell if the given component is up and running. Clients and monitoring tools can consume this endpoint to make sure if a service is available. However, sometimes it is not enough information if a service is up or down. Consider one of the multiple cases when the backend is running, but suddenly the database connection is lost due to some failure. Although the backend is up but it cannot function correctly. This leads to the conclusion that when the health endpoint of the backend is consumed, the result should indicate if there are problems in any of the dependencies of the backend which can disrupt its correct functionality. This way the users and the maintainers of the service can be sure that the system can function correctly if the health endpoint returns without failure.
+
+Summary of the required interfaces: \begin{itemize}
+	\item Task input submission
+	\item Task result query
+	\item Health endpoint
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Worker}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item provides a REST API interface to accept jobs from the backend to execute
-	\item exposes a metrics endpoint for external monitoring solutions
-	\item exposes health endpoint
+%\begin{itemize}
+%	\item provides a REST API interface to accept jobs from the backend to execute
+%	\item exposes a metrics endpoint for external monitoring solutions
+%	\item exposes health endpoint
+%\end{itemize}
+%
+%responsibilites + API + health endpoint
+
+The role of a worker instance is to listen for new task submissions from the backend and execute these tasks upon receiving them. Completed tasks should be sent back to the backend where the results will be saved in a persistent way.
+
+Observability is essential here as well. The system needs to be able determine which worker instances are running and if there are idle ones that can accept new task submissions. If there is not any free worker, new instances should be deployed. If there are multiple idle workers but no task to execute, then the system should scale in, stopping a couple of idle worker instances. To achieve that, the worker component should be able to expose information about itself if it is up and if it is currently busy working on a task or not.
+
+Summary of the required interfaces: \begin{itemize}
+	\item Listen for new tasks to execute
+	\item Health endpoint
+	\item Metrics endpoint
 \end{itemize}
 
-responsibilites + API + health endpoint
 
 %----------------------------------------------------------------------------
 \subsubsection{Message Queue}
