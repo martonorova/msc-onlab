@@ -51,10 +51,10 @@ For this project, a master-worker architecture was chosen, where the master comp
 TODO: activity diagram?
 
 \begin{enumerate}
-	\item \emph{Submit tasks } A client submits input parameters to the master component.
-	\item \emph{Distribute tasks} The master component creates a task definition based on the input parameters and then forwards it to one of the worker components.
+	\item \emph{Input submission} A client submits input parameters to the master component.
+	\item \emph{Task distribution} The master component creates a task definition based on the input parameters and then forwards it to one of the worker components.
 	\item \emph{Task execution} The worker components executes the received task and sends back the result to the master.
-	\item \emph{Persist results} The master persists the result of the completed task so it can be queried by clients.
+	\item \emph{Persisting results} The master persists the result of the completed task so it can be queried by clients.
 \end{enumerate}
 
 The designed architecture of the sample application can be seen in Figure \ref{fig:sample_app_arch}
@@ -144,21 +144,31 @@ Summary of the required interfaces: \begin{itemize}
 \subsubsection{Message Queue}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item connects the backend with the worker nodes
-	\item as the number of worker nodes is dynamic, it would be not feasible for the backend to try to keep record of all the running workers
-	\item the backend sends the jobs to the workers via this message queue
-	\item the the workers also use this to send back the finished jobs (at the moment, we could skip the message queue on the way back, but this way we do not need much modification if there would be more than one backend in order to \eg be able to handle a bigger load)
-\end{itemize}
+%\begin{itemize}
+%	\item connects the backend with the worker nodes
+%	\item as the number of worker nodes is dynamic, it would be not feasible for the backend to try to keep record of all the running workers
+%	\item the backend sends the jobs to the workers via this message queue
+%	\item the the workers also use this to send back the finished jobs (at the moment, we could skip the message queue on the way back, but this way we do not need much modification if there would be more than one backend in order to \eg be able to handle a bigger load)
+%\end{itemize}
+
+The goal of the message queue is to connect the backend and the worker instances. As the number of workers can dynamically change over time, it is not evident for the backend where to send new task assignments.
+
+A possible solution could be that the backend somehow internally keeps track of the running worker instances but would lead to much overhead both on the application logic level and on the network communication layer.
+
+Instead, a third component - a message queue - is introduced to the system. As its name suggests, it is a queue which behaves like a \emph{First In First Out} buffer. The backend can push new task assignments to the queue without the need to know which worker instance will process it. On the other end of the queue the worker instances wait for new tasks in the queue and when one appears, one of the worker takes it from the queue and starts working on it. Notice that this method is also applicable for the other direction. To prepare for situations where there can be multiple backend components, the message queue can be used to by the workers to send back completed tasks to the backend service without knowing how many backend instances are actually in the system.
+
+This pattern enforces loose coupling in the system and neither the backend nor the workers do not have to know about each other, they just need to know the message queue to produce and to consume new tasks. 
 
 %----------------------------------------------------------------------------
 \subsubsection{Database}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item stores the jobs with their result 
-	\item serves queries made by the backend component
-\end{itemize}
+%\begin{itemize}
+%	\item stores the jobs with their result 
+%	\item serves queries made by the backend component
+%\end{itemize}
+
+The database is responsible for storing the tasks in the system in a durable way. It provides an interface through which it is possible to execute CRUD operations on the task entities.
 
 %----------------------------------------------------------------------------
 \section{Implementation}
@@ -168,6 +178,10 @@ Summary of the required interfaces: \begin{itemize}
 	\item Introduce the general problem it solves (naive implementation of Fibonacci - this is implementation)
 	\item Docker
 \end{itemize}
+
+%----------------------------------------------------------------------------
+\subsection{The Task}
+%----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
 \subsection{Backend}
