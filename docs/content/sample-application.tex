@@ -6,7 +6,7 @@ This chapter presents the design and implementation of the sample application wh
 
 
 %----------------------------------------------------------------------------
-\section{Design}
+\section{Design} \label{design}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ components should provide an interface that other tools can use to collect metri
 
 Although the aim of the sample application is to attempt to provide a generalized system to fit many use-cases without limiting possibilities, when it comes to architectural design, it is indispensable to create the structure of the system with a specific use-case in mind. But with a fairly common use case, the fundamental goal can be roughly preserved.
 
-For this project, a master-worker architecture was chosen, where the master component receives input from clients and then assigns computational tasks to the workers based on the parameters. This architecture allows to easily define scalable, and both stateful and stateless components. The abstract workflow of the use case is the following:
+For this project, a master-worker architecture was chosen, where the master component receives input from clients and then assigns computational tasks to the workers based on the parameters. The computation should be resource heavy (\eg require much CPU time) and should last for an easily measurable time (minimum 30-40 seconds). This architecture allows to easily define scalable, and both stateful and stateless components. The abstract workflow of the use case is the following:
 
 TODO: activity diagram?
 
@@ -174,14 +174,27 @@ The database is responsible for storing the tasks in the system in a durable way
 \section{Implementation}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Introduce the general problem it solves (naive implementation of Fibonacci - this is implementation)
-	\item Docker
-\end{itemize}
+This section describes the implementation details and their justification for each component in the sample application.
+
+%\begin{itemize}
+%	\item Introduce the general problem it solves (naive implementation of Fibonacci - this is implementation)
+%	\item Docker
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{The Task}
 %----------------------------------------------------------------------------
+
+The motivation for having a use-case that drives the architectural design was emphasized in the previous section (\ref{design}). The specific task that the system can execute is calculating the value of a given element in the Fibonacci sequence. The clients can send the backend which Fibonacci number to calculate as input. For example if the client sends the number 6 as input, a worker will execute a task which result will be 8.
+
+At first glance, it seems to be an overly simple application, but one has to keep in mind, that the specific task that the worker components can execute is in fact can be anything. This simple computation was chosen, because it is easy to parameterize, the magnitude of the input correlates well with execution time and the implementation of the logic does not divert the focus from the main goals of the project.
+
+%----------------------------------------------------------------------------
+\subsection{Containerization}
+%----------------------------------------------------------------------------
+
+The section that describes the requirements of the sample application (\ref{sample-app-requirements}) states that containerization is crucial in order to create a scalable microservice application. There are several containerization technologies used in the industry, but perhaps the most popular is Docker \cite{Docker} which can be viewed as the de facto containerization technology adopted by the industry. Because of this, all the components in the system are packaged with Docker.
+
 
 %----------------------------------------------------------------------------
 \subsection{Backend}
@@ -193,6 +206,7 @@ The database is responsible for storing the tasks in the system in a durable way
 	\item introduce REST API
 	\item introduce health check
 	\item introduce Message Queue integration
+	\item spring bootBuildImage
 \end{itemize}
 
 %----------------------------------------------------------------------------
