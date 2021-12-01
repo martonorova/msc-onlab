@@ -272,24 +272,17 @@ As described in section \ref{design-message-queue} the backend uses a separate c
 This means that the backend should also use JMS to be able to send the tasks to the message queue. The implementation of this was inspired by the official Spring guide on handling messages with JMS \cite{JMSGuide}. The essential part is to configure a \texttt{JmsTemplate} that uses a connection to the message queue and using this object to send or receive messages. The actual implementation can be found under \texttt{messaging/activemq} package of the backend source code in the thesis repository \cite{ThesisRepo}.
 
 %----------------------------------------------------------------------------
-\subsubsection{Health check}
+\subsubsection{Health check} \label{impl-backend-healthcheck}
 %----------------------------------------------------------------------------
 
 The importance of an mechanism that can determine if the backend is able to function correctly was mentioned in section \ref{design-backend}. As the system builds up from multiple components, checking if every part is working right consists of several steps. In the backend component, the health check includes four steps:
 
-\begin{itemize}
-	\item \emph{Test the database connection - }
-	\item \emph{Test the worker connection - }
-	\item \emph{Test the message queue connection - }
-	\item \emph{Test the entire workflow with sample input - }
-\end{itemize}
-
-
-
-test db connection
-test worker connection
-test message queue connection
-test workflow with sample input (if last successful older than 90 seconds)
+\begin{enumerate}
+	\item \emph{Test database connection - }The backend test the connection to the database by attempting to save a test object. If it cannot be executed, the health check fails.
+	\item \emph{Test worker availability - }The backend test the availability of the worker service by calling its health endpoint (described later in section \ref{impl-worker-interfaces}). If it returns with error, the the health check fails.
+	\item \emph{Test message queue connection - }The backend sends a test message to the message queue which will be forwarded to one of the workers that will send back a reply. If the response is not received after a short amount of time, the health check fails.
+	\item \emph{Test entire workflow with sample input - }Every 90 seconds the backend creates a dummy \texttt{Job} instance and sends it to the message queue and waits for response. Other non-test task execution reset the timer on this check. If there are not any successful task executions (dummy or real) in the last 90 seconds, the health check fails.
+\end{enumerate}
 
 %----------------------------------------------------------------------------
 \subsubsection{Interfaces}
@@ -313,9 +306,13 @@ The backend implements the interfaces described in section \ref{design-backend}.
 	\item \emph{Response - } a JSON array containing all the tasks stored in the database
 \end{itemize}
 
-\paragraph{Health endpoint} Upon calling this endpoint
-
-
+\paragraph{Health endpoint} Upon calling this endpoint, the backend executes the health checks described in section \ref{impl-backend-healthcheck}.
+\begin{itemize}
+	\item \emph{Path - } \texttt{/api/v1/health}
+	\item \emph{HTTP method - } \texttt{GET}
+	\item \emph{Body - } None
+	\item \emph{Response - } If any of the steps fail, the endpoint returns with a HTTP 500 response, otherwise with a HTTP 200 response.
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Worker}
@@ -333,6 +330,9 @@ Similarly as the backend, the worker component is written in Java as well using 
 %	\item spring bootBuildImage - reference later in CI/CD pipeline
 %\end{itemize}
 
+%----------------------------------------------------------------------------
+\subsubsection{Interfaces} \label{impl-worker-interfaces}
+%----------------------------------------------------------------------------
 
 
 %----------------------------------------------------------------------------
