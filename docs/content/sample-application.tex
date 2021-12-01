@@ -318,17 +318,53 @@ The backend implements the interfaces described in section \ref{design-backend}.
 \subsection{Worker}
 %----------------------------------------------------------------------------
 
-Similarly as the backend, the worker component is written in Java as well using the Spring Boot framework.
-
 %\begin{itemize}
 %	\item Spring Boot Java
+%	\item execution of tasks, implementation of fibonacci
 %	\item introduce REST API
-%	\item db connection
-%	\item introduce Message Queue integration
+%	\item introduce Message Queue integration (same)
 %	\item introduce health check
 %	\item jobmodel (same)
 %	\item spring bootBuildImage - reference later in CI/CD pipeline
 %\end{itemize}
+
+Similarly to the backend, the worker component is written in Java as well using the Spring Boot framework. It uses the same \texttt{Job} model as the backend an the implementation of the JMS messaging is also quite alike to that of the backend.
+
+%----------------------------------------------------------------------------
+\subsubsection{Task execution} \label{impl-worker-task-execution}
+%----------------------------------------------------------------------------
+
+The execution of tasks is handled by two classed in the worker component: \texttt{WorkerService} and \texttt{WorkerTask}. The \texttt{WorkerService} manages a thread pool that can run the computational tasks represented by \texttt{WorkerTask}. To make sure that a worker instance executes only one task at a time, the size of the thread pool is fixed at one thread. The \texttt{WorkerService} exposes the method \texttt{submitJob} that enables submitting a new \texttt{WorkerTask} which implements the \texttt{Runnable} interface. The \texttt{WorkerTask} stores a reference of the \texttt{Job} model, so it is aware of the parameters of the task. Inside its \texttt{run()} method, it calculates the given Fibonacci number and sends it back to the message queue.
+
+The implementation of calculating a Fibonacci number can be seen below.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=java, caption={Calculating Fibonacci numbers}, label={lst:fibonacci-method}]
+	private long fibonacci(long n) {
+		long result = 0L;
+		if (n <= 2) {
+			return n - 1;
+		}
+		result = fibonacci(n - 1) + fibonacci(n - 2);
+		return result;
+	}
+	\end{lstlisting}
+\end{minipage}
+
+This implementation is not efficient as it does a lot of work repeatedly as it calculates the same values multiple times. However, increasing the performance of the worker is out of scope in this project. This algorithm is CPU heavy in its nature and the execution time can easily last for minutes with a large enough input, hence it satisfies the requirements defined in section \ref{design}.
+
+
+%----------------------------------------------------------------------------
+\subsubsection{Messaging}
+%----------------------------------------------------------------------------
+
+TODODODODODODODODOODODOD
+
+A notable difference is the configuration of the \texttt{PrefetchPolicy} of the message queue connection which tells the worker components to only consume one task from the queue at a time. This helps avoid scenarios where a worker instance takes out all the tasks from a queue and starts working on them seque
+
+%----------------------------------------------------------------------------
+\subsubsection{Health check}
+%----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
 \subsubsection{Interfaces} \label{impl-worker-interfaces}
