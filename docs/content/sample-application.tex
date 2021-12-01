@@ -94,7 +94,7 @@ The designed architecture of the sample application can be seen in Figure \ref{f
 In the following sections, each component and their responsibilities are presented.
 
 %----------------------------------------------------------------------------
-\subsubsection{Backend}
+\subsubsection{Backend} \label{design-backend}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -141,7 +141,7 @@ Summary of the required interfaces: \begin{itemize}
 
 
 %----------------------------------------------------------------------------
-\subsubsection{Message Queue}
+\subsubsection{Message Queue} \label{design-message-queue}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -200,28 +200,95 @@ The section that describes the requirements of the sample application (\ref{samp
 \subsection{Backend}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Spring Boot Java
-	\item introduce Job model
-	\item introduce REST API
-	\item introduce health check
-	\item introduce Message Queue integration
-	\item spring bootBuildImage
-\end{itemize}
+%\begin{itemize}
+%	\item Spring Boot Java
+%	\item introduce Job model
+%	\item introduce REST API
+%	\item db connection
+%	\item introduce health check
+%	\item introduce Message Queue integration
+%	\item spring bootBuildImage - reference later in CI/CD pipeline
+%\end{itemize}
+
+The backend component is written in the Java programming language using the Spring Boot framework that facilitates easy creation of stand-alone, production grade Spring based applications that can be run with minimal configuration \cite{SpringBoot}.
+
+%----------------------------------------------------------------------------
+\subsubsection{Job model}
+%----------------------------------------------------------------------------
+
+% TODO class diagram?
+
+To be able to easily manage tasks, model class named Job is defined that represents a single Fibonacci number computation. It is a common POJO (Plain Old Java Object) that stores the input and the result of a task along with an unique identifier. A summary the fields of the class can be seen in Figure \ref{fig:job_model}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=40mm, keepaspectratio]{figures/job_class.png}
+	\caption{Job class}
+	\label{fig:job_model}
+\end{figure}
+
+%----------------------------------------------------------------------------
+\subsubsection{Data persistence}
+%----------------------------------------------------------------------------
+
+When the backend component receives a task input from a client it creates a Job instance representing the task with an empty result and saves this object in the database. The reason of leaving the result field is evident as the task has not been executed by any of the workers and the backend does not know the result, but it is also quite practical to be able to tell at any point of the time which tasks have been completed and which have not. This feature will come handy when the test framework is used to measure the functional performance of the system.
+
+The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access layer without the need of having many lines of boilerplate code. To be able to store Job objects in the database, a couple of configurations should be made. The Job class needs to annotated with the \texttt{@Entity} annotation, indicating that this is a JPA entity so Spring Data JPA will know it must map this class in a table in the database. In order to be able to execute queries against the database in the program, a repository interface must be defined that Spring will use to generate the data accessing layer implementation with default CRUD operation. Lastly, the parameters of the database connection should be provided for the backend. This can be done in the \texttt{application.yaml}.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=java, caption={\texttt{JobRepository} interface}, label={lst:JobRepository}]
+		@Repository
+		public interface JobRepository extends JpaRepository<Job, Long> {
+			
+			@Query("SELECT j FROM Job j WHERE j.result IS NULL")
+			List<Job> findUnfinishedJobs();
+			
+			@Query("SELECT j FROM Job j WHERE j.result IS NOT NULL")
+			List<Job> findFinishedJobs();
+		}
+	\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Configuring the database connection}, label={lst:application-yaml-db}]
+	# Database Properties
+	database:
+		host: ${MYSQL_DB_HOST:localhost}
+		port: ${MYSQL_DB_PORT:3306}
+		db: ${MYSQL_DB_DB_NAME:jobs}
+	\end{lstlisting}
+\end{minipage}
+
+In \texttt{JobRepository} two additional methods are defined which will be later used to query \texttt{Job}s based on if they are completed or not.
+
+%----------------------------------------------------------------------------
+\subsubsection{Messaging}
+%----------------------------------------------------------------------------
+
+% TODO do we need more details?
+
+As described in section \ref{design-message-queue} the backend uses a separate component acting as a message queue to forward new tasks to the worker components. This component (introduced later in section \ref{impl-message-queue}) implements the JMS API \cite{JMS} to handle messages between Java based applications.
+
+This means that the backend should also use JMS to be able to send the tasks to the message queue. The implementation of this was inspired by the official Spring guide on handling messages with JMS \cite{JMSGuide}. The essential part is to configure a \texttt{JmsTemplate} that uses a connection to the message queue and using this object to send or receive messages. The actual implementation can be found under \texttt{messaging/activemq} package of the backend source code in the thesis repository \cite{ThesisRepo}.
 
 %----------------------------------------------------------------------------
 \subsection{Worker}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Spring Boot Java
-	\item introduce REST API
-	\item introduce health check
-	\item introduce Message Queue integration
-\end{itemize}
+%\begin{itemize}
+%	\item Spring Boot Java
+%	\item introduce REST API
+%	\item db connection
+%	\item introduce Message Queue integration
+%	\item introduce health check
+%	\item jobmodel (same)
+%	\item spring bootBuildImage - reference later in CI/CD pipeline
+%\end{itemize}
+
+
 
 %----------------------------------------------------------------------------
-\subsection{Message Queue}
+\subsection{Message Queue} \label{impl-message-queue}
 %----------------------------------------------------------------------------
 
 \begin{itemize}
