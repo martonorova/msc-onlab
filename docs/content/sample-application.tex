@@ -272,8 +272,56 @@ As described in section \ref{design-message-queue} the backend uses a separate c
 This means that the backend should also use JMS to be able to send the tasks to the message queue. The implementation of this was inspired by the official Spring guide on handling messages with JMS \cite{JMSGuide}. The essential part is to configure a \texttt{JmsTemplate} that uses a connection to the message queue and using this object to send or receive messages. The actual implementation can be found under \texttt{messaging/activemq} package of the backend source code in the thesis repository \cite{ThesisRepo}.
 
 %----------------------------------------------------------------------------
+\subsubsection{Health check}
+%----------------------------------------------------------------------------
+
+The importance of an mechanism that can determine if the backend is able to function correctly was mentioned in section \ref{design-backend}. As the system builds up from multiple components, checking if every part is working right consists of several steps. In the backend component, the health check includes four steps:
+
+\begin{itemize}
+	\item \emph{Test the database connection - }
+	\item \emph{Test the worker connection - }
+	\item \emph{Test the message queue connection - }
+	\item \emph{Test the entire workflow with sample input - }
+\end{itemize}
+
+
+
+test db connection
+test worker connection
+test message queue connection
+test workflow with sample input (if last successful older than 90 seconds)
+
+%----------------------------------------------------------------------------
+\subsubsection{Interfaces}
+%----------------------------------------------------------------------------
+
+The backend implements the interfaces described in section \ref{design-backend}.
+
+\paragraph{Task input endpoint} This endpoint handles new task submission. Upon calling this endpoint the backend creates a \texttt{Job} instance with an empty result, saves it to the database and forwards it to the message queue.
+\begin{itemize}
+	\item \emph{Path - } \texttt{/api/v1/jobs}
+	\item \emph{HTTP method - } \texttt{POST}
+	\item \emph{Body - } a JSON object that has a single field named \texttt{input} with an integer value.
+	\item \emph{Response - } a JSON object representing the created task (with empty result)
+\end{itemize}
+
+\paragraph{Task query endpoint} This endpoint can be used to retrieve all the tasks. Upon calling this endpoint the backend queries the database to get all the tasks stored there.
+\begin{itemize}
+	\item \emph{Path - } \texttt{/api/v1/jobs}
+	\item \emph{HTTP method - } \texttt{GET}
+	\item \emph{Body - } None
+	\item \emph{Response - } a JSON array containing all the tasks stored in the database
+\end{itemize}
+
+\paragraph{Health endpoint} Upon calling this endpoint
+
+
+
+%----------------------------------------------------------------------------
 \subsection{Worker}
 %----------------------------------------------------------------------------
+
+Similarly as the backend, the worker component is written in Java as well using the Spring Boot framework.
 
 %\begin{itemize}
 %	\item Spring Boot Java
@@ -304,10 +352,11 @@ This means that the backend should also use JMS to be able to send the tasks to 
 \end{itemize}
 
 
-\subsection{Kubernetes definitions}
+\subsection{Kubernetes deployment}
 
 
 \begin{itemize}
+	\item helm chart
 	\item K8s pod, depl, svc exapmle (one for each)
 	\item HPA definition, metrics server
 \end{itemize}
