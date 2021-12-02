@@ -118,7 +118,7 @@ Summary of the required interfaces: \begin{itemize}
 \end{itemize}
 
 %----------------------------------------------------------------------------
-\subsubsection{Worker}
+\subsubsection{Worker} \label{design-worker}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -132,12 +132,6 @@ Summary of the required interfaces: \begin{itemize}
 The role of a worker instance is to listen for new task submissions from the backend and execute these tasks upon receiving them. Completed tasks should be sent back to the backend where the results will be saved in a persistent way.
 
 Observability is essential here as well. The system needs to be able determine which worker instances are running and if there are idle ones that can accept new task submissions. If there is not any free worker, new instances should be deployed. If there are multiple idle workers but no task to execute, then the system should scale in, stopping a couple of idle worker instances. To achieve that, the worker component should be able to expose information about itself if it is up and if it is currently busy working on a task or not.
-
-Summary of the required interfaces: \begin{itemize}
-	\item Listen for new tasks to execute
-	\item Health endpoint
-	\item Metrics endpoint
-\end{itemize}
 
 
 %----------------------------------------------------------------------------
@@ -358,49 +352,262 @@ This implementation is not efficient as it does a lot of work repeatedly as it c
 \subsubsection{Messaging}
 %----------------------------------------------------------------------------
 
-TODODODODODODODODOODODOD
+A notable difference is the configuration of the \texttt{PrefetchPolicy} of the message queue connection which tells the worker components to only consume one task from the queue at a time. This helps avoid scenarios where a worker instance takes out all the tasks from a queue and starts working on them sequentially leaving the rest of the workers without consumable task and causing them to remain idle in the system.
 
-A notable difference is the configuration of the \texttt{PrefetchPolicy} of the message queue connection which tells the worker components to only consume one task from the queue at a time. This helps avoid scenarios where a worker instance takes out all the tasks from a queue and starts working on them seque
+This setting can be configured for example in the \texttt{application.yaml} file where the message queue connection is specified.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Configuring the message queue connection and modifying the default \texttt{PrefetchPolicy}}, label={lst:message-queue-connection}]
+	# ActiveMQ
+	activemq:
+		broker:
+			url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch=1"
+	\end{lstlisting}
+\end{minipage}
 
 %----------------------------------------------------------------------------
 \subsubsection{Health check}
 %----------------------------------------------------------------------------
 
+The worker component is in practice an independent unit in the system as long as it can connect to the message queue. This means that the implementation of the health check will not consist of so many steps as in the case of the backend component. In fact, simply returning without error during the health check can reliably indicate that the worker is able to function correctly.
+
+%----------------------------------------------------------------------------
+\subsubsection{Custom metrics}
+%----------------------------------------------------------------------------
+
+As the worker component can only process one task at a time by design, it is important that the worker should provide information about whether it is currently executing a test at a given point of time or not. This data can be used by the system to determine if should start more worker components in cases when there are tasks in the message queue waiting to be processed.
+
+For this reason, the worker component exposes an application specific metric called \texttt{worker\_busy\_threads} that indicates how many threads are currently processing a task in a worker instance. This metric is published with the help of using a Micrometer \cite{Micrometer} library that facilitates exposing the metric in a Prometheus compatible format.
+
+To achieve this, the custom metric is registered in the entrypoint class of the application, \texttt{WorkerApplication}.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=java,caption={Registering a custom metric}]
+	@Bean
+	public MeterBinder busyThreads(WorkerService workerService) {
+		return meterRegistry -> {
+			Gauge.builder("worker.busy.threads", workerService::getBusyThreads).register(meterRegistry);
+		};
+	}
+	\end{lstlisting}
+\end{minipage}
+
+The \texttt{WorkerService} has a method that returns how many threads are active at a given time. As the size of the threadpool is fixed at one, this method returns 0 or 1.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=java,caption={Get the count of busy threads in the threadpool}]
+	@Bean
+	public int getBusyThreads() {
+		return this.executor.getActiveCount();
+	}
+	\end{lstlisting}
+\end{minipage}
+
+Lastly, to configure Spring to expose the metrics, the desired endpoints should be enabled in the \texttt{application.yaml} file.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=java,caption={Enabling Spring management endpoints}]
+	management:
+		endpoints:
+			web:
+				exposure:
+					include: health,info,prometheus
+	\end{lstlisting}
+\end{minipage}
+
 %----------------------------------------------------------------------------
 \subsubsection{Interfaces} \label{impl-worker-interfaces}
 %----------------------------------------------------------------------------
 
+Based on the design described in Section \ref{design-worker} the worker exposes the following endpoints for the rest of the application.
+
+\paragraph{Health} Upon calling this endpoint the worker returns with a HTTP 200 response. When the worker is down or encountered some critical error, this endpoint does not respond with anything so the caller will know that the worker is not functioning.
+\begin{itemize}
+	\item \emph{Path - } \texttt{/api/health}
+	\item \emph{HTTP method - } \texttt{GET}
+	\item \emph{Body - } None
+	\item \emph{Response - } HTTP 200 response.
+\end{itemize}
+
+\paragraph{Metrics endpoint} This endpoint is provided by the Spring Boot Actuator that brings production-ready features to the application, for example various management endpoints.
+\begin{itemize}
+	\item \emph{Path - } \texttt{/actuator/prometheus}
+	\item \emph{HTTP method - } \texttt{GET}
+	\item \emph{Body - } None
+	\item \emph{Response - } All the metrics exposed by the worker in a Prometheus compatible format.
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Message Queue} \label{impl-message-queue}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item configuration? image?
-\end{itemize}
+%\begin{itemize}
+%	\item activemq
+%	\item configuration? image?
+%\end{itemize}
+
+To accomplish the functionality of the message queue component introduced in Section \ref{design-message-queue} the Apache ActiveMQ \cite{ActiveMQ} product was used in the project. ActiveMQ is an open source, Java-based message protocol. Among the many protocol it implements, it supports forwarding JMS messages that the backend and the worker components use.
 
 %----------------------------------------------------------------------------
 \subsection{Database}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item configuration? image?
-\end{itemize}
+%\begin{itemize}
+%	\item mysql
+%	\item configuration? image?
+%\end{itemize}
 
+The system uses MySQL \cite{MySQL} as the database which is an open source, relational database.
 
+%----------------------------------------------------------------------------
+\subsection{Deployment}
+%----------------------------------------------------------------------------
+
+%\begin{itemize}
+%	\item helm chart
+%	\item K8s pod, depl, svc exapmle (one for each)
+%	\item HPA definition, metrics server
+%\end{itemize}
+
+All the above mentioned components are packaged with Docker and deployed to a Kubernetes cluster. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the backend related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be sound in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
+
+%----------------------------------------------------------------------------
+\subsection{Helm chart}
+%----------------------------------------------------------------------------
+
+In order to facilitate easy deployment and configuration, a helm chart named \texttt{kubedepend} is created for the sample application that can be found in the thesis repository \cite{ThesisRepo} at \texttt{helm/kubedepend}.
+
+Considering the nature of the project and the fact that most of the configuration settings do not change, the chart definition does not follow everywhere production grade best practices for sake of simplicity. That means that the majority of the configuration values are hard-coded into the helm templates instead of using template variables.
+
+%----------------------------------------------------------------------------
 \subsection{Kubernetes deployment}
+%----------------------------------------------------------------------------
+
+Deploying the backend component requires three type of Kubernetes definitions. First, a \texttt{ConfigMap} is used to store the configuration of the backend. A \texttt{Deployment} object is necessary to create a \texttt{Pod} that runs the backend in a container in a somewhat fault tolerant way using a \texttt{ReplicaSet}. Lastly, a \texttt{Service} is needed to create an unchanging address for the backend inside the cluster so other components can communicate with it.
+
+%----------------------------------------------------------------------------
+\subsubsection{Kubernetes ConfigMap}
+%----------------------------------------------------------------------------
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	apiVersion: v1
+	kind: ConfigMap
+	metadata:
+		name: backend-config
+		namespace: kubedepend
+	data:
+		BACKEND_PORT: "8000"
+		WORKER_HOST: kubedepend-worker
+		WORKER_PORT: "5000"
+		MYSQL_DB_HOST: kubedepend-db.kubedepend.svc.cluster.local
+		MYSQL_DB_PORT: "3306"
+		MYSQL_DB_DB_NAME: jobs
+		ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
+		ACTIVEMQ_BROKER_PORT: "61616"
+		ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
+		ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
+	\end{lstlisting}
+\end{minipage}
 
 
-\begin{itemize}
-	\item helm chart
-	\item K8s pod, depl, svc exapmle (one for each)
-	\item HPA definition, metrics server
-\end{itemize}
+%----------------------------------------------------------------------------
+\subsubsection{Kubernetes Deployment}
+%----------------------------------------------------------------------------
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+		name: kubedepend-backend-depl
+		namespace: kubedepend
+	spec:
+		selector:
+			matchLabels:
+				app: kubedepend-backend-app
+		replicas: 1
+		template:
+			metadata:
+				labels:
+				app: kubedepend-backend-app
+			spec:
+				containers:
+				  - name: kubedepend-backend
+					image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+					imagePullPolicy: Always
+					envFrom:
+					- configMapRef:
+					  name: backend-config
+					resources:
+					  requests:
+				  	    memory: "1024Mi"
+					    cpu: "1000m"
+					  limits:
+					    memory: "2048Mi"
+					    cpu: "2000m"
+					ports:
+					- containerPort: 8000
+					  name: backend-port
+	\end{lstlisting}
+\end{minipage}
+
+%----------------------------------------------------------------------------
+\subsubsection{Kubernetes Service}
+%----------------------------------------------------------------------------
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	apiVersion: v1
+	kind: Service
+		metadata:
+			name: kubedepend-backend
+			namespace: kubedepend
+	spec:
+		selector:
+			app: kubedepend-backend-app
+		ports:
+		- port: 8000
+		  targetPort: backend-port
+	\end{lstlisting}
+\end{minipage}
 
 
+%----------------------------------------------------------------------------
+\subsubsection{Horizontal Pod Autoscaler}
+%----------------------------------------------------------------------------
 
-
-
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	apiVersion: autoscaling/v2beta2
+	kind: HorizontalPodAutoscaler
+	metadata:
+		name: worker-hpa
+		namespace: kubedepend
+	spec:
+		scaleTargetRef:
+			apiVersion: apps/v1
+			kind: Deployment
+			name: kubedepend-worker-depl
+		minReplicas: 1
+		maxReplicas: 10
+		metrics:
+		- type: Object
+			object:
+				metric:
+					name: {{ .Values.hpa.metricName }}
+				describedObject:
+					apiVersion: /v1
+					kind: Namespace
+					name: kubedepend
+				target:
+					type: Value
+					value: "1"
+		behavior:
+			scaleDown:
+				stabilizationWindowSeconds: 30 # default is 300
+	\end{lstlisting}
+\end{minipage}
 
 
 
