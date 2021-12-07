@@ -105,7 +105,7 @@ The responsibility of the load generator component is to simulate real world wor
 As the sample application (more precisely the backend) accepts user inputs in the form of HTTP requests, the load generator component should be able to produce correctly built up HTTP requests and send them to the application. This will trigger task executions and multiple worker instance deployments in case the requests are sent more frequently than a single worker could execute them one by one without leaving any tasks waiting in the message queue.
 
 %----------------------------------------------------------------------------
-\subsection{Parameters}
+\subsubsection{Parameters}
 %----------------------------------------------------------------------------
 
 % input value
@@ -125,25 +125,49 @@ There are several ways to customize the way that load generation happens and how
 \subsection{Fault Injector} \label{test-design-fault-injector}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item inject faults on different levels (Pod, Network, CPU, Memory)
-	\item periodic fault injection
-\end{itemize}
+%\begin{itemize}
+%	\item inject faults on different levels (Pod, Network, CPU, Memory)
+%	\item periodic fault injection
+%\end{itemize}
 
+The aim of the fault injector component is to introduce different kinds of failure anomalies to the application in order to trigger fault tolerant mechanisms in the system if they exist.
+
+The amount of possible failure anomalies proportionally increases with the complexity of the system and is most likely to be close to practically countless variations. To achieve the best results while limiting the number of failure anomalies to test, only the most common failure scenarios should be taken into account. Considering also the probability of the failure anomalies and applying only those to the system can result in a fairly good approximation of real world failure scenarios.
+
+The following sections attempt to collect some of the most common anomalies that can cause errors or even outages in cloud based systems.
 
 %----------------------------------------------------------------------------
-\subsubsection{Fault Profiles}
+\subsubsection{General failure anomalies}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item list fault profiles and justification
-\end{itemize}
+\paragraph{Network anomalies} Network anomalies include latency, jitter, slow bandwith, network partition. All of these can affect the performance and dependability of an application.
 
+\paragraph{CPU starvation} CPU starvation can occur if there are multiple software components deployed to the same physical machine which is the case most of the time when using the products of cloud provider companies to run an application. If a process on a machine executes a CPU heavy computation, it can reserve most of the CPU capacity of the machine, leaving other processes without enough processor time which can cause transient or even permanent application failures.
+
+\paragraph{Memory starvation} Memory starvation is similar to CPU starvation, only instead of sharing a machine with CPU usage heavy processes, there are programs that take up most of the memory of the physical machine.
+
+\paragraph{Disk anomalies} Disk anomalies are probably the most common failure anomalies as these type of devices are used in enormous amounts in every data center. This class of anomalies can frequently occur in several different forms, for example disk I/O latency, read/write errors or complete device failures.
+
+%----------------------------------------------------------------------------
+\subsubsection{Kubernetes failure anomalies}
+%----------------------------------------------------------------------------
+
+As the target platform is Kubernetes, the final list of applicable failure scenarios should include Kubernetes related anomalies as well. Some possible examples are listed below.
+
+\paragraph{Pod failure} Pod failures can happen for example in case of configuration errors or application errors. Typically, when a pod fails, it gets restarted by a \texttt{ReplicaSet} that may solve transient errors.
+
+\paragraph{Pod death} Pods can be terminated due to human operational faults but also when the Kubernetes control plane decides to reschedule a pod to a different physical machine.
+
+\paragraph{Cloud provider anomalies} Although Kubernetes clusters can be set up on private machines as well, generally they are used as a service offered by a cloud provider company. These products are highly available and are managed by experts, however, occasional errors can possibly happen in these type of environments too.
 
 %----------------------------------------------------------------------------
 \subsection{Monitoring}
 %----------------------------------------------------------------------------
-
+%need to monitor the application metrics, state --> need for monitoring system
+% which metrics to collect
+% whicch dependability metrics to use
+% timeseries metrics
+% vizualisation capabilities
 
 
 %----------------------------------------------------------------------------
@@ -152,6 +176,7 @@ There are several ways to customize the way that load generation happens and how
 
 \begin{itemize}
 	\item Test environment locally or in cloud
+	\item how does running tests affect the result
 	\item AWS infrastructure
 	\item CF template
 \end{itemize}
@@ -174,6 +199,14 @@ There are several ways to customize the way that load generation happens and how
 	\item deploy Chaos Mesh
 	\item define chaos experiments according to fault profiles (show one as example)
 	\item describe the usage of helm to deploy faults
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsubsection{Fault Profiles}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item list fault profiles and justification
 \end{itemize}
 
 %----------------------------------------------------------------------------
