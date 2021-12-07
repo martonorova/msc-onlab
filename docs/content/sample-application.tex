@@ -469,7 +469,7 @@ The system uses MySQL \cite{MySQL} as the database which is an open source, rela
 %	\item HPA definition, metrics server
 %\end{itemize}
 
-All the above mentioned components are packaged with Docker and deployed to a Kubernetes cluster. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the backend related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be sound in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
+All the above mentioned components are packaged with Docker and deployed to a Kubernetes cluster. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the worker component related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be sound in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
 
 %----------------------------------------------------------------------------
 \subsection{Helm chart}
@@ -483,30 +483,28 @@ Considering the nature of the project and the fact that most of the configuratio
 \subsection{Kubernetes deployment}
 %----------------------------------------------------------------------------
 
-Deploying the backend component requires three type of Kubernetes definitions. First, a \texttt{ConfigMap} is used to store the configuration of the backend. A \texttt{Deployment} object is necessary to create a \texttt{Pod} that runs the backend in a container in a somewhat fault tolerant way using a \texttt{ReplicaSet}. Lastly, a \texttt{Service} is needed to create an unchanging address for the backend inside the cluster so other components can communicate with it.
+Deploying the worker component requires three type of Kubernetes definitions. First, a \texttt{ConfigMap} is used to store the configuration of the worker. A \texttt{Deployment} object is necessary to create a \texttt{Pod} that runs the worker in a container in a somewhat fault tolerant way using a \texttt{ReplicaSet}. Lastly, a \texttt{Service} is needed to create an unchanging address for the workers inside the cluster so other components can communicate with them.
 
 %----------------------------------------------------------------------------
 \subsubsection{Kubernetes ConfigMap}
 %----------------------------------------------------------------------------
 
+The necessary configurations for the worker component are defined using a \texttt{ConfigMap}. These values could also be specified directly in the \texttt{Deployment}, however, keeping them separately results in cleaner code.
+
+In the example below, the parameters of the ActiveMQ connection and the queue names are defined for the worker.
+
 \begin{minipage}{\linewidth}
-	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	\begin{lstlisting}[caption={Worker \texttt{ConfigMap}}]
 	apiVersion: v1
 	kind: ConfigMap
 	metadata:
-		name: backend-config
-		namespace: kubedepend
+	  name: worker-config
+	  namespace: kubedepend
 	data:
-		BACKEND_PORT: "8000"
-		WORKER_HOST: kubedepend-worker
-		WORKER_PORT: "5000"
-		MYSQL_DB_HOST: kubedepend-db.kubedepend.svc.cluster.local
-		MYSQL_DB_PORT: "3306"
-		MYSQL_DB_DB_NAME: jobs
-		ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
-		ACTIVEMQ_BROKER_PORT: "61616"
-		ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
-		ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
+	  ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
+	  ACTIVEMQ_BROKER_PORT: "61616"
+	  ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
+	  ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
 	\end{lstlisting}
 \end{minipage}
 
@@ -515,97 +513,117 @@ Deploying the backend component requires three type of Kubernetes definitions. F
 \subsubsection{Kubernetes Deployment}
 %----------------------------------------------------------------------------
 
+The worker \texttt{Deployment} declares how the cluster will control running the worker components. Several configuration parameters are set that can be seen in the following example.
+
 \begin{minipage}{\linewidth}
-	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	\begin{lstlisting}[caption={Worker \texttt{Deployment}}]
 	apiVersion: apps/v1
 	kind: Deployment
 	metadata:
-		name: kubedepend-backend-depl
-		namespace: kubedepend
+	  name: kubedepend-worker-depl
+	  namespace: kubedepend
 	spec:
-		selector:
-			matchLabels:
-				app: kubedepend-backend-app
-		replicas: 1
-		template:
-			metadata:
-				labels:
-				app: kubedepend-backend-app
-			spec:
-				containers:
-				  - name: kubedepend-backend
-					image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
-					imagePullPolicy: Always
-					envFrom:
-					- configMapRef:
-					  name: backend-config
-					resources:
-					  requests:
-				  	    memory: "1024Mi"
-					    cpu: "1000m"
-					  limits:
-					    memory: "2048Mi"
-					    cpu: "2000m"
-					ports:
-					- containerPort: 8000
-					  name: backend-port
+	  selector:
+	    matchLabels:
+	      app: kubedepend-worker-app
+	  replicas: 1
+	  template:
+	    metadata:
+	      labels:
+	        app: kubedepend-worker-app
+	      annotations:
+	        prometheus.io/scrape: "true"
+	        prometheus.io/path: "/actuator/prometheus"
+	        prometheus.io/port: "5000"
+	    spec:
+	      containers:
+	      - name: kubedepend-worker
+	        image: {{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}
+	        imagePullPolicy: Always
+	        envFrom:
+	        - configMapRef:
+	          name: worker-config
+	        resources:
+	          requests:
+	            memory: "512Mi"
+	            cpu: "400m"
+	          limits:
+	            memory: "1024Mi"
+	            cpu: "1500m"
+	        ports:
+	        - containerPort: 5000
+	          name: worker-port
 	\end{lstlisting}
 \end{minipage}
+
+The worker container that will run in a \texttt{Pod} is defined under the \texttt{spec} key. Here, the previously declared \texttt{ConfigMap} is referenced to use the values inside it as environment variables in the worker container. The \texttt{resources} section tells the cluster how much resource (CPU and memory) the container can use. This can help prevent the worker component from unnecessarily reserving too much resource, causing other components to starve. The \texttt{ports} section specifies the open port of the container and sets its name. This will be used when the \texttt{Service} object is defined for the worker. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{measurement-impl}.
+
+The value of the \texttt{image} key is the only one that is not hard-coded. This is because every time the application is deployed, all the components get recompiled, rebuilt and packaged into a newly tagged docker image. Further details about the CI/CD pipeline in section \ref{cicd}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Kubernetes Service}
 %----------------------------------------------------------------------------
 
+As the number of worker instances in the cluster can dynamically change, it is useful if there is a single, practically constant address that can be used to access the worker components. The Kubernetes \texttt{Service} can be used to define an abstraction that can be used to create a unique address in the cluster through which other components are able to access the individual worker components in a round robin way (see section \ref{k8s-service}).
+
 \begin{minipage}{\linewidth}
-	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	\begin{lstlisting}[caption={Worker \texttt{Service}}]
 	apiVersion: v1
 	kind: Service
-		metadata:
-			name: kubedepend-backend
-			namespace: kubedepend
+	metadata:
+	  name: kubedepend-worker
+	  namespace: kubedepend
+	  annotations:
+	    prometheus.io/scrape: "true"
+	    prometheus.io/path: "/actuator/prometheus"
+	    prometheus.io/port: "5000"
 	spec:
-		selector:
-			app: kubedepend-backend-app
-		ports:
-		- port: 8000
-		  targetPort: backend-port
+	  selector:
+	    app: kubedepend-worker-app
+	  ports:
+	  - port: 5000
+	    targetPort: worker-port
 	\end{lstlisting}
 \end{minipage}
+
+In the example above the name of the port defined in the \texttt{Deployment} is used, so the \texttt{Service} is aware which port incoming requests should be forwarded to. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{measurement-impl}.
 
 
 %----------------------------------------------------------------------------
 \subsubsection{Horizontal Pod Autoscaler}
 %----------------------------------------------------------------------------
 
+The scaling of the worker component is managed by a Horizontal Pod Autoscaler. This object scales the target component (the worker \texttt{Deployment}) based on metric. Whenever the value of the metric differs from the target value (defined under \texttt{spec.metrics.[0].target.value = 1}) the HPA will start a new or stop a worker component to restore the metric value to the target value. 
+
 \begin{minipage}{\linewidth}
-	\begin{lstlisting}[caption={Backend \texttt{ConfigMap}}]
+	\begin{lstlisting}[caption={Worker \texttt{Horizontal Pod Autoscaler}}]
 	apiVersion: autoscaling/v2beta2
 	kind: HorizontalPodAutoscaler
 	metadata:
-		name: worker-hpa
-		namespace: kubedepend
+	  name: worker-hpa
+	  namespace: kubedepend
 	spec:
-		scaleTargetRef:
-			apiVersion: apps/v1
-			kind: Deployment
-			name: kubedepend-worker-depl
-		minReplicas: 1
-		maxReplicas: 10
-		metrics:
-		- type: Object
-			object:
-				metric:
-					name: {{ .Values.hpa.metricName }}
-				describedObject:
-					apiVersion: /v1
-					kind: Namespace
-					name: kubedepend
-				target:
-					type: Value
-					value: "1"
-		behavior:
-			scaleDown:
-				stabilizationWindowSeconds: 30 # default is 300
+	  scaleTargetRef:
+	    apiVersion: apps/v1
+	    kind: Deployment
+	    name: kubedepend-worker-depl
+	  minReplicas: 1
+	  maxReplicas: 10
+      metrics:
+      - type: Object
+	    object:
+	      metric:
+            name: {{ .Values.hpa.metricName }}
+          describedObject:
+            apiVersion: /v1
+            kind: Namespace
+            name: kubedepend
+          target:
+            type: Value
+            value: "1"
+      behavior:
+        scaleDown:
+        stabilizationWindowSeconds: 30 # default is 300
 	\end{lstlisting}
 \end{minipage}
 
