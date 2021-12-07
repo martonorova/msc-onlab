@@ -51,7 +51,6 @@ metadata:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/actuator/prometheus"
     prometheus.io/port: "5000"
-
 spec:
   selector:
     app: kubedepend-worker-app

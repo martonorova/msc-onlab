@@ -30,7 +30,6 @@ spec:
         volumeMounts:
           - name: proxy-config-volume
             mountPath: /etc/nginx
-              
       volumes:
           - name: proxy-config-volume
             configMap:
