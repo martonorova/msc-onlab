@@ -229,6 +229,7 @@ When the backend component receives a task input from a client it creates a Job 
 
 The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access layer without the need of having many lines of boilerplate code. To be able to store Job objects in the database, a couple of configurations should be made. The Job class needs to annotated with the \texttt{@Entity} annotation, indicating that this is a JPA entity so Spring Data JPA will know it must map this class in a table in the database. In order to be able to execute queries against the database in the program, a repository interface must be defined that Spring will use to generate the data accessing layer implementation with default CRUD operation. Lastly, the parameters of the database connection should be provided for the backend. This can be done in the \texttt{application.yaml}.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=java, caption={\texttt{JobRepository} interface}, label={lst:JobRepository}]
 		@Repository
@@ -243,6 +244,7 @@ The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access
 	\end{lstlisting}
 \end{minipage}
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Configuring the database connection}, label={lst:application-yaml-db}]
 	# Database Properties
@@ -332,6 +334,7 @@ The execution of tasks is handled by two classed in the worker component: \textt
 
 The implementation of calculating a Fibonacci number can be seen below.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=java, caption={Calculating Fibonacci numbers}, label={lst:fibonacci-method}]
 	private long fibonacci(long n) {
@@ -356,6 +359,7 @@ A notable difference is the configuration of the \texttt{PrefetchPolicy} of the 
 
 This setting can be configured for example in the \texttt{application.yaml} file where the message queue connection is specified.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Configuring the message queue connection and modifying the default \texttt{PrefetchPolicy}}, label={lst:message-queue-connection}]
 	# ActiveMQ
@@ -381,6 +385,7 @@ For this reason, the worker component exposes an application specific metric cal
 
 To achieve this, the custom metric is registered in the entrypoint class of the application, \texttt{WorkerApplication}.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=java,caption={Registering a custom metric}]
 	@Bean
@@ -394,6 +399,7 @@ To achieve this, the custom metric is registered in the entrypoint class of the 
 
 The \texttt{WorkerService} has a method that returns how many threads are active at a given time. As the size of the threadpool is fixed at one, this method returns 0 or 1.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=java,caption={Get the count of busy threads in the threadpool}]
 	@Bean
@@ -405,6 +411,7 @@ The \texttt{WorkerService} has a method that returns how many threads are active
 
 Lastly, to configure Spring to expose the metrics, the desired endpoints should be enabled in the \texttt{application.yaml} file.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=java,caption={Enabling Spring management endpoints}]
 	management:
@@ -498,6 +505,7 @@ The necessary configurations for the worker component are defined using a \textt
 
 In the example below, the parameters of the ActiveMQ connection and the queue names are defined for the worker.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Worker \texttt{ConfigMap}}]
 	apiVersion: v1
@@ -520,6 +528,7 @@ In the example below, the parameters of the ActiveMQ connection and the queue na
 
 The worker \texttt{Deployment} declares how the cluster will control running the worker components. Several configuration parameters are set that can be seen in the following example.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Worker \texttt{Deployment}}]
 	apiVersion: apps/v1
@@ -571,6 +580,7 @@ The value of the \texttt{image} key is the only one that is not hard-coded. This
 
 As the number of worker instances in the cluster can dynamically change, it is useful if there is a single, practically constant address that can be used to access the worker components. The Kubernetes \texttt{Service} can be used to define an abstraction that can be used to create a unique address in the cluster through which other components are able to access the individual worker components in a round robin way (see section \ref{k8s-service}).
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Worker \texttt{Service}}]
 	apiVersion: v1
@@ -600,6 +610,7 @@ In the example above the name of the port defined in the \texttt{Deployment} is 
 
 The scaling of the worker component is managed by a Horizontal Pod Autoscaler. This object scales the target component (the worker \texttt{Deployment}) based on metric. Whenever the value of the metric differs from the target value (defined under \texttt{spec.metrics.[0].target.value = 1}) the HPA will start a new or stop a worker component to restore the metric value to the target value. 
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[caption={Worker \texttt{Horizontal Pod Autoscaler}}]
 	apiVersion: autoscaling/v2beta2

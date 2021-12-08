@@ -21,12 +21,12 @@ Consistency is essential when testing. In order to get meaningful results that c
 %\end{itemize}
 
 %----------------------------------------------------------------------------
-\subsection{Test objective}
+\subsection{Test objective} \label{test-design-objective}
 %----------------------------------------------------------------------------
 
 The first thing to specify when designing a test framework is the test objective. This highly affects the way the framework should be planned and created.
 
-The goal of the framework is to measure the dependability metrics of the sample application to reveal weak spots and to discover opportunities to improve the dependability of the application.
+The goal of the framework is to measure the dependability metrics of the sample application to reveal weak spots and to discover opportunities to improve the dependability of the application. The results of the measurements can be used later as reference values when introducing various kinds of enhancements to the system to make the metrics better. The enhancements are described in Chapter \ref{enhancements}.
 
 %----------------------------------------------------------------------------
 \subsection{Requirements} \label{test-design-req}
@@ -207,6 +207,15 @@ The conclusion is to deploy the test framework and the application to evaluate s
 \subsection{Kubedepend}
 %----------------------------------------------------------------------------
 
+%\begin{itemize}
+%	\item what it is used for?
+%	\item facilitates automatic load generation, fault injection, collecting results
+%	\item describe its workflow
+%	\item purpose of waiting for stable system state
+%	\item prometheus metrics
+%	\item parameters (click)
+%\end{itemize}
+
 Section \ref{test-design-req} emphasized the importance that the framework should be configurable, give reproducible results and be automated. To satisfy these requirements, a command line program in Python was created to enforce them as well as to implement the major part of the test framework workflow proposed in Section \ref{test-design-workflow}. This tool is named Kubedepend.
 
 %----------------------------------------------------------------------------
@@ -221,6 +230,7 @@ For instance, the user can specify the duration of the load generation, the type
 
 An example on how to define a command line parameter for the entrypoint of the Python program can be seen below.
 
+\vspace{0.5cm}
 \begin{minipage}{\linewidth}
 	\begin{lstlisting}[language=python, caption={Define a parameter to control saving test results (simplified extract)}, label={lst:click-option}]
 	@click.command()
@@ -238,81 +248,158 @@ An example on how to define a command line parameter for the entrypoint of the P
 \subsubsection{Reproducibility}
 %----------------------------------------------------------------------------
 
+Kubedepend supports reproducible results in sense that when it is started with the same inputs, it executes the same logic to test and evaluate the system. 
+
 %----------------------------------------------------------------------------
 \subsubsection{Automation}
 %----------------------------------------------------------------------------
 
 After providing it with the right inputs, Kubedepend facilitates automatic load generation, fault injection and metric collection with the help of other third party tools later discussed in this chapter. When it is started, it is assumed that the Kubernetes infrastructure and the application are already ready and deployed. This means that it practically manages all the steps in Figure \ref{fig:test_framework_workflow} except the first one -- Prepare infrastructure and application. This step is executed by another mechanism that is later discussed (see Section \ref{cicd}).
 
-%\begin{itemize}
-%	\item what it is used for?
-%	\item facilitates automatic load generation, fault injection, collecting results
-%	\item describe its workflow
-%	\item purpose of waiting for stable system state
-%	\item prometheus metrics
-%	\item parameters (click)
-%\end{itemize}
-
 %----------------------------------------------------------------------------
 \subsection{Load generation}
 %----------------------------------------------------------------------------
 
+%\begin{itemize}
+%	\item locust
+%	\item usermodel
+%	\item parameterization
+%\end{itemize}
+
+Kubedepend uses Locust \cite{Locust} to generate load for the sample application (more specifically for the backend component) to trigger executions. Locust is a scriptable and scalable performance testing tool that enables defining different user behaviors in regular Python code. Locust can be used as an independent tool with command line or graphical interface, but it is also possible to embed it into existing Python programs as a library. Kubedepend utilizes the functionality of Locust in the last mentioned way.
+
+%----------------------------------------------------------------------------
+\subsubsection{User Model}
+%----------------------------------------------------------------------------
+
+In order to generate load with Locust, a user model is required, that represents the behavior of one user. This model can specify the actions Locust will make against the backend \eg what request to send, how much time to wait between submitting task inputs.
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=python, caption={Locust user model}, label={lst:locust-user}]
+	from locust import HttpUser, task, constant_pacing
+	import constants as c # constants used in the program
+	
+	class User(HttpUser):
+		# wait for an adaptive amount of time that ensures the task runs (at most) once every X seconds
+		wait_time = constant_pacing(5)
+		# the URL of the backend component
+		host = c.BACKEND_HOST
+		
+		@task
+		def submit_job_task(self):
+			headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
+			}
+			data = {
+			'input': 48
+			}
+			# make request
+			self.client.post('/api/v1/jobs', json=data, headers=headers)
+	\end{lstlisting}
+\end{minipage}
+
+The user model is a subclass of \texttt{HttpUser} which is the most commonly used model because it has a \texttt{client} attribute that can be used to make HTTP requests.
+
+The \texttt{User} class has one custom method (\texttt{submit\_job\_task()}) that defines a Locust task. When the load generation is started, an instance of the \texttt{User} class will be created for each simulated user and while these run, they execute their Locust tasks which can be specified \eg by applying the \texttt{@task} decorator to member methods. The \texttt{submit\_job\_task()} creates a JSON object specifying the input for a new execution, then sends the request to the task input endpoint of the backend (see Section \ref{impl-backend-interfaces}).
+
+The \texttt{wait\_time} method makes it possible to introduce delays after each Locust task execution. In the above example, it sets how many time to wait between sending inputs for new executions to the backend. The built-in \texttt{constant\_pacing} method is used for an adaptive time that ensures the requests are sent once every 5 seconds.
+
+The \texttt{host} attribute stores the base URL of the backend service.
+
+% TODO is the implementation of load generation (the sequence of locust command) needed here?
+
+%----------------------------------------------------------------------------
+\subsubsection{Parameters}
+%----------------------------------------------------------------------------
+
+Kubedepend exposes several command line options to configure the load generation mechanism:
+
 \begin{itemize}
-	\item locust
-	\item usermodel
-	\item parameterization
+	\item \texttt{load-duration} - Specifies the duration of the load generation in a single measurement in seconds (further details about the measurement in Section \ref{test-impl-measurement}). 
+	\item \texttt{locust-user-count} - Specifies the total number of Locust users to start in a single measurement
+	\item \texttt{locust-spawn-rate} - Specifies the number of Locust users to start per second in a single measurement. Once the total number of users defined by \texttt{locust-user-count} is reached, no more simulated users are started. 
 \end{itemize}
+
 
 %----------------------------------------------------------------------------
 \subsection{Fault Injection}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item deploy Chaos Mesh
-	\item define chaos experiments according to fault profiles (show one as example)
-	\item describe the usage of helm to deploy faults
-\end{itemize}
+%\begin{itemize}
+%	\item deploy Chaos Mesh
+%	\item define chaos experiments according to fault profiles (show one as example)
+%	\item describe the usage of helm to deploy faults
+%\end{itemize}
+
+Fault injection is implemented by using Chaos Mesh (see details in Section \ref{background-chaos-mesh}).
+
+In order to be able to inject failure anomalies, the core components of Chaos Mesh (Chaos Controller Manager, Chaos Daemon, Chaos Dashboard) must be deployed to the Kubernetes cluster prior to applying chaos experiments. It can be achieved using the official helm chart of Chaos Mesh \cite{ChaosMeshChart}. Kubedepend assumes that Chaos Mesh is already deployed on the Kubernetes cluster.
+
+Kubedepend supports easy management of the chaos objects that represent failure anomalies. To avoid the need of individually creating, applying and deleting each chaos experiment Custom Resource Definition, these objects are collected into a custom helm chart called \texttt{kubedepend-chaos}. This also facilitates the easy configuration of chaos experiments through the use of helm templates and a values file.
 
 %----------------------------------------------------------------------------
 \subsubsection{Fault Profiles}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item list fault profiles and justification
-\end{itemize}
+%\begin{itemize}
+%	\item list fault profiles and justification
+%	\item parameterization
+%\end{itemize}
+
+Kubedepend defines fault profiles as a way of organizing chaos experiments into scenarios. Each fault profile attempts to describe a set of possible errors in a system that can arise. Applying these fault profiles and measuring the dependability metrics of the application can provide valuable insights about how the system would react to real world incidents. The results produced by inserting the fault profiles can act as reference values when comparing different versions of the application under test. This notion is also used when different kind of enhancements are introduced to the system (see Chapter \ref{enhancements}).
 
 %----------------------------------------------------------------------------
-\subsection{Measurement} \label{measurement-impl}
+\subsubsection{Parameters}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Deploy tools \begin{itemize}
-		\item Prometheus
-		\item Prometheus Adapter
-		\item Promethues Blackbox Exporter
-		\item Grafana
-	\end{itemize}
-	\item prometheus annotations, scrape config
-	\item measurement sequence - what is the purpose of this
-\end{itemize}
+%----------------------------------------------------------------------------
+\subsection{Measurement} \label{test-impl-measurement}
+%----------------------------------------------------------------------------
+
+%\begin{itemize}
+%	\item Deploy tools \begin{itemize}
+%		\item Prometheus
+%		\item Prometheus Adapter
+%		\item Promethues Blackbox Exporter
+%		\item Grafana
+%	\end{itemize}
+%	\item prometheus annotations, scrape config
+%	\item measurement sequence - what is the purpose of this
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Metrics}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	
-	\item dependability metrics in PromQL
-	\item justify the 15 multiplier - it is the prometheus scrape interval
-\end{itemize}
+%\begin{itemize}
+%	
+%	\item dependability metrics in PromQL
+%	\item justify the 15 multiplier - it is the prometheus scrape interval
+%\end{itemize}
+
+%----------------------------------------------------------------------------
+\subsubsection{Parameters}
+%----------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------
+\subsection{Kubedepend workflow}
+%----------------------------------------------------------------------------
+
+% TODO diagram about how Kubedepent connects to the different parts in the framework and the application
+
+% wait for stable state -- why it is needed?
+
+This section describes the implementation of the designed workflow (see Section \ref{test-design-workflow}) with the components presented in the previous sections.
 
 %----------------------------------------------------------------------------
 \subsection{CI/CD Pipeline} \label{cicd}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item CF template
-	\item Steps and what do they do
-	\item image about jenkins pipeline steps
-	\item parameters - passed to kubedepend
-\end{itemize}
+%\begin{itemize}
+%	\item CF template
+%	\item Steps and what do they do
+%	\item image about jenkins pipeline steps
+%	\item parameters - passed to kubedepend
+%\end{itemize}
