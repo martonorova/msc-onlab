@@ -29,7 +29,7 @@ The first thing to specify when designing a test framework is the test objective
 The goal of the framework is to measure the dependability metrics of the sample application to reveal weak spots and to discover opportunities to improve the dependability of the application.
 
 %----------------------------------------------------------------------------
-\subsection{Requirements}
+\subsection{Requirements} \label{test-design-req}
 %----------------------------------------------------------------------------
 
 The design of the test framework was driven by several requirements to create an architecture that facilitates achieving the test objective defined in the previous section.
@@ -47,7 +47,7 @@ The design of the test framework was driven by several requirements to create an
 %\end{itemize}
 
 %----------------------------------------------------------------------------
-\subsection{Framework workflow}
+\subsection{Framework workflow} \label{test-design-workflow}
 %----------------------------------------------------------------------------
 
 %	\item Introduce abstract workflow \begin{enumerate}
@@ -169,17 +169,89 @@ As the target platform is Kubernetes, the final list of applicable failure scena
 % timeseries metrics
 % vizualisation capabilities
 
+The framework should be able to collect metrics about the infrastructure and the sample application. This requires that the framework should have a separate monitoring subsystem.
+
+As the value of different metrics changes over time while the system executes task and while various failure anomalies are injected, the monitoring system should be able to handle time series data format effectively.
+
+In order to increase the human usability of the framework, it is required that the monitoring system provides a visual interface where its users can track the status of the system under test during execution and to evaluate results.
+
+There are a lot of metrics that the monitoring system can collect. Apart from the application specific custom metric like \texttt{worker\_busy\_thread} introduced in section \ref{impl-worker-custom-metrics}, Kubernetes itself exposes a vast amount of metrics in several categories. As the focus of the thesis is on measuring the dependability metrics, only the values related to this should be collected and used. Section \ref{background-dep-metrics-mean-values} and \ref{background-dep-metrics-prob-funcs} describes the possible dependability metrics that can be measured. The monitoring system targets collecting measurements for the following dependability metrics:
+
+\begin{itemize}
+	\item Mean Up Time
+	\item Mean Down Time
+	\item Mean Time Between Failures
+	\item Availability
+\end{itemize}
+
+These metrics were chosen because they acceptably describe the dependability characteristics of a cloud based system that is designed to function continuously. 
 
 %----------------------------------------------------------------------------
 \section{Implementation}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item Test environment locally or in cloud
-	\item how does running tests affect the result
-	\item AWS infrastructure
-	\item CF template
-\end{itemize}
+%\begin{itemize}
+%	\item Test environment locally or in cloud
+%	\item how does running tests affect the 
+%\end{itemize}
+
+This section describes the implementation of the test framework and presents the decisions behind them.
+
+Before going into the details of each subsystem in the framework, the environment of the test framework should be specified. The question is, where to run the framework? Should it be deployed next to the system under test to minimize communication overhead or should it run independently from the application?
+
+Operating the test framework in the same environment as the tested application seems obvious at first, however this would bring in several issues that should be taken into account. Deploying the the framework and the system under the test would create a tightly coupled structure, whereas in distributed systems, loosely-coupled units are preferred. Co-deployment would also lead to the possibility that operating the framework could have a performance impact on the tested application itself, causing altered measurement results. Any infrastructural error (for example physical machine crash) -- either provoked by transient failures or inserted by the fault injector -- would affect both the application under test (which is accepted and should be handled by the application) and the framework itself. This is not passable as it would lead to framework malfunctions.
+
+The conclusion is to deploy the test framework and the application to evaluate separately. As it is practical for some of the tools used in the framework to run in the same Kubernetes cluster as the application, separation is implemented with exploiting the namespacing capabilities of Kubernetes.
+
+%----------------------------------------------------------------------------
+\subsection{Kubedepend}
+%----------------------------------------------------------------------------
+
+Section \ref{test-design-req} emphasized the importance that the framework should be configurable, give reproducible results and be automated. To satisfy these requirements, a command line program in Python was created to enforce them as well as to implement the major part of the test framework workflow proposed in Section \ref{test-design-workflow}. This tool is named Kubedepend.
+
+%----------------------------------------------------------------------------
+\subsubsection{Configuration}
+%----------------------------------------------------------------------------
+
+Kubedepend supports easy configuration through exposing command line parameters that can be used to customize some behaviors of the tool.
+
+This functionality is implemented with the help of the Click Python package \cite{Click}. Click enables creating clean command line interfaces in a composable way with as little code as necessary.
+
+For instance, the user can specify the duration of the load generation, the types of failures anomalies to inject into the system and the number of tests to execute in sequence with the same configuration. The main configuration options are presented in later sections describing the implementation of the test framework workflow steps.
+
+An example on how to define a command line parameter for the entrypoint of the Python program can be seen below.
+
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[language=python, caption={Define a parameter to control saving test results (simplified extract)}, label={lst:click-option}]
+	@click.command()
+	@click.option('--nosave', is_flag=True)
+	def main(nosave):
+		...
+	
+		click.echo('nosave=' + str(nosave))
+		
+		...
+	\end{lstlisting}
+\end{minipage}
+
+%----------------------------------------------------------------------------
+\subsubsection{Reproducibility}
+%----------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------
+\subsubsection{Automation}
+%----------------------------------------------------------------------------
+
+After providing it with the right inputs, Kubedepend facilitates automatic load generation, fault injection and metric collection with the help of other third party tools later discussed in this chapter. When it is started, it is assumed that the Kubernetes infrastructure and the application are already ready and deployed. This means that it practically manages all the steps in Figure \ref{fig:test_framework_workflow} except the first one -- Prepare infrastructure and application. This step is executed by another mechanism that is later discussed (see Section \ref{cicd}).
+
+%\begin{itemize}
+%	\item what it is used for?
+%	\item facilitates automatic load generation, fault injection, collecting results
+%	\item describe its workflow
+%	\item purpose of waiting for stable system state
+%	\item prometheus metrics
+%	\item parameters (click)
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Load generation}
@@ -234,30 +306,12 @@ As the target platform is Kubernetes, the final list of applicable failure scena
 	\item justify the 15 multiplier - it is the prometheus scrape interval
 \end{itemize}
 
-
-
-
-
-
-
-%----------------------------------------------------------------------------
-\subsection{Kubedepend}
-%----------------------------------------------------------------------------
-
-\begin{itemize}
-	\item what it is used for?
-	\item facilitates automatic load generation, fault injection, collecting results
-	\item describe its workflow
-	\item purpose of waiting for stable system state
-	\item prometheus metrics
-	\item parameters (click)
-\end{itemize}
-
 %----------------------------------------------------------------------------
 \subsection{CI/CD Pipeline} \label{cicd}
 %----------------------------------------------------------------------------
 
 \begin{itemize}
+	\item CF template
 	\item Steps and what do they do
 	\item image about jenkins pipeline steps
 	\item parameters - passed to kubedepend

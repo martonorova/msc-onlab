@@ -372,7 +372,7 @@ This setting can be configured for example in the \texttt{application.yaml} file
 The worker component is in practice an independent unit in the system as long as it can connect to the message queue. This means that the implementation of the health check will not consist of so many steps as in the case of the backend component. In fact, simply returning without error during the health check can reliably indicate that the worker is able to function correctly.
 
 %----------------------------------------------------------------------------
-\subsubsection{Custom metrics}
+\subsubsection{Custom metrics} \label{impl-worker-custom-metrics}
 %----------------------------------------------------------------------------
 
 As the worker component can only process one task at a time by design, it is important that the worker should provide information about whether it is currently executing a test at a given point of time or not. This data can be used by the system to determine if should start more worker components in cases when there are tasks in the message queue waiting to be processed.
@@ -464,12 +464,17 @@ The system uses MySQL \cite{MySQL} as the database which is an open source, rela
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
+%	\item aws eks
 %	\item helm chart
 %	\item K8s pod, depl, svc exapmle (one for each)
 %	\item HPA definition, metrics server
 %\end{itemize}
 
-All the above mentioned components are packaged with Docker and deployed to a Kubernetes cluster. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the worker component related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be sound in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
+To be able to deploy the components, a running Kubernetes cluster is needed. Kubernetes can be set up manually on private machines but ususally the most feasible way to use Kubernetes is to exploit the managed Kubernetes service of a cloud provider. A managed Kubernetes means that the master nodes of the cluster (the control plane) are managed by a provider, taking off the operation burdens from users who have a simple way accessing the cluster.
+
+There are many cloud providers that sell managed Kubernetes solution, in this project the product of Amazon Web Services is used called Elastic Kubernetes Service (EKS) \cite{EKS}.
+
+All the above mentioned components are packaged with Docker and deployed to AWS EKS. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the worker component related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be sound in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
 
 %----------------------------------------------------------------------------
 \subsection{Helm chart}
