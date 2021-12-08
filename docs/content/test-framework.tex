@@ -348,11 +348,78 @@ Kubedepend supports easy management of the chaos objects that represent failure 
 %	\item parameterization
 %\end{itemize}
 
-Kubedepend defines fault profiles as a way of organizing chaos experiments into scenarios. Each fault profile attempts to describe a set of possible errors in a system that can arise. Applying these fault profiles and measuring the dependability metrics of the application can provide valuable insights about how the system would react to real world incidents. The results produced by inserting the fault profiles can act as reference values when comparing different versions of the application under test. This notion is also used when different kind of enhancements are introduced to the system (see Chapter \ref{enhancements}).
+Kubedepend defines fault profiles as a way of organizing chaos experiments into scenarios. Each fault profile attempts to describe a set of possible errors in a system that can arise. Applying these fault profiles and measuring the dependability metrics of the application can provide valuable insights about how the system would react to real world incidents.
+
+The results produced by inserting the fault profiles can act as reference values when comparing different versions of the application under test. This notion is also used when different kind of enhancements are introduced to the system (see Chapter \ref{enhancements}).
+
+The framework allows defining multiple chaos experiments inside one fault profile, however at this stage the fault profiles typically contain one experiment. 
+
+It is also possible to set a strength level for each chaos experiment inside a fault profile. For example, when setting up a profile that uses a network delay chaos, the different strength levels control how much delay should be applied for each network packet. The exact values used for specifying the strength levels are arbitrary but can be modified easily if needed.
+
+Currently the following fault profiles are defined:
+
+\paragraph{IO} The IO fault profile introduces delays to disk read and write operations for a specific period of time. The current implementation limits the profile to only affect the database because IO operations are practically only critical for the database component.
+
+\paragraph{Network Delay} The Network Delay fault profile causes latency in the network connections of the targeted Pods for a specific period of time.
+
+\paragraph{Network Partition} The Network Partition fault profile separates Pods into several subnets by blocking communication between them for a specific period of time.
+
+\paragraph{Pod Failure} The Pod Failure fault profile makes the targeted Pods unavailable for a specific period of time.
+
+\paragraph{Pod Kill} The Pod Kill fault profile kills the targeted Pods triggering a restart if a ReplicaSet or similar mechanism is configured for the given Pod.
+
+\paragraph{Stress CPU} The Stress CPU fault profile starts a specified number of worker processes that occupy a given percentage of CPU capacity in targeted Pods for a specified period of time.
+
+\paragraph{Stress Memory} The Stress Memory fault profile starts a specified number of worker processes that that continuously allocate, read and write memory in the targeted Pods for a specified period of time.
+
+\paragraph{None} The None fault profile does not apply any chaos experiments. It can be used to measure the failure free dependability characteristics of the system under test.
+
+\paragraph{Custom} The Custom fault profile demonstrates the possibility of defining multiple chaos experiments inside a single fault profile. It consists of a Pod Failure and ab IO chaos experiments.
+
+As an example, the chaos experiment in Pod Kill failure profile is defined the following way:
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Pod Kill chaos}, label={lst:pod-kill-chaos}]
+	{{- if .Values.podKillChaos.enabled -}}
+	apiVersion: chaos-mesh.org/v1alpha1
+	kind: Schedule
+	metadata:
+		name: schedule-pod-kill-worker
+	spec:
+		schedule: '*/3 * * * *'
+		historyLimit: 5
+		concurrencyPolicy: 'Forbid'
+		type: 'PodChaos'
+		podChaos:
+			action: pod-kill
+			mode: fixed-percent
+			{{- if eq .Values.podKillChaos.strength "low" }}
+			value: {{ .Values.mode.fixPercent.low | quote }}
+			{{- else if eq .Values.podKillChaos.strength "high" }}
+			value: {{ .Values.mode.fixPercent.high | quote }}
+			{{- else }}
+			value: {{ .Values.mode.fixPercent.medium | quote }}
+			{{- end }}
+			selector:
+				namespaces:
+				- kubedepend
+		duration: "60s"
+	{{- end }}
+	\end{lstlisting}
+\end{minipage}
+
+The pod kill chaos is defined under the \texttt{podChaos} key, the role of the \texttt{Schedule} object is described in Section \ref{test-impl-measurement}. The \texttt{mode: fixed-percent} configuration means that when the chaos experiment is active, it will randomly select a fixed percentage of eligible Pods (defined by the \texttt{selector}) to delete. The example uses helm template variables to set the value of the actual percentage based on which strength level is selected in the values file.
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
 %----------------------------------------------------------------------------
+
+Kubedepend exposes one command line option to configure the fault injection mechanism:
+
+\begin{itemize}
+	\item \texttt{fault-profile} - Specifies the name of the fault profile to apply to the system during fault injection.
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Measurement} \label{test-impl-measurement}
