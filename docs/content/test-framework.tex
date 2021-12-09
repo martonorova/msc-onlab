@@ -240,8 +240,7 @@ An example on how to define a command line parameter for the entrypoint of the P
 	
 		click.echo('nosave=' + str(nosave))
 		
-		...
-	\end{lstlisting}
+		...\end{lstlisting}
 \end{minipage}
 
 %----------------------------------------------------------------------------
@@ -255,6 +254,38 @@ Kubedepend supports reproducible results in sense that when it is started with t
 %----------------------------------------------------------------------------
 
 After providing it with the right inputs, Kubedepend facilitates automatic load generation, fault injection and metric collection with the help of other third party tools later discussed in this chapter. When it is started, it is assumed that the Kubernetes infrastructure and the application are already ready and deployed. This means that it practically manages all the steps in Figure \ref{fig:test_framework_workflow} except the first one -- Prepare infrastructure and application. This step is executed by another mechanism that is later discussed (see Section \ref{cicd}).
+
+%----------------------------------------------------------------------------
+\subsubsection{Measurement and Measurement sequence} \label{test-impl-measurement-seq}
+%----------------------------------------------------------------------------
+
+In Kubedepend a Measurement represents the process of load generation, fault injection and metric collection. Section \ref{test-design-req} pointed out that it is not feasible to require completely deterministic results from the test framework. However, to even out the transient, temporary behaviors of the system, Kubedepend introduces the concept of Measurement Sequences. A Measurement Sequence is the collection of arbitrary number of individual Measurements with the same configuration. A single execution of Kubedepend carries out the running of one Measurement Sequence. The result of the Measurement Sequence is the collection of individual Measurement results. A graphical representation of the idea of Measurement Sequence can be seen in Figure \ref{fig:measurement_sequence}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/measurement_sequence.png}
+	\caption{Measurement Sequence}
+	\label{fig:measurement_sequence}
+\end{figure}
+
+The number of Measurements to execute during a Measurement Sequence can be set with the command line parameter \texttt{measurement-count}.
+
+% TODO diagram about how Kubedepent connects to the different parts in the framework and the application
+
+% wait for stable state -- why it is needed?
+
+% the role of scheduled chaos experiment
+
+\paragraph{Periodic Fault Injection} During a single Measurement Kubedepend injects failure anomalies periodically. This supports testing the robustness of the system under test and that how well the application can recover from failures.
+
+\paragraph{Stable System State} Executing Measurement Sequences instead of a single Measurement introduces another complication to the test framework. It have to ensured that the effects of a previous Measurement does not have an impact on consequent Measurements. For this purpose, Kubedepend uses the notion of Stable System State which represents the state of the application under test, where all the components are up and running, there are no task executions in progress and there are not any messages waiting in the message queue. A Measurement can only be started if the application is in Stable System State.
+
+%----------------------------------------------------------------------------
+\subsubsection{Kubedepend Output} \label{test-impl-kubedepend-output}
+%----------------------------------------------------------------------------
+% what is the output data, what are the fields
+
+To control Kubedepend whether to save the results to a file can be configured with the \texttt{nosave} command line flag.
 
 %----------------------------------------------------------------------------
 \subsection{Load generation}
@@ -296,8 +327,7 @@ In order to generate load with Locust, a user model is required, that represents
 			'input': 48
 			}
 			# make request
-			self.client.post('/api/v1/jobs', json=data, headers=headers)
-	\end{lstlisting}
+			self.client.post('/api/v1/jobs', json=data, headers=headers)\end{lstlisting}
 \end{minipage}
 
 The user model is a subclass of \texttt{HttpUser} which is the most commonly used model because it has a \texttt{client} attribute that can be used to make HTTP requests.
@@ -317,7 +347,7 @@ The \texttt{host} attribute stores the base URL of the backend service.
 Kubedepend exposes several command line options to configure the load generation mechanism:
 
 \begin{itemize}
-	\item \texttt{load-duration} - Specifies the duration of the load generation in a single measurement in seconds (further details about the measurement in Section \ref{test-impl-measurement}). 
+	\item \texttt{load-duration} - Specifies the duration of the load generation in a single measurement in seconds (further details about the measurement in Section \ref{test-impl-measurement-seq}). 
 	\item \texttt{locust-user-count} - Specifies the total number of Locust users to start in a single measurement
 	\item \texttt{locust-spawn-rate} - Specifies the number of Locust users to start per second in a single measurement. Once the total number of users defined by \texttt{locust-user-count} is reached, no more simulated users are started. 
 \end{itemize}
@@ -405,11 +435,10 @@ As an example, the chaos experiment in Pod Kill failure profile is defined the f
 				namespaces:
 				- kubedepend
 		duration: "60s"
-	{{- end }}
-	\end{lstlisting}
+	{{- end }}\end{lstlisting}
 \end{minipage}
 
-The pod kill chaos is defined under the \texttt{podChaos} key, the role of the \texttt{Schedule} object is described in Section \ref{test-impl-measurement}. The \texttt{mode: fixed-percent} configuration means that when the chaos experiment is active, it will randomly select a fixed percentage of eligible Pods (defined by the \texttt{selector}) to delete. The example uses helm template variables to set the value of the actual percentage based on which strength level is selected in the values file.
+The pod kill chaos is defined under the \texttt{podChaos} key, the chaos experiment is wrapped into a \texttt{Schedule} object to facilitate periodic chaos creation and deletion as described in Section \ref{test-impl-workflow}. The \texttt{mode: fixed-percent} configuration means that when the chaos experiment is active, it will randomly select a fixed percentage of eligible Pods (defined by the \texttt{selector}) to delete. The example uses helm template variables to set the value of the actual percentage based on which strength level is selected in the values file.
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
@@ -507,8 +536,7 @@ With the default settings Prometheus already collects vast amounts of metrics fr
 	  action: replace
 	  regex: ([^:]+)(?::\d+)?;(\d+)
 	  replacement: $1:$2
-	  target_label: __address__
-	\end{lstlisting}
+	  target_label: __address__\end{lstlisting}
 \end{minipage}
 
 The \texttt{kubernetes\_sd\_configs} object sets up Kubernetes Service Discovery which allows retrieving up to date scrape targets from the Kubernetes REST API. Here, the \texttt{pod} role is used, that specifies that the scrape job only looks for Pod objects. The targets are further filtered to be in the \texttt{kubedepend} namespace and have the label \texttt{app=kubedepend-worker-app}.
@@ -530,11 +558,11 @@ Throughout the project, several metrics are used that are not available as built
 
 \emph{Note:} In the implementation, the \texttt{probe\_success} metrics are used with the label matcher \texttt{instance=~".*kubedepend-backend.*"} but it was left out from here for the sake of readibility.
 
-\emph{Note:} \texttt{<range\_length>}
+\emph{Note:} \texttt{<range\_length>} is a variable used by Kubedepend to dynamically set the range of metric samples back from the current time instant to the beginning of the measurement. For example, it can hold the value \texttt{600s}.
 
-\emph{Note:} multiplier 15
+\emph{Note:} Prometheus scrapes its targets every 15 seconds by default. That means that the \texttt{probe\ success} metrics produces a value of 1 every 15 seconds. So in order to calculate the total time in seconds when the probe returned successfully, a multiplier of \texttt{15} is needed. It is important to notice that the scrape interval of Prometheus determines the granularity of the metrics, for example it cannot detect if a service is unavailable between two scrapes if the service is up and running at the moment of scraping.
  
- \paragraph{Mean Up Time} asdfa
+ \paragraph{Mean Up Time} To calculate Mean Up Time, the total length of uptime is divided by the number of time intervals when the system was up and running. The count of these intervals can be determined by querying the system state at the beginning of the measurement (\texttt{probe\_success\ offset\ <range\_length>}) and by getting how many times the state changed during the measurement (\texttt{change()} PromQL function).
  
  \vspace{0.5cm}
  \begin{minipage}{\linewidth}
@@ -542,22 +570,21 @@ Throughout the project, several metrics are used that are not available as built
  	15
  	* 
  	sum_over_time(
- 		probe_success[<range_length>s]
+ 		probe_success[<range_length>]
  	)
  	/ 
  	floor(
  		(changes(
- 			probe_success[<range_length>s]
+ 			probe_success[<range_length>]
  		)
  		+ 1
- 		+ probe_success offset <range_length>s
+ 		+ probe_success offset <range_length>
  		)
  		/ 2
- 	)
- 	\end{lstlisting}
+ 	)\end{lstlisting}
  \end{minipage}
  
- \paragraph{Mean Down Time} asfaf
+ \paragraph{Mean Down Time} The Mean Down Time is calculated similarly to Mean Up Time. To get the total time when the application was down, the length of uptime is subtracted from the count of all metric values during the measurement. Then the same logic is applied to determine the number of intervals when the system was not down.
  
  \vspace{0.5cm}
  \begin{minipage}{\linewidth}
@@ -565,69 +592,63 @@ Throughout the project, several metrics are used that are not available as built
  	15 
  	* 
  	(count_over_time(
- 		probe_success[<range_length>s])
+ 		probe_success[<range_length>])
  		- sum_over_time(
- 			probe_success[<range_length>s]
+ 			probe_success[<range_length>]
  		)
  	)
  	/ 
  	floor(
  		(changes(
- 			probe_success[<range_length>s]
+ 			probe_success[<range_length>]
  		)
  		+ 2
- 		- probe_success offset <range_length>s
+ 		- probe_success offset <range_length>
  		)
  		/ 2
- 	)
- 	\end{lstlisting}
+ 	)\end{lstlisting}
  \end{minipage}
  
- \paragraph{Mean Time Between Failures} Is calculated by the sum of the above two metrics.
+ \paragraph{Mean Time Between Failures} This metric is calculated by the sum of the above two metrics.
  
- \paragraph{Availability} afasdf
+ \paragraph{Availability} The Availability of the system is calculated by getting the average of the \texttt{probe\_succes} values over the time period of the measurement. Because the value of \texttt{probe\_succes} is 0 or 1, the result will be between 0 and 1, no further transformations are needed.
  
  \vspace{0.5cm}
  \begin{minipage}{\linewidth}
  	\begin{lstlisting}[caption={Availability defined in PromQL}, label={lst:promql-availability}]
- 	avg_over_time(probe_success[<range_length>s])
- 	\end{lstlisting}
+ 	avg_over_time(probe_success[<range_length>])\end{lstlisting}
  \end{minipage}
+
+\paragraph{Needed worker ratio} This custom metric is defined in Prometheus Adapter and is used by the Horizontal Pod Autoscaler that manages that scales the worker components. The equation used to calculate \texttt{needed\_worker\_ratio} was presented in Section \ref{impl-hpa}, in PromQL it is defined the following way:
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={\texttt{needed\_worker\_ratio} defined in PromQL}, label={lst:promql-availability}]
+	(
+		1
+		+
+		(
+			org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue", job="activemq"}
+			or
+			absent(org_apache_activemq_Broker_QueueSize{destinationName="jobWorkerQueue", job="activemq", namespace="kubedepend"}) - 1)
+			+
+			on(namespace) ( sum by (namespace) (worker_busy_threads{job="worker-pods"})
+			or
+			label_replace(vector(0), "namespace", "kubedepend", "", "")
+		)
+	)
+	/
+	on(namespace) (kube_deployment_status_replicas{deployment="kubedepend-worker-depl"})\end{lstlisting}
+\end{minipage}
+
+\emph{Note:} The \texttt{absent} and \texttt{label\_replace} PromQL functions are used to provide provide 0 values in case one of the metrics is missing (\texttt{org\_apache\_activemq\_Broker\_QueueSize} or \texttt{worker\_busy\_threads}). These metrics can be missing from Prometheus if the Pods exposing them are not available due to the fault injection.
+
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
 %----------------------------------------------------------------------------
 
 Kubedepend does not expose any command line options to configure the monitoring as this subsystem is not part of it.
-
-%----------------------------------------------------------------------------
-\subsection{Measurement} \label{test-impl-measurement}
-%----------------------------------------------------------------------------
-
-% \item measurement sequence - what is the purpose of this
-% the role of scheduled chaos experiments
-
-%----------------------------------------------------------------------------
-\subsubsection{Parameters}
-%----------------------------------------------------------------------------
-
-Kubedepend exposes two command line option to configure the measurement mechanism:
-
-\begin{itemize}
-	\item \texttt{nosave} - If provided, tells Kubedepend not to save the test configuration and the results.
-	\item \texttt{measurement-count} - Specifies the number of measurements ot execute during a measurement sequence.
-\end{itemize}
-
-%----------------------------------------------------------------------------
-\subsection{Kubedepend workflow}
-%----------------------------------------------------------------------------
-
-% TODO diagram about how Kubedepent connects to the different parts in the framework and the application
-
-% wait for stable state -- why it is needed?
-
-
-This section describes the implementation of the designed workflow (see Section \ref{test-design-workflow}) with the components presented in the previous sections.
 
 %----------------------------------------------------------------------------
 \subsection{CI/CD Pipeline} \label{cicd}

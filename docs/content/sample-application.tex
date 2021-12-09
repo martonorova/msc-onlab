@@ -240,8 +240,7 @@ The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access
 			
 			@Query("SELECT j FROM Job j WHERE j.result IS NOT NULL")
 			List<Job> findFinishedJobs();
-		}
-	\end{lstlisting}
+		}\end{lstlisting}
 \end{minipage}
 
 \vspace{0.5cm}
@@ -251,8 +250,7 @@ The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access
 	database:
 		host: ${MYSQL_DB_HOST:localhost}
 		port: ${MYSQL_DB_PORT:3306}
-		db: ${MYSQL_DB_DB_NAME:jobs}
-	\end{lstlisting}
+		db: ${MYSQL_DB_DB_NAME:jobs}\end{lstlisting}
 \end{minipage}
 
 In \texttt{JobRepository} two additional methods are defined which will be later used to query \texttt{Job}s based on if they are completed or not.
@@ -344,8 +342,7 @@ The implementation of calculating a Fibonacci number can be seen below.
 		}
 		result = fibonacci(n - 1) + fibonacci(n - 2);
 		return result;
-	}
-	\end{lstlisting}
+	}\end{lstlisting}
 \end{minipage}
 
 This implementation is not efficient as it does a lot of work repeatedly as it calculates the same values multiple times. However, increasing the performance of the worker is out of scope in this project. This algorithm is CPU heavy in its nature and the execution time can easily last for minutes with a large enough input, hence it satisfies the requirements defined in section \ref{design}.
@@ -365,8 +362,7 @@ This setting can be configured for example in the \texttt{application.yaml} file
 	# ActiveMQ
 	activemq:
 		broker:
-			url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch=1"
-	\end{lstlisting}
+			url: "tcp://${ACTIVEMQ_BROKER_HOST:localhost}:${ACTIVEMQ_BROKER_PORT:61616}?jms.prefetchPolicy.queuePrefetch=1"\end{lstlisting}
 \end{minipage}
 
 %----------------------------------------------------------------------------
@@ -393,8 +389,7 @@ To achieve this, the custom metric is registered in the entrypoint class of the 
 		return meterRegistry -> {
 			Gauge.builder("worker.busy.threads", workerService::getBusyThreads).register(meterRegistry);
 		};
-	}
-	\end{lstlisting}
+	}\end{lstlisting}
 \end{minipage}
 
 The \texttt{WorkerService} has a method that returns how many threads are active at a given time. As the size of the threadpool is fixed at one, this method returns 0 or 1.
@@ -405,8 +400,7 @@ The \texttt{WorkerService} has a method that returns how many threads are active
 	@Bean
 	public int getBusyThreads() {
 		return this.executor.getActiveCount();
-	}
-	\end{lstlisting}
+	}\end{lstlisting}
 \end{minipage}
 
 Lastly, to configure Spring to expose the metrics, the desired endpoints should be enabled in the \texttt{application.yaml} file.
@@ -418,8 +412,7 @@ Lastly, to configure Spring to expose the metrics, the desired endpoints should 
 		endpoints:
 			web:
 				exposure:
-					include: health,info,prometheus
-	\end{lstlisting}
+					include: health,info,prometheus\end{lstlisting}
 \end{minipage}
 
 %----------------------------------------------------------------------------
@@ -517,8 +510,7 @@ In the example below, the parameters of the ActiveMQ connection and the queue na
 	  ACTIVEMQ_BROKER_HOST: kubedepend-activemq.kubedepend.svc.cluster.local
 	  ACTIVEMQ_BROKER_PORT: "61616"
 	  ACTIVEMQ_WORKER_QUEUE: jobWorkerQueue
-	  ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue
-	\end{lstlisting}
+	  ACTIVEMQ_BACKEND_QUEUE: jobBackendQueue\end{lstlisting}
 \end{minipage}
 
 
@@ -566,8 +558,7 @@ The worker \texttt{Deployment} declares how the cluster will control running the
 	            cpu: "1500m"
 	        ports:
 	        - containerPort: 5000
-	          name: worker-port
-	\end{lstlisting}
+	          name: worker-port\end{lstlisting}
 \end{minipage}
 
 The worker container that will run in a \texttt{Pod} is defined under the \texttt{spec} key. Here, the previously declared \texttt{ConfigMap} is referenced to use the values inside it as environment variables in the worker container. The \texttt{resources} section tells the cluster how much resource (CPU and memory) the container can use. This can help prevent the worker component from unnecessarily reserving too much resource, causing other components to starve. The \texttt{ports} section specifies the open port of the container and sets its name. This will be used when the \texttt{Service} object is defined for the worker. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{measurement-impl}.
@@ -597,23 +588,24 @@ As the number of worker instances in the cluster can dynamically change, it is u
 	    app: kubedepend-worker-app
 	  ports:
 	  - port: 5000
-	    targetPort: worker-port
-	\end{lstlisting}
+	    targetPort: worker-port\end{lstlisting}
 \end{minipage}
 
-In the example above the name of the port defined in the \texttt{Deployment} is used, so the \texttt{Service} is aware which port incoming requests should be forwarded to. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{test-impl-measurement}.
+In the example above the name of the port defined in the \texttt{Deployment} is used, so the \texttt{Service} is aware which port incoming requests should be forwarded to. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{test-impl-monitoring}.
 
 
 %----------------------------------------------------------------------------
-\subsubsection{Horizontal Pod Autoscaler}
+\subsubsection{Horizontal Pod Autoscaler} \label{impl-hpa}
 %----------------------------------------------------------------------------
+
+% TODO HPA target instance calculation algorithm
 
 The scaling of the worker component is managed by a Horizontal Pod Autoscaler. This object scales the target component (the worker \texttt{Deployment}) based on a custom metric. Whenever the value of the metric differs from the target value (defined under \texttt{spec.metrics.[0].target.value = 1}) the HPA will start a new or stop a worker component to restore the metric value to the target value.
 
 The metric value is based on the number of messages waiting in the message queue, the number of currently busy workers executing tasks and the total number of worker instances. To prepare for frequent task input submissions, a hot spare worker instance is always present. The metric is calculated with the following equation:
 
 \[
-	\texttt{needed\_worker\_ratio} = 1 + \frac{\#\ of\ messages\ in\ queue + \#\ of\ busy\ worker\ instances}{\#\ of\ worker\ instances}
+	\texttt{needed\_worker\_ratio} = \frac{1 + \#\ of\ messages\ in\ queue + \#\ of\ busy\ worker\ instances}{\#\ of\ worker\ instances}
 \]
 
 \vspace{0.5cm}
@@ -645,8 +637,7 @@ The metric value is based on the number of messages waiting in the message queue
             value: "1"
       behavior:
         scaleDown:
-        stabilizationWindowSeconds: 30 # default is 300
-	\end{lstlisting}
+        stabilizationWindowSeconds: 30 # default is 300\end{lstlisting}
 \end{minipage}
 
 
