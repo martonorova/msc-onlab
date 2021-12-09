@@ -161,7 +161,7 @@ As the target platform is Kubernetes, the final list of applicable failure scena
 \paragraph{Cloud provider anomalies} Although Kubernetes clusters can be set up on private machines as well, generally they are used as a service offered by a cloud provider company. These products are highly available and are managed by experts, however, occasional errors can possibly happen in these type of environments too.
 
 %----------------------------------------------------------------------------
-\subsection{Monitoring}
+\subsection{Monitoring} \label{test-design-monitoring}
 %----------------------------------------------------------------------------
 %need to monitor the application metrics, state --> need for monitoring system
 % which metrics to collect
@@ -422,33 +422,177 @@ Kubedepend exposes one command line option to configure the fault injection mech
 \end{itemize}
 
 %----------------------------------------------------------------------------
-\subsection{Measurement} \label{test-impl-measurement}
+\subsection{Monitoring} \label{test-impl-monitoring}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
 %	\item Deploy tools \begin{itemize}
 %		\item Prometheus
+%		\item Metrics server
 %		\item Prometheus Adapter
 %		\item Promethues Blackbox Exporter
 %		\item Grafana
 %	\end{itemize}
-%	\item prometheus annotations, scrape config
-%	\item measurement sequence - what is the purpose of this
+%	
+%	
 %\end{itemize}
 
+As per the design description of the test framework discussed in Section \ref{test-design-monitoring}, the framework should provide a monitoring subsystem that is capable of collecting metrics related to the dependability of the application under test.
+
+The monitoring system consists of several third-party tools in order to provide with the required functionality.
+
+\paragraph{Prometheus} Prometheus is used to collect and store the metrics from the application components and the underlying Kubernetes infrastructure they run on.
+
+\paragraph{Metrics Server} Metrics Server is a cluster-wide source of container metrics for Kubernetes built-in autoscaling pipelines and is needed to be able to user Prometheus Adapter.
+
+\paragraph{Prometheus Adapter} The Prometheus Adapter enables Kubernetes to scale workloads (\eg Deployments) based upon custom metrics that are pulled from external metric provider like Prometheus.
+
+\paragraph{Prometheus Blackbox Exporter} Prometheus Blackbox Exporter allows blackbox probing of endpoints over various protocols, for instance HTTP.
+
+\paragraph{Grafana} Grafana is used by the framework to display the collected metrics and results on human-friendly dashboards.
+
+The tools mentioned above are deployed using official helm charts \cite{PrometheusChart} \cite{PrometheusAdapterChart} \cite{BlackboxExporterChart} \cite{GrafanaChart} except the Metrics Server which is installed with plain Kubernetes definitions. 
+
 %----------------------------------------------------------------------------
-\subsubsection{Metrics}
+\subsubsection{Metric collection}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
-%	
-%	\item dependability metrics in PromQL
-%	\item justify the 15 multiplier - it is the prometheus scrape interval
+%	\item prometheus annotations, scrape config
 %\end{itemize}
+
+With the default settings Prometheus already collects vast amounts of metrics from the Kubernetes layer. However, to collect metrics from the application components, further configuration is needed. To gather metrics from the worker instances, the following modifications are necessary.
+
+\paragraph{Pod annotations} The worker Pods should be annotated with the following annotations to enable metric collection:
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Worker annotation to enable monitoring}, label={lst:worker-annotation-monitoring}]
+	prometheus.io/scrape: "true"
+	prometheus.io/path: "/actuator/prometheus"
+	prometheus.io/port: "5000"
+	\end{lstlisting}
+\end{minipage}
+
+\begin{itemize}
+	\item \texttt{prometheus.io/scrape: "true"} Tells Prometheus to scrape the given Pod.
+	\item \texttt{prometheus.io/path: "/actuator/prometheus"} Specifies the path where the metrics of the worker components are exposes in Prometheus compatible format.
+	\item \texttt{prometheus.io/port: "5000"} Specifies which port to use to access the metrics.
+\end{itemize}
+
+\paragraph{Scrape job configuration} The scrape job configuration among other things specifies which targets to collects metrics from. To collect metrics from the worker Pods, the following settings are used (extract):
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Prometheus scrape configuration for worker pods}, label={lst:worker-pods-scrape-job}]
+	job_name: worker-pods
+	kubernetes_sd_configs:
+	- role: pod
+	  namespaces:
+	    names:
+	    - 'kubedepend'
+	  selectors:
+	  - role: pod
+	    label: app=kubedepend-worker-app
+	
+	relabel_configs:
+	- source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+	  action: keep
+	  regex: true
+	- source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+	  action: replace
+	  target_label: __metrics_path__
+	  regex: (.+)
+	- source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+	  action: replace
+	  regex: ([^:]+)(?::\d+)?;(\d+)
+	  replacement: $1:$2
+	  target_label: __address__
+	\end{lstlisting}
+\end{minipage}
+
+The \texttt{kubernetes\_sd\_configs} object sets up Kubernetes Service Discovery which allows retrieving up to date scrape targets from the Kubernetes REST API. Here, the \texttt{pod} role is used, that specifies that the scrape job only looks for Pod objects. The targets are further filtered to be in the \texttt{kubedepend} namespace and have the label \texttt{app=kubedepend-worker-app}.
+
+Relabeling is a powerful tool to dynamically configure the behavior of scraping. In the above three rules, Prometheus only keeps those targets, which posses the \texttt{prometheus.io/scrape: "true"} annotation. Then the metrics path -- which tells Prometheus on which path to access the exposed metrics -- is overwritten with value of \texttt{prometheus.io/path} annotation. Lastly, the address of the Pod is extended with the port number specified by the value of \texttt{prometheus.io/port} annotation.
+
+%----------------------------------------------------------------------------
+\subsubsection{Composite Metric Definitions}
+%----------------------------------------------------------------------------
+%	\item dependability metrics in PromQL
+%	\item needed worker ratio
+%	\item justify the 15 multiplier - it is the prometheus scrape interval
+
+Throughout the project, several metrics are used that are not available as built-in values, rather composed from multiple basic metrics. These are the dependability metrics measured by the test framework and the custom metric used by the Horizontal Pod Autoscaler managing the replication of worker components.
+
+ Section \ref{test-design-monitoring} described which dependability metrics are relevant in the framework to characterize the system. However, these metrics should be mapped to actual Prometheus queries in order to be able to use them.
+ 
+%  TODO helper figures
+ 
+ \paragraph{Mean Up Time} asdfa
+ 
+ \vspace{0.5cm}
+ \begin{minipage}{\linewidth}
+ 	\begin{lstlisting}[caption={Mean Up Time defined in PromQL}, label={lst:promql-mut}]
+ 	15
+ 	* 
+ 	sum_over_time(
+ 		probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]
+ 	)
+ 	/ 
+ 	floor(
+ 		(changes(
+ 			probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])
+ 			+ 1
+ 			+ probe_success{instance=~".*kubedepend-backend.*"} offset <range_length>s
+ 		)
+ 		/ 2
+ 	)
+ 	\end{lstlisting}
+ \end{minipage}
+ 
+ \paragraph{Mean Down Time} asfaf
+ 
+ \vspace{0.5cm}
+ \begin{minipage}{\linewidth}
+ 	\begin{lstlisting}[caption={Mean Up Time defined in PromQL}, label={lst:promql-mut}]
+ 	15 * (count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset <range_length>s) / 2))
+ 	\end{lstlisting}
+ \end{minipage}
+ 
+ \paragraph{Mean Time Between Failures} Is calculated by the sum of the above two metrics.
+ 
+ \paragraph{Availability} afasdf
+ 
+ \vspace{0.5cm}
+ \begin{minipage}{\linewidth}
+ 	\begin{lstlisting}[caption={Availability defined in PromQL}, label={lst:promql-availability}]
+ 	avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])
+ 	\end{lstlisting}
+ \end{minipage}
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
 %----------------------------------------------------------------------------
+
+Kubedepend does not expose any command line options to configure the monitoring as this subsystem is not part of it.
+
+%----------------------------------------------------------------------------
+\subsection{Measurement} \label{test-impl-measurement}
+%----------------------------------------------------------------------------
+
+% \item measurement sequence - what is the purpose of this
+% the role of scheduled chaos experiments
+
+%----------------------------------------------------------------------------
+\subsubsection{Parameters}
+%----------------------------------------------------------------------------
+
+Kubedepend exposes two command line option to configure the measurement mechanism:
+
+\begin{itemize}
+	\item \texttt{nosave} - If provided, tells Kubedepend not to save the test configuration and the results.
+	\item \texttt{measurement-count} - Specifies the number of measurements ot execute during a measurement sequence.
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Kubedepend workflow}
@@ -457,6 +601,7 @@ Kubedepend exposes one command line option to configure the fault injection mech
 % TODO diagram about how Kubedepent connects to the different parts in the framework and the application
 
 % wait for stable state -- why it is needed?
+
 
 This section describes the implementation of the designed workflow (see Section \ref{test-design-workflow}) with the components presented in the previous sections.
 

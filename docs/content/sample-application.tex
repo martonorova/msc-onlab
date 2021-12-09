@@ -601,14 +601,20 @@ As the number of worker instances in the cluster can dynamically change, it is u
 	\end{lstlisting}
 \end{minipage}
 
-In the example above the name of the port defined in the \texttt{Deployment} is used, so the \texttt{Service} is aware which port incoming requests should be forwarded to. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{measurement-impl}.
+In the example above the name of the port defined in the \texttt{Deployment} is used, so the \texttt{Service} is aware which port incoming requests should be forwarded to. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{test-impl-measurement}.
 
 
 %----------------------------------------------------------------------------
 \subsubsection{Horizontal Pod Autoscaler}
 %----------------------------------------------------------------------------
 
-The scaling of the worker component is managed by a Horizontal Pod Autoscaler. This object scales the target component (the worker \texttt{Deployment}) based on metric. Whenever the value of the metric differs from the target value (defined under \texttt{spec.metrics.[0].target.value = 1}) the HPA will start a new or stop a worker component to restore the metric value to the target value. 
+The scaling of the worker component is managed by a Horizontal Pod Autoscaler. This object scales the target component (the worker \texttt{Deployment}) based on a custom metric. Whenever the value of the metric differs from the target value (defined under \texttt{spec.metrics.[0].target.value = 1}) the HPA will start a new or stop a worker component to restore the metric value to the target value.
+
+The metric value is based on the number of messages waiting in the message queue, the number of currently busy workers executing tasks and the total number of worker instances. To prepare for frequent task input submissions, a hot spare worker instance is always present. The metric is calculated with the following equation:
+
+\[
+	\texttt{needed\_worker\_ratio} = 1 + \frac{\#\ of\ messages\ in\ queue + \#\ of\ busy\ worker\ instances}{\#\ of\ worker\ instances}
+\]
 
 \vspace{0.5cm}
 \begin{minipage}{\linewidth}
