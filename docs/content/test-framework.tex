@@ -524,9 +524,15 @@ Relabeling is a powerful tool to dynamically configure the behavior of scraping.
 
 Throughout the project, several metrics are used that are not available as built-in values, rather composed from multiple basic metrics. These are the dependability metrics measured by the test framework and the custom metric used by the Horizontal Pod Autoscaler managing the replication of worker components.
 
- Section \ref{test-design-monitoring} described which dependability metrics are relevant in the framework to characterize the system. However, these metrics should be mapped to actual Prometheus queries in order to be able to use them.
+ Section \ref{test-design-monitoring} described which dependability metrics are relevant in the framework to characterize the system. However, these metrics should be mapped to actual Prometheus queries in order to be able to use them. The following queries are built up from PromQL functions introduced in Section \ref{background-promql}.
  
 %  TODO helper figures
+
+\emph{Note:} In the implementation, the \texttt{probe\_success} metrics are used with the label matcher \texttt{instance=~".*kubedepend-backend.*"} but it was left out from here for the sake of readibility.
+
+\emph{Note:} \texttt{<range\_length>}
+
+\emph{Note:} multiplier 15
  
  \paragraph{Mean Up Time} asdfa
  
@@ -536,14 +542,15 @@ Throughout the project, several metrics are used that are not available as built
  	15
  	* 
  	sum_over_time(
- 		probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]
+ 		probe_success[<range_length>s]
  	)
  	/ 
  	floor(
  		(changes(
- 			probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])
- 			+ 1
- 			+ probe_success{instance=~".*kubedepend-backend.*"} offset <range_length>s
+ 			probe_success[<range_length>s]
+ 		)
+ 		+ 1
+ 		+ probe_success offset <range_length>s
  		)
  		/ 2
  	)
@@ -555,7 +562,24 @@ Throughout the project, several metrics are used that are not available as built
  \vspace{0.5cm}
  \begin{minipage}{\linewidth}
  	\begin{lstlisting}[caption={Mean Up Time defined in PromQL}, label={lst:promql-mut}]
- 	15 * (count_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]) - sum_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])) / (floor((changes(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s]) + 2 - probe_success{instance=~".*kubedepend-backend.*"} offset <range_length>s) / 2))
+ 	15 
+ 	* 
+ 	(count_over_time(
+ 		probe_success[<range_length>s])
+ 		- sum_over_time(
+ 			probe_success[<range_length>s]
+ 		)
+ 	)
+ 	/ 
+ 	floor(
+ 		(changes(
+ 			probe_success[<range_length>s]
+ 		)
+ 		+ 2
+ 		- probe_success offset <range_length>s
+ 		)
+ 		/ 2
+ 	)
  	\end{lstlisting}
  \end{minipage}
  
@@ -566,7 +590,7 @@ Throughout the project, several metrics are used that are not available as built
  \vspace{0.5cm}
  \begin{minipage}{\linewidth}
  	\begin{lstlisting}[caption={Availability defined in PromQL}, label={lst:promql-availability}]
- 	avg_over_time(probe_success{instance=~".*kubedepend-backend.*"}[<range_length>s])
+ 	avg_over_time(probe_success[<range_length>s])
  	\end{lstlisting}
  \end{minipage}
 
