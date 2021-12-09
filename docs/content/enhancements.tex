@@ -2,48 +2,80 @@
 \chapter{Enhancements} \label{enhancements}
 %----------------------------------------------------------------------------
 
+This chapter describes a few alternatives to improve the dependability of the sample application.
+
 %----------------------------------------------------------------------------
 \section{Design}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item possibilities to enhance dependability - in which layers of the deployment (infr, K8s definition, application, using 3rd party technologies)
-	\item CI/CD pipeline changes -  new steps
-\end{itemize}
+%\begin{itemize}
+%	\item possibilities to enhance dependability - in which layers of the deployment (infr, K8s definition, application, using 3rd party technologies)
+%	\item CI/CD pipeline changes -  new steps
+%\end{itemize}
+
+The robustness of the system can be enhanced in different layers. Some options are presented below:
+
+\paragraph{Kubernetes Infrastructure layer} The Kubernetes infrastructure layer is the fundamental of the whole system. Even a little configuration change can have a huge impact on the behavior of the applications. For instance, to tackle Pod lifecycle related failure anomalies, the Kubernetes Scheduler could be extended to introduce application specific fine tuning.
+
+\paragraph{Kubernetes Deployment layer} This layer affects how the application is deployed and run on the Kubernetes cluster. The dependability of the system can be improved with the right selection and configuration of Kubernetes objects. For example, all the component Pods could be replicated (not just the worker) or scaled with using a Horizontal Pod Autoscaler to eliminate single-point-of-failures from the system.
+
+\paragraph{Service layer} In the service layer third-party tools can be used to outsource or to make better some feature-sets of the application. A distributed database or messaging solution could improve the availability and robustness of the system.
+
+\paragraph{Application layer} To achieve application level progress, the source code and the design of the backend and worker components should be analyzed in order to discover weak spots. Distributed software development best-practices can help achieving a higher level of dependability in the system.
 
 %----------------------------------------------------------------------------
 \subsection{Kafka}
 %----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\subsubsection{Motivation, goals}
-%----------------------------------------------------------------------------
+% TODO first describe the failure scenario it solves?
 
-\begin{itemize}
-	\item robust, fault-tolerant messaging
-	\item widely used in the industry
-\end{itemize}
+Apache Kafka is an open-source distributed event streaming platform that can be used for high-performance data pipelines, streaming analytics and data integration \cite{Kafka}. It acts as a scalable, fault tolerant publish-subscribe messaging system ideal for performance critical applications.
+
+In this project, Kafka can be used to replace ActiveMQ to provide a robust, more fault-tolerant messaging solution for the application.
+
+Kafka topics can be used to facilitate the forwarding of task submissions and results in the system. The backend and worker components can both act as producers and consumers of the topics.
 
 %----------------------------------------------------------------------------
 \subsection{Heartbeats}
 %----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\subsubsection{Motivation, goals}
-%----------------------------------------------------------------------------
+% TODO first describe the failure scenario it solves?
 
-\begin{itemize}
-	\item job status reporting, retry in case of lost jobs
-\end{itemize}
+Heartbeats is a custom enhancement option in the application to provide reliable task execution.
+
+In case when a worker instance stops during the calculation of a task, the task is lost and its result remains empty as per the original implementation of the application. Heartbeats aims to solve this by introducing another communication channel between the backend and worker components to keep track of task executions.
 
 %----------------------------------------------------------------------------
 \section{Implementation}
 %----------------------------------------------------------------------------
 
+This section presents the implementation details of the two enhancement proposals mentioned above.
+
 %----------------------------------------------------------------------------
 \subsection{Kafka}
 %----------------------------------------------------------------------------
 
+%\begin{itemize}
+%	\item deploy kafka
+%	\item adapt backend and worker
+%	\item adapt needed worker ratio metric
+%	\item use kafka exporter
+%	\item integrate JMX into kafka
+%\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsection{Heartbeats}
 %----------------------------------------------------------------------------
+
+%\begin{itemize}
+%	\item adapt backend and worker
+%	\item scheduled tasks
+%\end{itemize}
+
+
+
+
+
+
+
+
