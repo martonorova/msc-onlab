@@ -281,14 +281,38 @@ The number of Measurements to execute during a Measurement Sequence can be set w
 \paragraph{Stable System State} Executing Measurement Sequences instead of a single Measurement introduces another complication to the test framework. It have to ensured that the effects of a previous Measurement does not have an impact on consequent Measurements. For this purpose, Kubedepend uses the notion of Stable System State which represents the state of the application under test, where all the components are up and running, there are no task executions in progress and there are not any messages waiting in the message queue. A Measurement can only be started if the application is in Stable System State.
 
 %----------------------------------------------------------------------------
-\subsubsection{Kubedepend Output} \label{test-impl-kubedepend-output}
+\subsubsection{Output} \label{test-impl-kubedepend-output}
 %----------------------------------------------------------------------------
 % what is the output data, what are the fields
+
+Kubedepend saves the results of the measurements in a CSV file, where each row describes a Measurement in a Measurement Sequence. The CSV file has the following fields:
+
+\begin{itemize}
+	\item \texttt{id} - A unique identifier attached to the Measurement Sequence.
+	\item \texttt{measurement\_seq\_start\_time} - The time when the Measurement Sequence was started.
+	\item \texttt{availability} - The availability result of the application in a given Measurement.
+	\item \texttt{mut} - The mean up time result of the application in a given Measurement.
+	\item \texttt{mdt} - The mean down time result of the application in a given Measurement.
+	\item \texttt{mtbf} - The mean time between failures result of the application in a given Measurement.
+	\item \texttt{measurement\_start\_time} - The time when the given Measurement was started inside the Measurement Sequence.
+	\item \texttt{measurement\_end\_time} - The time when the given Measurement ended inside the Measurement Sequence.
+	\item \texttt{submitted\_jobs} - The number of jobs submitted by the client during a given Measurement.
+	\item \texttt{finished\_jobs} - The number of successfully finished jobs during a given Measurement.
+	\item \texttt{fault\_profile} - The fault profile used for fault injection during the Measurement Sequence.
+	\item \texttt{cluster\_type} - The type of the Kubernetes cluster the application runs on. Can be set with the \texttt{cluster-type} Kubedend command line parameter. Possible values at the moment are \texttt{eks} or \texttt{minikube}.
+	\item \texttt{measurement\_count} - The number of Measurements executed in the given Measurement Sequence.
+	\item \texttt{load\_duration} - The duration of the load generation in seconds.
+	\item \texttt{locust\_user\_count} - The number of simulated users (further details in Section \ref{test-impl-load-generation}).
+	\item \texttt{locust\_spawn\_rate} - The rate of how fast new simulated users are started (further details in Section \ref{test-impl-load-generation}).
+	\item \texttt{prev\_stack\_git\_commit\_short} - The git commit hash of the repository.
+	\item \texttt{comment} - Arbitrary comment attached to the Measurement Sequence. Can be set with the \texttt{comment} Kubedepend command line parameter.
+	
+\end{itemize}
 
 To control Kubedepend whether to save the results to a file can be configured with the \texttt{nosave} command line flag.
 
 %----------------------------------------------------------------------------
-\subsection{Load generation}
+\subsection{Load generation} \label{test-impl-load-generation}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -438,7 +462,7 @@ As an example, the chaos experiment in Pod Kill failure profile is defined the f
 	{{- end }}\end{lstlisting}
 \end{minipage}
 
-The pod kill chaos is defined under the \texttt{podChaos} key, the chaos experiment is wrapped into a \texttt{Schedule} object to facilitate periodic chaos creation and deletion as described in Section \ref{test-impl-workflow}. The \texttt{mode: fixed-percent} configuration means that when the chaos experiment is active, it will randomly select a fixed percentage of eligible Pods (defined by the \texttt{selector}) to delete. The example uses helm template variables to set the value of the actual percentage based on which strength level is selected in the values file.
+The pod kill chaos is defined under the \texttt{podChaos} key, the chaos experiment is wrapped into a \texttt{Schedule} object to facilitate periodic chaos creation and deletion as described in Section \ref{test-impl-measurement-seq}. The \texttt{mode: fixed-percent} configuration means that when the chaos experiment is active, it will randomly select a fixed percentage of eligible Pods (defined by the \texttt{selector}) to delete. The example uses helm template variables to set the value of the actual percentage based on which strength level is selected in the values file.
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
