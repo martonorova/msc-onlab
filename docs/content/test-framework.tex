@@ -675,12 +675,65 @@ Throughout the project, several metrics are used that are not available as built
 Kubedepend does not expose any command line options to configure the monitoring as this subsystem is not part of it.
 
 %----------------------------------------------------------------------------
-\subsection{CI/CD Pipeline} \label{cicd}
+\subsection{Build Pipeline} \label{cicd}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
-%	\item CF template
+%	\item  framework workflow can be viewed as a build pipeline - use industry standard tools - Jenkins!
+%	\item facilitates greater level of automation
+%		\item CF template
 %	\item Steps and what do they do
 %	\item image about jenkins pipeline steps
 %	\item parameters - passed to kubedepend
 %\end{itemize}
+
+One of the goals of the framework is to provide an environment that can be used to constantly analyze the dependability characteristics of a Kubernetes based application and to make these easily traceable through the evolution of different software versions. This functionality is very similar to that of the Continuous Integration and Continuous Deployment pipeline tools that are widely used in the industry. This notion suggests that the usage of a CI/CD pipeline tool can provide useful contributions for the framework.
+
+In this work, the Jenkins open source automation server is used, which provides a lot of plugins to support building, deploying and automating any project \cite{Jenkins}. With Jenkins, the build pipeline consists of multiple stages, each one executing a different set of steps.
+ 
+Kubedepend is not replaced with Jenkins, but the pipeline uses Kubedepend in its steps. The new features that Jenkins adds to the framework are creating the Kubernetes infrastructure, building and deploying the application to test and starting the third party tools to facilitate the fault injection and the measurement, all in an automated way.
+
+%----------------------------------------------------------------------------
+\subsubsection{Build Stages}
+%----------------------------------------------------------------------------
+
+This section describes the build stages of the Jenkins pipeline that runs the test framework. The pipeline is defined in a declarative way in a Jenkinsfile located in the repository of the thesis \cite{ThesisRepo} at \texttt{jenkins/Jenkinsfile}.
+
+\emph{Note:} The actual stage names defined in the Jenkinsfile are between the parentheses.
+
+\paragraph{Prepare build} This stage configures the credentials used for programmatically accessing AWS and to prepare the authentication settings to connect to DockerHub.
+
+\paragraph{Check Infrastructure (\texttt{INFR - check})} In this stage, Jenkins checks if the Kubernetes cluster is ready in AWS EKS. If it does not exist, the next stage creates it.
+
+\paragraph{Create Infrastructure (\texttt{INFR - create)}} This stage created the AWS EKS cluster with the help of a CloudFormation template that defines the infrastructure of the system. The template can be found at \texttt{utils/infrastructure.yaml} in the thesis repository \cite{ThesisRepo}.
+
+\paragraph{Configure kubectl (\texttt{INFR - config kubectl})} In order to be able communicate with the Kubernetes cluster, the \texttt{kubectl} client has to be configured. This is carried out by this stage.
+
+\paragraph{Update Helm Repositories (\texttt{INFR - update helm repos})} Several tools used by the framework (Prometheus, Prometheus Adapter, Prometheus Blackbox Exporter, Grafana, Chaos Mesh) are installed via third-party helm charts which are located in external helm repositories. This stage configures the \texttt{helm} client in Jenkins so that it is able to use these helm charts.
+
+\paragraph{Create Namespaces (\texttt{INFR - create namespaces})} The subsystems run in different \texttt{Namespace}s. For example, the monitoring components run in the \texttt{monitoring} namespace while the application runs in the \texttt{kubedepend} namespace. The stage creates these namespaces.
+
+\paragraph{Deploy Tools (\texttt{INFR - deploy tools})} All the third-party tools (\eg Prometheus) are deployed in this stage.
+
+\paragraph{Build Application (\texttt{APP - build})} Each time a modification is made to the sample application (practically to the backend or the worker), a new version should be built and published to enforce traceability and reproducibility. This stage compiles, packages and builds a Docker image of the backend and worker components before publishing them to a Docker repository.
+
+\paragraph{Deploy Application (\texttt{APP - deploy})} This stage uses the previously built Docker images to install the application with the helm chart.
+
+\paragraph{Setup Measurements(\texttt{MEAS - setup})} This stage sets up the dependencies needed for the Kubedepend Python program.
+
+\paragraph{Run Tests(\texttt{MEAS - running tests})} In this stage, Kubedepend is called to execute the measurements with the configuration passed as Jenkins pipeline parameters.
+
+\paragraph{Save Test Results(\texttt{MEAS - Save test results})} This stage archives the results of the Kubedepend measurements for further analysis.
+
+\paragraph{Clean Up Infrastructure(\texttt{CLEAN - INFR})} After the measurements are done, this stage cleans up the infrastructure by deleting the Kubernetes cluster.
+
+\paragraph{Clean Workspace(\texttt{CLEAN - WS})} As the last stage, the Jenkins workspace is deleted to remove any remaining files that could have side effects on the following pipeline executions.
+
+%----------------------------------------------------------------------------
+\subsubsection{Pipeline Parameters}
+%----------------------------------------------------------------------------
+
+It is possible to define pipeline parameters in Jenkins to customize the behavior of the stages from the Jenkins user interface. In the Jenkinsfile there are several parameters defined, for example to control if the infrastructure should be deleted or if it is needed to run the measurements (\eg when only testing the application on its own).
+
+All the command line configuration options of Kubedepend are exposed in the Jenkinsfile as well for easy usage.
+

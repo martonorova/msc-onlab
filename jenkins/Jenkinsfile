@@ -338,7 +338,7 @@ pipeline {
             }
         }
 
-        stage('MEAS - config') {
+        stage('MEAS - setup') {
             when { expression { RunMeasurement == 'true' } }
             steps {
                 echo "Install dependencies for kubedepend"
@@ -350,7 +350,7 @@ pipeline {
             }
         }
 
-        stage('MEAS - Running tests') {
+        stage('MEAS - Run tests') {
             when { expression { RunMeasurement == 'true' } }
             steps {
                 dir('kubedepend/kubedepend') {
