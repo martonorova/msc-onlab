@@ -27,6 +27,7 @@ The robustness of the system can be enhanced in different layers. Some options a
 \subsection{Kafka}
 %----------------------------------------------------------------------------
 
+% TODO more details about Kafka - Producer, Consumer, Topic?
 % TODO first describe the failure scenario it solves?
 
 Apache Kafka is an open-source distributed event streaming platform that can be used for high-performance data pipelines, streaming analytics and data integration \cite{Kafka}. It acts as a scalable, fault tolerant publish-subscribe messaging system ideal for performance critical applications.
@@ -60,8 +61,20 @@ This section presents the implementation details of the two enhancement proposal
 %	\item adapt backend and worker
 %	\item adapt needed worker ratio metric
 %	\item use kafka exporter
-%	\item integrate JMX into kafka
+%	\item integrate JMX into kafka?
 %\end{itemize}
+
+There are official or community managed Kafka charts available, however, to be able to have full control over the tool, Kafka is deployed to the system with the usage of a custom helm chart. The default recommended way to run a Kafka cluster is to run 3 Kafka brokers along with a ZooKeeper cluster. ZooKeeper \cite{ZooKeeper} is an open source, centralized service for maintaining configuration information, naming, providing distributed synchronization. It supports the Kafka brokers in order to be able to discover each other.
+
+The Horizontal Pod Autoscaler that manages the replica count of the worker components constantly observers a metric which the scaling is based upon (see Section \ref{impl-hpa}). This metric includes the number of messages in the message queue. The Docker image used for running ActiveMQ supported exposing Prometheus compatible metrics, yet that is not the case with Kafka. In order to get metrics from the Kafka cluster a custom exporter should be used \cite{KafkaExporter}. That leads to the modification of the custom metric used for autoscaling, instead of the usage of the ActiveMQ queue size, the following metric is used:
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Metric for the number of unconsumed messages in Kafka}, label={lst:kafka-consumerlag-metric}]
+	kafka_consumergroup_lag_sum{consumergroup="worker",topic="jobWorkerTopic"}\end{lstlisting}
+\end{minipage}
+
+To adapt the backend and worker to use Kafka instead of ActiveMQ as a messaging system, similar modifications were needed in both components using the \texttt{org.springframework.kafka:spring-kafka} library based on a popular guide . The related source code van be found under the \texttt{messaging/kafka} package in the components in the thesis repository \cite{ThesisRepo}.
 
 %----------------------------------------------------------------------------
 \subsection{Heartbeats}
@@ -72,9 +85,24 @@ This section presents the implementation details of the two enhancement proposal
 %	\item scheduled tasks
 %\end{itemize}
 
+The basic idea of Heartbeats is to constantly track which tasks are executed in worker components.
+
+When a worker starts the calculations for a task, it continuously sends heartbeat messages to the backend every few seconds providing the identifier of the task. The backend component maintains a map about the state of each task storing the timestamp of the last received heartbeat message for each task. It periodically checks the heartbeat timestamps of unfinished tasks and resubmits those with timestamps older than a minute. To prevent the map getting too big, the backend removes the information about successfully finished jobs from the data structure.
+
+To achieve periodic operations both in the backend and the worker components, the Spring annotation \texttt{@Scheduled} is used.
 
 
+%----------------------------------------------------------------------------
+\subsection{Build Pipeline Modifications} \label{cicd-modifications}
+%----------------------------------------------------------------------------
 
+The build pipeline presented in Section \ref{cicd} introduces new stages and modifies existing ones to support the optional enabling of enhancements.
+
+\paragraph{Set up Enhancements (\texttt{ENHNC - set up})} This stage configures and installs the helm chart for Kafka onto the Kubernetes cluster. The execution of Kafka deployment is controlled by the pipeline parameter \texttt{UseKafka}.
+
+\paragraph{Deploy Application (\texttt{APP - deploy})} The stage is extended with passing parameters to the application helm chart that control which enhancement options to use. 
+
+\paragraph{Clean up Enhancements (\texttt{CLEAN - ENHNC})} In this stage, all the enhancements related tools and settings can be cleaned up from the cluster and the Jenkins workspace.
 
 
 
