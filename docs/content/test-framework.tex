@@ -203,6 +203,8 @@ Operating the test framework in the same environment as the tested application s
 
 The conclusion is to deploy the test framework and the application to evaluate separately. As it is practical for some of the tools used in the framework to run in the same Kubernetes cluster as the application, separation is implemented with exploiting the namespacing capabilities of Kubernetes.
 
+TODO physical separation can be achieved with NodeSelectors and Affinity / Antiaffinity.
+
 %----------------------------------------------------------------------------
 \subsection{Kubedepend}
 %----------------------------------------------------------------------------
@@ -278,7 +280,7 @@ The number of Measurements to execute during a Measurement Sequence can be set w
 
 \paragraph{Periodic Fault Injection} During a single Measurement Kubedepend injects failure anomalies periodically. This supports testing the robustness of the system under test and that how well the application can recover from failures.
 
-\paragraph{Stable System State} Executing Measurement Sequences instead of a single Measurement introduces another complication to the test framework. It have to ensured that the effects of a previous Measurement does not have an impact on consequent Measurements. For this purpose, Kubedepend uses the notion of Stable System State which represents the state of the application under test, where all the components are up and running, there are no task executions in progress and there are not any messages waiting in the message queue. A Measurement can only be started if the application is in Stable System State.
+\paragraph{Stable System State} Executing Measurement Sequences instead of a single Measurement introduces another complication to the test framework. It has to ensured that the effects of a previous Measurement does not have an impact on consequent Measurements. For this purpose, Kubedepend uses the notion of Stable System State which represents the state of the application under test, where all the components are up and running, there are no task executions in progress and there are not any messages waiting in the message queue. A Measurement can only be started if the application is in Stable System State.
 
 %----------------------------------------------------------------------------
 \subsubsection{Output} \label{test-impl-kubedepend-output}
@@ -344,11 +346,11 @@ In order to generate load with Locust, a user model is required, that represents
 		@task
 		def submit_job_task(self):
 			headers = {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json'
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
 			}
 			data = {
-			'input': 48
+				'input': 48
 			}
 			# make request
 			self.client.post('/api/v1/jobs', json=data, headers=headers)\end{lstlisting}
@@ -719,15 +721,15 @@ This section describes the build stages of the Jenkins pipeline that runs the te
 
 \paragraph{Deploy Application (\texttt{APP - deploy})} This stage uses the previously built Docker images to install the application with the helm chart.
 
-\paragraph{Setup Measurements(\texttt{MEAS - setup})} This stage sets up the dependencies needed for the Kubedepend Python program.
+\paragraph{Setup Measurements (\texttt{MEAS - setup})} This stage sets up the dependencies needed for the Kubedepend Python program.
 
-\paragraph{Run Tests(\texttt{MEAS - running tests})} In this stage, Kubedepend is called to execute the measurements with the configuration passed as Jenkins pipeline parameters.
+\paragraph{Run Tests (\texttt{MEAS - running tests})} In this stage, Kubedepend is called to execute the measurements with the configuration passed as Jenkins pipeline parameters.
 
-\paragraph{Save Test Results(\texttt{MEAS - Save test results})} This stage archives the results of the Kubedepend measurements for further analysis.
+\paragraph{Save Test Results (\texttt{MEAS - Save test results})} This stage archives the results of the Kubedepend measurements for further analysis.
 
-\paragraph{Clean Up Infrastructure(\texttt{CLEAN - INFR})} After the measurements are done, this stage cleans up the infrastructure by deleting the Kubernetes cluster.
+\paragraph{Clean Up Infrastructure (\texttt{CLEAN - INFR})} After the measurements are done, this stage cleans up the infrastructure by deleting the Kubernetes cluster.
 
-\paragraph{Clean Workspace(\texttt{CLEAN - WS})} As the last stage, the Jenkins workspace is deleted to remove any remaining files that could have side effects on the following pipeline executions.
+\paragraph{Clean Workspace (\texttt{CLEAN - WS})} As the last stage, the Jenkins workspace is deleted to remove any remaining files that could have side effects on the following pipeline executions.
 
 %----------------------------------------------------------------------------
 \subsubsection{Pipeline Parameters}
