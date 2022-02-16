@@ -709,6 +709,10 @@ This section describes the build stages of the Jenkins pipeline that runs the te
 
 \paragraph{Create Infrastructure (\texttt{INFR - create)}} This stage created the AWS EKS cluster with the help of a CloudFormation template that defines the infrastructure of the system. The template can be found at \texttt{utils/infrastructure.yaml} in the thesis repository \cite{ThesisRepo}.
 
+
+TODO briefly describe the CF template somewhere
+
+
 \paragraph{Configure kubectl (\texttt{INFR - config kubectl})} In order to be able communicate with the Kubernetes cluster, the \texttt{kubectl} client has to be configured. This is carried out by this stage.
 
 \paragraph{Update Helm Repositories (\texttt{INFR - update helm repos})} Several tools used by the framework (Prometheus, Prometheus Adapter, Prometheus Blackbox Exporter, Grafana, Chaos Mesh) are installed via third-party helm charts which are located in external helm repositories. This stage configures the \texttt{helm} client in Jenkins so that it is able to use these helm charts.
