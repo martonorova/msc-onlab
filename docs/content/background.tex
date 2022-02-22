@@ -137,85 +137,98 @@ before this, monolithic applications were popular
 \section{Dependability}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item dependability is a complex extra-functional characteristic of a system
-	\item \cite{FundamentalConceptsOfDependability} - attributes
-	\item \cite{DependabilityBMEMIT} - attributes and metrics
-\end{itemize}
-
+Dependability of a computing system is the ability to provide service in which reliance can be justifiably placed \cite{DependabilityBMEMIT}. Meaning that based on conducting several analysis, evaluations and measurements it can be proofed that service satisfies the needs.
 
 %----------------------------------------------------------------------------
 \subsection{Attributes of Dependability}
-
 %----------------------------------------------------------------------------
 
+Dependability is a complex extra-functional characteristic of a system that consists of multiple attributes (based on the lectures in Systems Engineering \cite{DependabilityBMEMIT} and the Fundamental Concepts of Dependability \cite{FundamentalConceptsOfDependability}):
 
-%----------------------------------------------------------------------------
-\subsubsection{Availability}
-%----------------------------------------------------------------------------
+\paragraph{Availability} - Availability describes the probability of correct service in system. It also takes into account the time needed for repairs and maintenance tasks.
 
-%----------------------------------------------------------------------------
-\subsubsection{Reliability}
-%----------------------------------------------------------------------------
+\paragraph{Reliability} - Reliability describes the probability of continuous correct service until the first failure. In case of mission critical systems, high reliability is an absolute requirement.
 
-%----------------------------------------------------------------------------
-\subsubsection{Safety}
-%----------------------------------------------------------------------------
+\paragraph{Safety} - A system is considered safe if it is free from unacceptable risk of harm. Harm can be defined in many different ways according to the domain in which the system operates.
 
-%----------------------------------------------------------------------------
-\subsubsection{Integrity}
-%----------------------------------------------------------------------------
+\paragraph{Integrity} - Integrity assesses the absence of erroneous changes or alterations in the system. Integrity is a prerequisite for availability, reliability and safety as one cannot guarantee these attributes when there are misconfigurations in the system.
 
-%----------------------------------------------------------------------------
-\subsubsection{Maintainability}
-%----------------------------------------------------------------------------
+\paragraph{Maintainability} - Maintainability describes the possibility that the system is able to undergo repairs and improvements.
 
 
 %----------------------------------------------------------------------------
-\subsection{Dependability Metrics - Mean values} \label{background-dep-metrics-mean-values}
+\subsection{Dependability Metrics}
 %----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\subsubsection{Mean Time to First Failure}
-%----------------------------------------------------------------------------
+The section above describing dependability presents well its compound nature, however, solely these definitions cannot be used to objectively assess the dependability of a given system in a deterministic way. Numerical representations of dependability -- so called dependability metrics -- are necessary in order to be able to conduct dependability analysis and measurements.
 
-%----------------------------------------------------------------------------
-\subsubsection{Mean Up Time}
-%----------------------------------------------------------------------------
+For sake of simplicity, one can use the notion that any given system has fundamentally two states, an Up and a Down state partitions. The Up partition stands for all the system states, where the system can provide correct service whereas the Down partitions denotes the states, where it cannot \cite{DependabilityBMEMIT}. It is important to mention, that providing correct service does not necessarily mean that the system is error free. Especially in case of highly distributed, dynamic environments, it is not feasible to guarantee the complete absence of errors for a long time. This leads to the fact that the essential question is not whether the system is error free, rather if it is able to function correctly and reliably.
 
-or Mean Time To Failure
-
-%----------------------------------------------------------------------------
-\subsubsection{Mean Down Time}
-%----------------------------------------------------------------------------
-
-or Mean Time to Repair
-
-%----------------------------------------------------------------------------
-\subsubsection{Mean Time Between Failures}
-%----------------------------------------------------------------------------
+The state of a system over time with respect to the before mentioned two state partitions can be visualized as shown is figure \ref{fig:system_state_partitions}. The function \(s(t)\) shows the system partition at any given time. During the intervals labeled with \(u_i\) the system was in the Up partition while during the intervals labeled with \(d_i\) the system was in the Down partition.
 
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/system_state_partitions.png}
+	\caption{ Partitioning the states of the system \cite{DependabilityBMEMIT} }
+	\label{fig:system_state_partitions}
+\end{figure}
 
 %----------------------------------------------------------------------------
-\subsection{Dependability Metrics - Probability functions} \label{background-dep-metrics-prob-funcs}
+\subsubsection{Mean Values} \label{background-dep-metrics-mean-values}
 %----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\subsubsection{Availability}
-%----------------------------------------------------------------------------
+\paragraph{Mean Time to First Failure} - TODO
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/MTFF.png}
+	\caption{ Mean Time to First Failure \cite{DependabilityBMEMIT} }
+	\label{fig:mtff}
+\end{figure}
+
+\paragraph{Mean Up Time} - TODO
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/MUT.png}
+	\caption{ Mean Up Time \cite{DependabilityBMEMIT} }
+	\label{fig:mut}
+\end{figure}
+
+\paragraph{Mean Down Time} - TODO
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/MDT.png}
+	\caption{ Mean Down Time \cite{DependabilityBMEMIT} }
+	\label{fig:mdt}
+\end{figure}
+
+\paragraph{Mean Time Between Failures} - TODO
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=100mm, keepaspectratio]{figures/MTBF.png}
+	\caption{ Mean Time Between Failures \cite{DependabilityBMEMIT} }
+	\label{fig:mtbf}
+\end{figure}
 
 %----------------------------------------------------------------------------
-\subsubsection{Asymptotic availability}
+\subsubsection{Probability Functions} \label{background-dep-metrics-prob-funcs}
 %----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\subsubsection{Reliability}
-%----------------------------------------------------------------------------
+\paragraph{Availability} - TODO
 
+\[
+a(t) = P\{ s(t) \in U \}
+\]
 
+\paragraph{Reliability} - TODO
 
-
+\[
+r(t) = P\{ s(t') \in U, \forall t' < t \}
+\]
 
 
 %----------------------------------------------------------------------------
@@ -322,6 +335,10 @@ for Chaos Mesh experiments
 %----------------------------------------------------------------------------
 \section{Chaos Engineering}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item 
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Chaos Mesh} \label{background-chaos-mesh}
