@@ -140,12 +140,12 @@ before this, monolithic applications were popular
 Dependability of a computing system is the ability to provide service in which reliance can be justifiably placed \cite{DependabilityBMEMIT}. Meaning that based on conducting several analysis, evaluations and measurements it can be proofed that service satisfies the needs.
 
 %----------------------------------------------------------------------------
-\subsection{Attributes of Dependability}
+\subsection{Attributes of Dependability} \label{dependability-attributes}
 %----------------------------------------------------------------------------
 
 Dependability is a complex extra-functional characteristic of a system that consists of multiple attributes (based on the lectures in Systems Engineering \cite{DependabilityBMEMIT} and the Fundamental Concepts of Dependability \cite{FundamentalConceptsOfDependability}):
 
-\paragraph{Availability} - Availability describes the probability of correct service in system. It also takes into account the time needed for repairs and maintenance tasks.
+\paragraph{Availability} - Availability describes the probability of correct service in a system. It also takes into account the time needed for repairs and maintenance tasks.
 
 \paragraph{Reliability} - Reliability describes the probability of continuous correct service until the first failure. In case of mission critical systems, high reliability is an absolute requirement.
 
@@ -164,7 +164,7 @@ The section above describing dependability presents well its compound nature, ho
 
 For sake of simplicity, one can use the notion that any given system has fundamentally two states, an Up and a Down state partitions. The Up partition stands for all the system states, where the system can provide correct service whereas the Down partitions denotes the states, where it cannot \cite{DependabilityBMEMIT}. It is important to mention, that providing correct service does not necessarily mean that the system is error free. Especially in case of highly distributed, dynamic environments, it is not feasible to guarantee the complete absence of errors for a long time. This leads to the fact that the essential question is not whether the system is error free, rather if it is able to function correctly and reliably.
 
-The state of a system over time with respect to the before mentioned two state partitions can be visualized as shown is figure \ref{fig:system_state_partitions}. The function \(s(t)\) shows the system partition at any given time. During the intervals labeled with \(u_i\) the system was in the Up partition while during the intervals labeled with \(d_i\) the system was in the Down partition.
+The state of a system over time with respect to the before mentioned two state partitions can be visualized as shown in Figure \ref{fig:system_state_partitions}. The function \(s(t)\) shows the system partition at any given time. During the intervals labeled with \(u_i\) the system was in the Up partition while during the intervals labeled with \(d_i\) the system was in the Down partition.
 
 
 \begin{figure}[h]
@@ -178,7 +178,7 @@ The state of a system over time with respect to the before mentioned two state p
 \subsubsection{Mean Values} \label{background-dep-metrics-mean-values}
 %----------------------------------------------------------------------------
 
-\paragraph{Mean Time to First Failure} - TODO
+\paragraph{Mean Time to First Failure} - Mean Time to First Failure -- or MTFF -- denotes the expected time before a given system first encounters a failure that prevents providing correct service. MTFF is calculated with the following formula: \(E\{u_1\}\) and can be visualized using the previously mentioned state partitions as seen in Figure \ref{fig:mtff}.
 
 \begin{figure}[h]
 	\centering
@@ -187,7 +187,7 @@ The state of a system over time with respect to the before mentioned two state p
 	\label{fig:mtff}
 \end{figure}
 
-\paragraph{Mean Up Time} - TODO
+\paragraph{Mean Up Time} - Mean Up Time -- or MUT -- is the average duration of time periods during which the system is able to provide correct service. MUT is calculated with the following formula: \(E\{u_i\}\) and can be visualized using the previously mentioned state partitions as seen in Figure \ref{fig:mut}.
 
 \begin{figure}[h]
 	\centering
@@ -196,7 +196,7 @@ The state of a system over time with respect to the before mentioned two state p
 	\label{fig:mut}
 \end{figure}
 
-\paragraph{Mean Down Time} - TODO
+\paragraph{Mean Down Time} - Mean Down Time -- or MDT -- is the average duration of time periods during which the system cannot provide correct service due to failures or maintenance. MDT is calculated with the following formula: \(E\{d_i\}\) and can be visualized using the previously mentioned state partitions as seen in Figure \ref{fig:mdt}.
 
 \begin{figure}[h]
 	\centering
@@ -205,7 +205,7 @@ The state of a system over time with respect to the before mentioned two state p
 	\label{fig:mdt}
 \end{figure}
 
-\paragraph{Mean Time Between Failures} - TODO
+\paragraph{Mean Time Between Failures} - Mean Time Between Failures -- or MTBF -- denotes the average time between repairable failures of system \cite{KPIMetrics}. MTBF is calculated with the following formula: \(E\{u_i + d_i\} = E\{u_i\} + E\{d_i\}\) (the sum of MUT and MDT) and can be visualized using the previously mentioned state partitions as seen in Figure \ref{fig:mdt}.
 
 \begin{figure}[h]
 	\centering
@@ -218,13 +218,13 @@ The state of a system over time with respect to the before mentioned two state p
 \subsubsection{Probability Functions} \label{background-dep-metrics-prob-funcs}
 %----------------------------------------------------------------------------
 
-\paragraph{Availability} - TODO
+\paragraph{Availability} - As mentioned earlier in Section \ref{dependability-attributes}, availability describes the probability of correct service in a system. Using the notion of Up and Down system partitions, availability can be calculated with the following formula:
 
 \[
 a(t) = P\{ s(t) \in U \}
 \]
 
-\paragraph{Reliability} - TODO
+\paragraph{Reliability} - As mentioned earlier in Section \ref{dependability-attributes}, reliability describes the probability of continuous correct service until the first failure. Using the notion of Up and Down system partitions, availability can be calculated with the following formula:
 
 \[
 r(t) = P\{ s(t') \in U, \forall t' < t \}
@@ -235,12 +235,26 @@ r(t) = P\{ s(t') \in U, \forall t' < t \}
 \section{Kubernetes}
 %----------------------------------------------------------------------------
 
+TODO justify containers?
+
+Kubernetes is an open-source platform for managing containerized workloads and services, that facilitates both declarative configuration and automation \cite{KubernetesOverview}. Kubernetes orchestration allows IT professionals to build application services that span multiple containers, schedule those containers across a cluster, scale those containers, and manage the health of those containers over time \cite{KubernetesOverviewRH}.
+
+Kubernetes brings a vast amount of useful features, but a thorough discussion concerning these is out of the scope of this work. However, a brief list is provided below for a clearer context \cite{KubernetesOverview}.
+
+\paragraph{Service discovery and load balancing} - Kubernetes can expose a container using the DNS name or using their own IP address. If traffic to a container is high, Kubernetes is able to load balance and distribute the network traffic so that the deployment is stable.
+
+\paragraph{Automated rollouts and rollbacks} - Cluster administrators can describe the desired state for the deployed containers using Kubernetes, and it can change the actual state to the desired state at a controlled rate. For example, Kubernetes can automatically create new containers for a deployment, remove existing containers and adopt all their resources to the new container.
+
+\paragraph{Automatic bin packing} - Kubernetes can automatically schedule the containers of deployments to the nodes in the cluster and aims to achieve the best resource utilization over the whole cluster.
+
+\paragraph{Self-healing} Kubernetes can automatically restart containers that fail, replace containers, kill containers that do not respond to user-defined health check, and does not advertise them to clients until they are ready to serve.
+
 %----------------------------------------------------------------------------
-\subsection{Overview}
+\subsection{Cluster Architecture}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
-\subsection{Basic components}
+\subsection{Common Kubernetes Objects}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
