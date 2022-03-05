@@ -211,7 +211,7 @@ def query_prometheus(query, trycount=0):
             # TODO, no data can occur also, when there is no downtime of the APP
             logging.info(res.json())
             raise ValueError('No data from Prometheus for query: ' + str(query))
-        # wait 1 sec with next attempt
+        # wait 5 sec + trycount with next attempt
         time.sleep(5 + trycount)
         return query_prometheus(query, trycount=trycount + 1)
 
