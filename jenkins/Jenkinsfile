@@ -270,7 +270,6 @@ pipeline {
                     |kubectl -n monitoring scale deployment grafana --replicas=0
                     |kubectl -n monitoring scale deployment grafana --replicas=1
                     |helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing -f helm/chaos-mesh/values.yaml --version v2.0.2
-                    |helm upgrade --install kafka-exporter ./helm/kafka-exporter -n monitoring
                     """.stripMargin('|')
                 }
             }
@@ -295,6 +294,8 @@ pipeline {
                         echo "Deploy Kafka"
                         sh "helm upgrade --install kafka ./helm/kafka -n kafka \
                             --set kafka.image.repository=${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+
+                        sh "helm upgrade --install kafka-exporter ./helm/kafka-exporter -n monitoring"
                     }
                 }
             }
