@@ -274,7 +274,7 @@ def get_dependability_metrics(range_length):
     metrics.mut = query_prometheus(c.backend_mut_query(range_length))
     metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
     if math.isnan(metrics.mdt): metrics.mdt = 0.0
-    metrics.mtbf = query_prometheus(c.backend_mtbf_query(range_length))
+    metrics.mtbf = metrics.mut + metrics.mdt
 
     return metrics
 
