@@ -16,6 +16,7 @@ from datetime import datetime
 import tarfile
 import pathlib
 import subprocess
+import math
 
 import constants as c
 from model import MeasurementResult
@@ -272,6 +273,7 @@ def get_dependability_metrics(range_length):
         c.backend_availability_query(range_length))
     metrics.mut = query_prometheus(c.backend_mut_query(range_length))
     metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
+    if math.isnan(metrics.mdt): metrics.mdt = 0.0
     metrics.mtbf = query_prometheus(c.backend_mtbf_query(range_length))
 
     return metrics
