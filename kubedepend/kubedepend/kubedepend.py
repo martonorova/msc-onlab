@@ -254,7 +254,7 @@ def is_stable_state():
 def wait_for_stable_state():
     while not is_stable_state():
         logging.info('State NOT OK, waiting...')
-        time.sleep(5)
+        time.sleep(30)
     logging.info('State OK')
 
 
