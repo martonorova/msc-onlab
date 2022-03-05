@@ -24,7 +24,6 @@ class MeasurementResult:
         # backend metrics
         self.backend_metrics = None
         # Start time of this single measurement
-        # self.start_time = time.time()
         self.start_time = datetime.now().strftime("%m-%d-%Y_%H-%M-%S.%f")
         # End time of this single measurement
         self.end_time = None
