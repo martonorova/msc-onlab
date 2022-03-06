@@ -271,9 +271,13 @@ def get_dependability_metrics(range_length):
 
     metrics.availability = query_prometheus(
         c.backend_availability_query(range_length))
-    metrics.mut = query_prometheus(c.backend_mut_query(range_length))
+    # get <metric> / range_length so it is more informative
+    metrics.mut = query_prometheus(c.backend_mut_query(range_length)) / range_length
     metrics.mdt = query_prometheus(c.backend_mdt_query(range_length))
-    if math.isnan(metrics.mdt): metrics.mdt = 0.0
+    if math.isnan(metrics.mdt):
+        metrics.mdt = 0.0
+    else:
+        metrics.mdt /= range_length
     metrics.mtbf = metrics.mut + metrics.mdt
 
     return metrics
