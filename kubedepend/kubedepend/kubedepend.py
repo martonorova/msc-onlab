@@ -126,6 +126,9 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
         max_count=max_measurement_count)
 
     while (not finished):
+
+        logging.info(f'Start measurement #{len(sequence_result.metrics) + 1}')
+
         # run a measurement
         measurement_result = run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration)
 
@@ -169,8 +172,6 @@ def is_end_criteria_met(sequence_result, target_std, min_count, max_count):
 
 
 def run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration):
-
-    logging.info(f'Start measurement #{i + 1}')
 
     logging.info('Waiting for stable system state...')
     wait_for_stable_state()
