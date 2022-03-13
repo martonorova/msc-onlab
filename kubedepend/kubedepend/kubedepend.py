@@ -160,7 +160,7 @@ def is_end_criteria_met(sequence_result, target_std, min_count, max_count):
         logging.info(f'meas_count={meas_count} too small or too large')
         return False
 
-    series = pd.Series([m.backend_metrics.availabitliy for m in sequence_result.measurements])
+    series = pd.Series([m.backend_metrics.availability for m in sequence_result.measurements])
 
     availability_std = series.std(ddof=0)
 
