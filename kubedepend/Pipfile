@@ -10,6 +10,7 @@ requests = "*"
 locust = "*"
 click = "*"
 mysql-connector-python = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.9"

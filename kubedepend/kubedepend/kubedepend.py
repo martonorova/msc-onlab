@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 from locust import HttpUser, task, constant_pacing
 from locust.env import Environment
 from locust.stats import stats_history, stats_printer
@@ -62,7 +63,9 @@ HELM_COMMAND_FIX_PART = [
 @click.command()
 @click.option('--nosave', is_flag=True)
 @click.option('--fault-profile', type=click.Choice(list(c.FAULT_PROFILES.keys())), default='none', help='Name of the fault profile')
-@click.option('--measurement-count', type=click.INT, default=10, help='Number of measurements to make during the measurement sequence')
+@click.option('--min-measurement-count', type=click.INT, default=5, help='Minimum number of measurements to make during the measurement sequence')
+@click.option('--max-measurement-count', type=click.INT, default=25, help='Maximum number of measurements to make during the measurement sequence')
+@click.option('--target-std', type=click.FLOAT, default=0.05, help='Target standard deviation of availabitliy in a measurement sequence')
 @click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
 @click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
 @click.option('--locust-user-count', type=click.INT, default=1, help='Total number of Locust users to start')
@@ -71,7 +74,9 @@ HELM_COMMAND_FIX_PART = [
 def main(nosave, fault_profile, measurement_count, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
     click.echo('nosave=' + str(nosave))
     click.echo('fault_profile=' + str(fault_profile))
-    click.echo('measurement_count=' + str(measurement_count))
+    click.echo('min_measurement_count=' + str(min_measurement_count))
+    click.echo('max_measurement_count=' + str(max_measurement_count))
+    click.echo('target_std=' + str(target_std))
     click.echo('load_duration=' + str(load_duration))
     click.echo('cluster_type=' + str(cluster_type))
     click.echo('locust_user_count=' + str(locust_user_count))
@@ -112,81 +117,121 @@ def main(nosave, fault_profile, measurement_count, load_duration, locust_user_co
         locust_spawn_rate=locust_spawn_rate,
         comment=comment)
 
-    for i in range(measurement_count):
 
-        logging.info(f'Start measurement #{i + 1}')
+    # measurement_count = 0
+    finished = is_end_criteria_met(
+        sequence_result,
+        target_std=target_std,
+        min_count=min_measurement_count,
+        max_count=max_measurement_count)
 
-        logging.info('Waiting for stable system state...')
-        wait_for_stable_state()
-
-        # Initialize measurement result
-        measurement_result = MeasurementResult()
-
-        # Setup Locust objects
-
-        # setup Environment and Runner
-        env = Environment(user_classes=[User])
-        env.create_local_runner()
-
-        # start a greenlet that periodically outputs the current stats
-        gevent.spawn(stats_printer(env.stats))
-
-        # start a greenlet that save current stats to history
-        gevent.spawn(stats_history, env.runner)
-
-        logging.info('Creating chaos objects...')
-
-        subprocess.run(helm_command)
-
-        logging.info('Chaos objects applied.')
-
-        logging.info('Generating load...')
-
-        # start the test
-        env.runner.start(user_count=locust_user_count,
-                         spawn_rate=locust_spawn_rate)
-
-        # in 'duartion' seconds stop the runner
-        gevent.spawn_later(load_duration, lambda: env.runner.quit())
-
-        # wait for the greenlets
-        env.runner.greenlet.join()
-
-        logging.info('Load generation finished')
-
-        # get dependability metrics
-
-        metrics = get_dependability_metrics(load_duration)
-
-        # add metrics to measurement result
-        measurement_result.backend_metrics = metrics
-        # end measurement (fill end_time attribute)
-        measurement_result.end()
-        
-
-        # save dependability metrics
-
-        logging.info('Deleting chaos objects...')
-
-        subprocess.run(['helm', 'delete', 'kubedepend-chaos', '-n', 'chaos-testing'])
-
-        logging.info('Chaos objects deleted.')
-
-        logging.info('Waiting for stable system state (end)...')
-        wait_for_stable_state()
-
-        # get finished jobs in database
-        (measurement_result.submitted_jobs, measurement_result.finished_jobs) = get_jobs_summary()
+    while (not finished):
+        # run a measurement
+        measurement_result = run_measurement(helm_command)
 
         # add measurement result to sequence result
         sequence_result.add_measurement_result(measurement_result)
 
+        finished = is_end_criteria_met(
+            sequence_result,
+            target_std=target_std,
+            min_count=min_measurement_count,
+            max_count=max_measurement_count)
+
     if not nosave:
         sequence_result.save_results('results/results.csv')
+        logging.info('Test results saved')
 
     # TODO stop running greenlets (stats)
 
     logging.info('Test finished')
+
+def is_end_criteria_met(sequence_result, target_std, min_count, max_count):
+    if not isinstance(sequence_result, MeasurementSequenceResult):
+        raise ValueError('sequence_result must be a MeasurementSequenceResult')
+
+    meas_count = len(sequence_result.measurements)
+
+    # check min and max measurement count
+    if meas_count < min_count or meas_count >= max_count:
+        return True
+
+    series = pd.Series([m.backend_metrics.availabitliy for m in sequence_result.measurements])
+
+    if series.std(ddof=0) < target_std:
+        return True
+
+    return False
+
+
+def run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration):
+
+    logging.info(f'Start measurement #{i + 1}')
+
+    logging.info('Waiting for stable system state...')
+    wait_for_stable_state()
+
+    # Initialize measurement result
+    measurement_result = MeasurementResult()
+
+    # Setup Locust objects
+
+    # setup Environment and Runner
+    env = Environment(user_classes=[User])
+    env.create_local_runner()
+
+    # start a greenlet that periodically outputs the current stats
+    gevent.spawn(stats_printer(env.stats))
+
+    # start a greenlet that save current stats to history
+    gevent.spawn(stats_history, env.runner)
+
+    logging.info('Creating chaos objects...')
+
+    subprocess.run(helm_command)
+
+    logging.info('Chaos objects applied.')
+
+    logging.info('Generating load...')
+
+    # start the test
+    env.runner.start(user_count=locust_user_count,
+                        spawn_rate=locust_spawn_rate)
+
+    # in 'duartion' seconds stop the runner
+    gevent.spawn_later(load_duration, lambda: env.runner.quit())
+
+    # wait for the greenlets
+    env.runner.greenlet.join()
+
+    logging.info('Load generation finished')
+
+    # get dependability metrics
+
+    metrics = get_dependability_metrics(load_duration)
+
+    # add metrics to measurement result
+    measurement_result.backend_metrics = metrics
+    # end measurement (fill end_time attribute)
+    measurement_result.end()
+    
+
+    # save dependability metrics
+
+    logging.info('Deleting chaos objects...')
+
+    subprocess.run(['helm', 'delete', 'kubedepend-chaos', '-n', 'chaos-testing'])
+
+    logging.info('Chaos objects deleted.')
+
+    logging.info('Waiting for stable system state (end)...')
+    wait_for_stable_state()
+
+    # get finished jobs in database
+    (measurement_result.submitted_jobs, measurement_result.finished_jobs) = get_jobs_summary()
+
+    
+    return measurement_result
 
 
 # Queries Prometheus with the given Prometheus format query

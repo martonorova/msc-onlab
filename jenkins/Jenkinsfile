@@ -36,7 +36,9 @@ pipeline {
         separator(name: 'MEASUREMENT', sectionHeader: 'Measurement', separatorStyle: 'border-width: 5', sectionHeaderStyle: sectionHeaderStyle)
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
-        string(name: 'MEASMeasurementCount', defaultValue: '10', description: 'Number of measurements to make during the measurement sequence')
+        string(name: 'MEASMinMeasurementCount', defaultValue: '5', description: 'Minimum umber of measurements to make during the measurement sequence')
+        string(name: 'MEASMaxMeasurementCount', defaultValue: '25', description: 'Maximum number of measurements to make during the measurement sequence')
+        string(name: 'MEASTargetStd', defaultValue: '0.05', description: 'Target standard deviation of availabitliy in a measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
         choice(name: 'MEASClusterType', choices: ['eks', 'minikube'], description: 'Type of the K8s cluster the stack runs on')
         string(name: 'MEASLocustUserCount', defaultValue: '1', description: 'Total number of Locust users to start')
@@ -362,7 +364,7 @@ pipeline {
                     |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
                     |MEAS_PROXY_PORT_FW_PID=\$!
                     |echo "Running tests"
-                    |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --measurement-count=$MEASMeasurementCount --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust-user-count=$MEASLocustUserCount --locust-spawn-rate=$MEASLocustSpawnRate --comment=\"$MEASComment\"
+                    |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --min-measurement-count=$MEASMinMeasurementCount --max-measurement-count=$MEASMaxMeasurementCount --target-std=$MEASTargetStd --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust-user-count=$MEASLocustUserCount --locust-spawn-rate=$MEASLocustSpawnRate --comment=\"$MEASComment\"
                     """.stripMargin('|')
                 }
             }
