@@ -127,7 +127,7 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
 
     while (not finished):
 
-        logging.info(f'Start measurement #{len(sequence_result.metrics) + 1}')
+        logging.info(f'Start measurement #{len(sequence_result.measurements) + 1}')
 
         # run a measurement
         measurement_result = run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration)
