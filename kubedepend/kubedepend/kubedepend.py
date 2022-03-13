@@ -71,7 +71,7 @@ HELM_COMMAND_FIX_PART = [
 @click.option('--locust-user-count', type=click.INT, default=1, help='Total number of Locust users to start')
 @click.option('--locust-spawn-rate', type=click.INT, default=1, help='Number of Locust users to spawn per second')
 @click.option('--comment', type=click.STRING, help='Give a comment about the measurement sequence')
-def main(nosave, fault_profile, measurement_count, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
+def main(nosave, fault_profile, min_measurement_count, max_measurement_count, target_std, load_duration, locust_user_count, locust_spawn_rate, cluster_type, comment):
     click.echo('nosave=' + str(nosave))
     click.echo('fault_profile=' + str(fault_profile))
     click.echo('min_measurement_count=' + str(min_measurement_count))
@@ -154,14 +154,18 @@ def is_end_criteria_met(sequence_result, target_std, min_count, max_count):
 
     # check min and max measurement count
     if meas_count < min_count or meas_count >= max_count:
-        return True
+        logging.info(f'meas_count={meas_count} too small or too large')
+        return False
 
     series = pd.Series([m.backend_metrics.availabitliy for m in sequence_result.measurements])
 
-    if series.std(ddof=0) < target_std:
-        return True
+    availability_std = series.std(ddof=0)
 
-    return False
+    if availability_std > target_std:
+        logging.info(f'availability standard deviation is too large ({availability_std})')
+        return False
+
+    return True
 
 
 def run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration):
