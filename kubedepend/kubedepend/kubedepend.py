@@ -127,7 +127,7 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
 
     while (not finished):
         # run a measurement
-        measurement_result = run_measurement(helm_command)
+        measurement_result = run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_duration)
 
         # add measurement result to sequence result
         sequence_result.add_measurement_result(measurement_result)
