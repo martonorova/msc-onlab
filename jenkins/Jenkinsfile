@@ -49,7 +49,7 @@ pipeline {
     options {
         skipStagesAfterUnstable()
         skipDefaultCheckout()
-        timeout(time: 6, unit: 'HOURS')
+        timeout(time: 36, unit: 'HOURS')
         timestamps()
     }
 
