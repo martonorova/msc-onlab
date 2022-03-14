@@ -141,11 +141,9 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
             min_count=min_measurement_count,
             max_count=max_measurement_count)
 
-    if not nosave:
-        sequence_result.save_results('results/results.csv')
-        logging.info('Test results saved')
-
-    # TODO stop running greenlets (stats)
+        if not nosave:
+            sequence_result.save_results('results/results.csv')
+            logging.info('Measurement results saved')
 
     logging.info('Test finished')
 
