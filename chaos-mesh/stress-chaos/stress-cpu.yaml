@@ -8,8 +8,6 @@ spec:
   selector:
     namespaces:
       - kubedepend
-    # labelSelectors:
-    #   "app": "kubedepend-proxy-app"
   stressors:
     cpu:
       workers: 100
