@@ -91,11 +91,13 @@ spec:
             - name: fixed-proxy-config-vol # the fixed config is written here, this volume is used by the proxy too
               mountPath: /workdir-dest
       volumes:
-          - name: proxy-config-volume
-            configMap:
-              name: measurement-proxy-config
-          - name: fixed-proxy-config-vol # an emptyDir is needed to be able to overwrite configfile from configMap
-            emptyDir: {}
+        - name: proxy-config-volume
+          configMap:
+            name: measurement-proxy-config
+        - name: fixed-proxy-config-vol # an emptyDir is needed to be able to overwrite configfile from configMap
+          emptyDir: {}
+      nodeSelector:
+        nodegroup: framework
 
 ---
 
