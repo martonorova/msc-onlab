@@ -368,13 +368,13 @@ pipeline {
                     """.stripMargin('|')
                 }
             }
-        }
 
-        stage('MEAS - Save test results') {
-            when { expression { RunMeasurement == 'true' } }
-            steps {
-                dir('kubedepend/kubedepend/results') {
-                    archiveArtifacts artifacts: '*'
+            post {
+                always {
+                    dir('kubedepend/kubedepend/results') {
+                        echo "Save test results"
+                        archiveArtifacts artifacts: '*'
+                    }
                 }
             }
         }
