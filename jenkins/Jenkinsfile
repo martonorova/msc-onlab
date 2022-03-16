@@ -162,13 +162,12 @@ pipeline {
 
             steps {
                 script {
-                    // Uploading does not work, --body parameter parse error
-                    // echo "Upload CF template to S3"
-                    // def uploadResult = sh(
-                    //     script: "aws s3api --debug put-object --bucket $S3Bucket --key eks/infrastructure.yaml --body ./utils/infrastructure.yaml",
-                    //     returnStdout: true
-                    // ).trim()
-                    // println "uploadResult = ${uploadResult}"
+
+                    echo "Upload CF template to S3"
+                    sh """
+                    |aws s3 cp \$WORKSPACE/utils/infrastructure.yaml s3://morova-bucket/eks/infrastructure.yaml
+                    """.stripMargin('|')
+
 
                     echo "Create CloudFormation stack"
                     def stackId = sh(
