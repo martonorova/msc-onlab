@@ -102,6 +102,7 @@ spec:
           mountPath: /tmp
       nodeSelector:
         kubernetes.io/os: linux
+        nodegroup: framework
 ---
 apiVersion: v1
 kind: Service

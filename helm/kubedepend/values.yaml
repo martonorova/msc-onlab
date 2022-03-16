@@ -23,4 +23,7 @@ worker:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+nodeSelector:
+  nodegroup: app
+
 

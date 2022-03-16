@@ -39,6 +39,10 @@ spec:
               value: zookeeper3
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -81,6 +85,10 @@ spec:
               value: zookeeper3
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -123,3 +131,7 @@ spec:
               value: zookeeper3
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

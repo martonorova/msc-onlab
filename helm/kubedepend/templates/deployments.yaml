@@ -34,6 +34,10 @@ spec:
           - name: proxy-config-volume
             configMap:
               name: proxy-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 
 ---
@@ -70,6 +74,10 @@ spec:
         ports:
         - containerPort: 8000
           name: backend-port
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 ---
 
@@ -106,6 +114,10 @@ spec:
         ports:
         - containerPort: 3000
           name: frontend-port
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 
 ---
@@ -146,6 +158,10 @@ spec:
         ports:
         - containerPort: 5000
           name: worker-port
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 ---
 
@@ -189,37 +205,10 @@ spec:
         - name: kubedepend-db-vol
           persistentVolumeClaim:
             claimName: kubedepend-db-pvc
-
-
-# ---
-
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: kubedepend-adminer-depl
-#   namespace: kubedepend
-# spec:
-#   selector:
-#     matchLabels:
-#       app: kubedepend-adminer-app
-#   replicas: 1
-#   template:
-#     metadata:
-#       labels:
-#         app: kubedepend-adminer-app
-#     spec:
-#       containers:
-#       - name: kubedepend-adminer
-#         image: adminer:4.7.7
-#         imagePullPolicy: "IfNotPresent"
-#         # resources:
-#         #   limits:
-#         #     memory: "128Mi"
-#         #     cpu: "100m"
-#         ports:
-#         - containerPort: 8080
-#           name: adminer-port
-
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 ---
 
@@ -257,6 +246,10 @@ spec:
           name: amq-webconsole
         - containerPort: 8080
           name: amq-metrics
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
 {{- end -}}
 

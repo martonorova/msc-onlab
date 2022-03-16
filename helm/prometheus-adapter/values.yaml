@@ -12,7 +12,8 @@ metricsRelistInterval: 1m
 
 listenPort: 6443
 
-nodeSelector: {}
+nodeSelector:
+  nodegroup: framework
 
 priorityClassName: ""
 

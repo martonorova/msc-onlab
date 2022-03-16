@@ -68,7 +68,8 @@ controllerManager:
       cpu: 25m
       memory: 512Mi
 
-  nodeSelector: {}
+  nodeSelector:
+    nodegroup: framework
 
   tolerations: []
 
@@ -180,7 +181,8 @@ dashboard:
 
   securityMode: true
 
-  nodeSelector: {}
+  nodeSelector:
+    nodegroup: framework
 
   tolerations: []
 
@@ -294,7 +296,8 @@ dnsServer:
 
   priorityClassName: ""
 
-  nodeSelector: {}
+  nodeSelector:
+    nodegroup: framework
 
   podAnnotations: {}
 
@@ -332,7 +335,8 @@ prometheus:
 
   priorityClassName: ""
 
-  nodeSelector: {}
+  nodeSelector:
+    nodegroup: framework
 
   tolerations: []
 

@@ -47,6 +47,10 @@ spec:
               value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -96,6 +100,10 @@ spec:
               value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -145,3 +153,7 @@ spec:
               value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
           resources:
             {{- toYaml .Values.kafka.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

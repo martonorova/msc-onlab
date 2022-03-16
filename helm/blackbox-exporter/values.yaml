@@ -93,7 +93,8 @@ readinessProbe:
     path: /health
     port: http
 
-nodeSelector: {}
+nodeSelector:
+  nodegroup: framework
 tolerations: []
 affinity: {}
 

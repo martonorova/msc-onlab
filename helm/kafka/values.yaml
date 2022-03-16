@@ -1,3 +1,6 @@
+nodeSelector:
+  nodegroup: app
+
 kafka:
   image:
     repository: "wurstmeister/kafka:2.12-2.5.0"
