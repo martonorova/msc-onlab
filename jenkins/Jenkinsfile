@@ -138,7 +138,7 @@ pipeline {
 
                         def stack = stacksResultParsed[0]
                         switch(stack.StackStatus) {
-                            case "CREATE_COMPLETE":
+                            case ["CREATE_COMPLETE", "UPDATE_COMPLETE"]:
                                 println "CloudFormation stack is ready!"
                             default:
                                 error("CF stack named '${CFStackName}' with ARN '${stack.StackId}' has status '${stack.StackStatus}' - probably another job is working with it or check AWS Console")
