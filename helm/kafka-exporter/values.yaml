@@ -19,9 +19,9 @@ service:
 kafkaExporter:
   kafka:
     servers:
-      - kafka-service-0.kafka.svc.cluster.local:9092
-      - kafka-service-1.kafka.svc.cluster.local:9093
-      - kafka-service-2.kafka.svc.cluster.local:9094
+      - kafka-service-0.kubedepend.svc.cluster.local:9092
+      - kafka-service-1.kubedepend.svc.cluster.local:9093
+      - kafka-service-2.kubedepend.svc.cluster.local:9094
     version: "2.5.0"
 
   sasl:

@@ -293,7 +293,7 @@ pipeline {
 
 
                         echo "Deploy Kafka"
-                        sh "helm upgrade --install kafka ./helm/kafka -n kafka \
+                        sh "helm upgrade --install kafka ./helm/kafka -n kubedepend \
                             --set kafka.image.repository=${REGISTRY_PREFIX}/${KAFKA_DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
 
                         sh "helm upgrade --install kafka-exporter ./helm/kafka-exporter -n monitoring"
