@@ -65,7 +65,7 @@ HELM_COMMAND_FIX_PART = [
 @click.option('--fault-profile', type=click.Choice(list(c.FAULT_PROFILES.keys())), default='none', help='Name of the fault profile')
 @click.option('--min-measurement-count', type=click.INT, default=5, help='Minimum number of measurements to make during the measurement sequence')
 @click.option('--max-measurement-count', type=click.INT, default=25, help='Maximum number of measurements to make during the measurement sequence')
-@click.option('--target-std', type=click.FLOAT, default=0.05, help='Target standard deviation of availabitliy in a measurement sequence')
+@click.option('--target-std', type=click.FLOAT, default=0.1, help='Target standard deviation of availabitliy in a measurement sequence')
 @click.option('--load-duration', type=click.INT, default=600, help='Duration of the load generation in a single measurement in SECONDS')
 @click.option('--cluster-type', type=click.Choice(['minikube', 'eks']), default='minikube', help='Type of the K8s cluster the stack runs on')
 @click.option('--locust-user-count', type=click.INT, default=1, help='Total number of Locust users to start')
