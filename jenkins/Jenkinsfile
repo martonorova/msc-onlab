@@ -39,7 +39,7 @@ pipeline {
         string(name: 'MEASMinMeasurementCount', defaultValue: '5', description: 'Minimum umber of measurements to make during the measurement sequence')
         string(name: 'MEASMaxMeasurementCount', defaultValue: '25', description: 'Maximum number of measurements to make during the measurement sequence')
         string(name: 'MEASTargetStd', defaultValue: '0.1', description: 'Target standard deviation of availabitliy in a measurement sequence')
-        string(name: 'MEASLoadDuration', defaultValue: '600', description: 'Duration of the load generation in a single measurement in SECONDS')
+        string(name: 'MEASLoadDuration', defaultValue: '300', description: 'Duration of the load generation in a single measurement in SECONDS')
         choice(name: 'MEASClusterType', choices: ['eks', 'minikube'], description: 'Type of the K8s cluster the stack runs on')
         string(name: 'MEASLocustUserCount', defaultValue: '1', description: 'Total number of Locust users to start')
         string(name: 'MEASLocustSpawnRate', defaultValue: '1', description: 'Number of Locust users to spawn per second')
