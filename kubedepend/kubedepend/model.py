@@ -69,6 +69,7 @@ class SystemState:
 
 
 class MeasurementSequenceResult:
+    self.last_saved_idx = -1
     def __init__(self,
                  start_time,
                  fault_profile,
@@ -123,17 +124,21 @@ class MeasurementSequenceResult:
                 if os.path.getsize(filename) == 0:
                     writer.writeheader()
 
-                for measurement in self.measurements:
-                    row = measurement.asdict()
-                    row['id'] = self.id
-                    row['measurement_seq_start_time'] = self.start_time
-                    row['fault_profile'] = self.fault_profile
-                    row['cluster_type'] = self.cluster_type
-                    row['measurement_count'] = len(self.measurements)
-                    row['load_duration'] = self.load_duration
-                    row['locust_user_count'] = self.locust_user_count
-                    row['locust_spawn_rate'] = self.locust_spawn_rate
-                    row['prev_stack_git_commit_short'] = git_commit_short
-                    row['comment'] = self.comment
+                meas_idx_to_save = len(self.measurements - 1)
+                measurement = self.measurements[meas_idx_to_save]
 
-                    writer.writerow(row)
+                row = measurement.asdict()
+                row['id'] = self.id
+                row['measurement_seq_start_time'] = self.start_time
+                row['fault_profile'] = self.fault_profile
+                row['cluster_type'] = self.cluster_type
+                row['measurement_count'] = len(self.measurements)
+                row['load_duration'] = self.load_duration
+                row['locust_user_count'] = self.locust_user_count
+                row['locust_spawn_rate'] = self.locust_spawn_rate
+                row['prev_stack_git_commit_short'] = git_commit_short
+                row['comment'] = self.comment
+
+                writer.writerow(row)
+
+                self.last_saved_idx = meas_idx_to_save
