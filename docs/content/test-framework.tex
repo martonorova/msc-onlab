@@ -206,6 +206,17 @@ The conclusion is to deploy the test framework and the application to evaluate s
 TODO physical separation can be achieved with NodeSelectors and Affinity / Antiaffinity.
 
 %----------------------------------------------------------------------------
+\subsection{Measurement Proxy}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item why is it needed - to ensure that the framework can always reach the app (pod kill can disrupt port-forwarding the backend service)
+	\item none of the fault injection cases affect the measurement proxy
+\end{itemize}
+
+TODO
+
+%----------------------------------------------------------------------------
 \subsection{Kubedepend}
 %----------------------------------------------------------------------------
 
@@ -260,6 +271,8 @@ After providing it with the right inputs, Kubedepend facilitates automatic load 
 %----------------------------------------------------------------------------
 \subsubsection{Measurement and Measurement sequence} \label{test-impl-measurement-seq}
 %----------------------------------------------------------------------------
+
+TODO adaptive measurement count
 
 In Kubedepend a Measurement represents the process of load generation, fault injection and metric collection. Section \ref{test-design-req} pointed out that it is not feasible to require completely deterministic results from the test framework. However, to even out the transient, temporary behaviors of the system, Kubedepend introduces the concept of Measurement Sequences. A Measurement Sequence is the collection of arbitrary number of individual Measurements with the same configuration. A single execution of Kubedepend carries out the running of one Measurement Sequence. The result of the Measurement Sequence is the collection of individual Measurement results. A graphical representation of the idea of Measurement Sequence can be seen in Figure \ref{fig:measurement_sequence}.
 
@@ -745,6 +758,70 @@ All the command line configuration options of Kubedepend are exposed in the Jenk
 
 
 %----------------------------------------------------------------------------
-\section{Baseline measuring}
+\section{Measuring the baseline}
 %----------------------------------------------------------------------------
+
+Motivation:
+
+\begin{itemize}
+	\item app and framework is ready
+	\item need the characteristics of the app in various fault profiles
+	\item analyzing these values can help determine which part of the system should be / can be improved - enhancements can be designed
+	\item need baseline values for each fault profiles for comparison during fine-tuning and measuring the impact of enhancements
+\end{itemize}
+
+Baseline justification:
+
+\begin{itemize}
+	\item from the beginning, the framework is built up with reproducibility in mind - the pipeline supports the usage of the exact same configuration and system on each measurement
+	\begin{itemize}
+		\item infrastructure - CloudFormation template
+		\item tools - helm chart with fixed values
+		\item app - building docker images from the same source code and configuration
+		\item measurement - running measurement with the same logic and configuration
+	\end{itemize}
+	\item ENVIRONMENT can be considered constant:
+	\begin{itemize}
+		\item the whole system runs on virtual machines that have the same OS and resources available
+		\item VMs are in a separated subnetwork in the cloud - no unsolicited traffic
+		\item the workload of other tenants in the cloud can have brief transient effects on the system but executing multiple measurements with the same configuration aims to compensate this
+		\item the workload of other tenants can affect the system in production mode as well - it can be considered as constant "noise"
+		\item the kubernetes resource request definitions ensure that all components have enough resources (cpu, memory) available
+	\end{itemize}
+\end{itemize}
+
+
+TODO
+
+Overall grouped bar chart diagram (availability, relative MUT, rel MDT, rel MTBF, successful jobs percent)
+
+TODO
+
+\begin{itemize}
+	\item compare and try to reason about the results
+\end{itemize}
+
+TODO
+
+Spider chart of each fault profiles
+
+TODO
+
+\begin{itemize}
+	\item none profile should be all 1-s, or close to it (explain why not exactly 1)
+	\item reveal possible  directions to improve the results (details in Enhancements chapter) - goal is radius 1 on all 5 axis
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
