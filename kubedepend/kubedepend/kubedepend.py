@@ -153,10 +153,15 @@ def is_end_criteria_met(sequence_result, target_std, min_count, max_count):
 
     meas_count = len(sequence_result.measurements)
 
-    # check min and max measurement count
-    if meas_count < min_count or meas_count >= max_count:
-        logging.info(f'meas_count={meas_count} too small or too large')
+    # check min measurement count
+    if meas_count < min_count:
+        logging.info(f'meas_count={meas_count} too small')
         return False
+
+    # check max measurement count
+    if meas_count >= max_count:
+        logging.info(f'meas_count={meas_count} reached the maximum')
+        return True
 
     series = pd.Series([m.backend_metrics.availability for m in sequence_result.measurements])
 
