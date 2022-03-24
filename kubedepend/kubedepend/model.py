@@ -124,7 +124,7 @@ class MeasurementSequenceResult:
                 if os.path.getsize(filename) == 0:
                     writer.writeheader()
 
-                meas_idx_to_save = len(self.measurements - 1)
+                meas_idx_to_save = len(self.measurements) - 1
                 measurement = self.measurements[meas_idx_to_save]
 
                 row = measurement.asdict()
