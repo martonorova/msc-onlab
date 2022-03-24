@@ -69,7 +69,6 @@ class SystemState:
 
 
 class MeasurementSequenceResult:
-    self.last_saved_idx = -1
     def __init__(self,
                  start_time,
                  fault_profile,
@@ -89,6 +88,7 @@ class MeasurementSequenceResult:
         self.locust_spawn_rate = locust_spawn_rate
         self.comment = comment
         self.measurements = None
+        self.last_saved_idx = -1
 
         if not isinstance(measurements, list):
             raise ValueError('metrics must be an array')
@@ -140,5 +140,4 @@ class MeasurementSequenceResult:
                 row['comment'] = self.comment
 
                 writer.writerow(row)
-
                 self.last_saved_idx = meas_idx_to_save
