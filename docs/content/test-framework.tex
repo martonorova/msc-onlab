@@ -408,6 +408,12 @@ In order to be able to inject failure anomalies, the core components of Chaos Me
 
 Kubedepend supports easy management of the chaos objects that represent failure anomalies. To avoid the need of individually creating, applying and deleting each chaos experiment Custom Resource Definition, these objects are collected into a custom helm chart called \texttt{kubedepend-chaos}. This also facilitates the easy configuration of chaos experiments through the use of helm templates and a values file.
 
+TODO
+
+chaos experiments only affect the application namespace
+
+TODO
+
 %----------------------------------------------------------------------------
 \subsubsection{Fault Profiles}
 %----------------------------------------------------------------------------
@@ -809,7 +815,7 @@ TODO
 
 \begin{itemize}
 	\item none profile should be all 1-s, or close to it (explain why not exactly 1)
-	\item reveal possible  directions to improve the results (details in Enhancements chapter) - goal is radius 1 on all 5 axis
+	\item reveal possible  root causes - goal is radius 1 on all 5 axis
 \end{itemize}
 
 

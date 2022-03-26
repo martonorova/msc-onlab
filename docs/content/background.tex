@@ -253,31 +253,84 @@ Kubernetes brings a vast amount of useful features, but a thorough discussion co
 \subsection{Cluster Architecture}
 %----------------------------------------------------------------------------
 
+TODO
+%TODO
+diagram from K8s page or own
+
+
+A Kubernetes cluster consists of a set of worker machines, called nodes, and the control plane. The nodes can be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions and even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}.
+
 %----------------------------------------------------------------------------
-\subsection{Common Kubernetes Objects}
+\subsubsection{Control Plane Components}
 %----------------------------------------------------------------------------
+
+The components in the control plane make global decisions about the cluster -- for example scheduling -- and handle cluster events \cite{KubernetesArchitecture}. 
+
+\paragraph{kube-apiserver} The API server exposes the Kubernetes API which acts as the frontend for the Kubernetes control plane.
+
+\paragraph{etcd} The etcd is a consistent and highly-available key value storage to keep all Kubernetes cluster data persisted.
+
+\paragraph{kube-scheduler} The kube-scheduler manages the assignment of newly created workloads to nodes based on various factors in order to maintain a balanced cluster state.
+
+\paragraph{kube-controller-manager} This component runs the controller processes in the cluster that watch the shared state of the cluster through the apiserver and make changes attempting to move the current state towards the defined desired state.
+
+\paragraph{cloud-controller-manager} The cloud-controller-manager enables linking the Kubernetes cluster into a cloud provider's API. This permits cloud providers to create a custom integration layer between Kubernetes and their own infrastructure and allows the cloud users to interact with their Kubernetes cluster in a universal way, no matter the underlying cloud infrastructure.
+
+%----------------------------------------------------------------------------
+\subsubsection{Node Components}
+%----------------------------------------------------------------------------
+
+Node components run on each node in the cluster. Their responsibility is to maintain running the application workloads and to provide the Kubernetes runtime environment \cite{KubernetesArchitecture}.
+
+\paragraph{kubelet} Kubelet is an agent that runs on each node in the cluster, making sure that containers are running in Kubernetes managed resources called Pods (described in section \ref{k8s-pod}).
+
+\paragraph{kube-proxy} This component maintains network rules on each node allowing network communication to application workload running on the cluster from inside or outside of the cluster.
+
+\paragraph{Container Runtime} The container runtime is a software running on each node responsible for managing containers.
+
+%----------------------------------------------------------------------------
+\subsection{Common Kubernetes Resources}
+%----------------------------------------------------------------------------
+
+The following sections briefly describe some of the commonly used Kubernetes resources in order to enable better comprehension of the thesis work.
+
+%----------------------------------------------------------------------------
+\subsubsection{Label}
+%----------------------------------------------------------------------------
+
+Labels are key-value pairs that are attached to Kubernetes resources. Labels are intended to be used to specify identifying attributes to objects \cite{KubernetesLabel}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Namespace}
 %----------------------------------------------------------------------------
 
+Namespaces provide a mechanism for isolating groups of resources within a single Kubernetes cluster \cite{KubernetesNamespace}. In case of deploying larger applications, namespaces are a good way of keeping maintenance at a manageable level.
+
 %----------------------------------------------------------------------------
-\subsubsection{Pod}
+\subsubsection{Pod} \label{k8s-pod}
 %----------------------------------------------------------------------------
 
-+ assigning Pods to Nodes (PodAffinity)
+Pods are the smallest deployable units of computing that can be created and managed in Kubernetes. A Pod is a set of containers, with shared storage and network resources, and a specification for how to run the containers. The containers in a Pod are always co-located, co-scheduled and run in a shared context \cite{KubernetesPod}.
+
+Pods can only be run on nodes. The kube-scheduler automatically assigns every newly created Pods to nodes in the cluster taking into account multiple parameters and constraints. Pods can define scheduling constraints such as so called node selectors which specify the labels a node must have in order to be able to run a Pod \cite{KubernetesNodeSelector}.
 
 %----------------------------------------------------------------------------
 \subsubsection{ReplicaSet}
 %----------------------------------------------------------------------------
 
+A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time. As such, it is often used to guarantee the availability of a specified number of identical Pods \cite{KubernetesReplicaSet}.
+
 %----------------------------------------------------------------------------
 \subsubsection{Deployment}
 %----------------------------------------------------------------------------
 
+Deployments provide declarative updates for Pods and ReplicaSets based on a declared desired state. Among many things, Deployments can be used to rollout new ReplicaSets, update Pod definitions or scale up and down ReplicaSets to adapt to current workloads \cite{KubernetesDeployment}.
+
 %----------------------------------------------------------------------------
 \subsubsection{Service} \label{k8s-service}
 %----------------------------------------------------------------------------
+
+
 
 %----------------------------------------------------------------------------
 \subsubsection{HPA}
@@ -294,15 +347,15 @@ for Chaos Mesh experiments
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
-\subsection{AWS}
+\section{AWS}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
-\subsubsection{CloudFormation}
+\subsection{CloudFormation}
 %----------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------
-\subsubsection{EKS}
+\subsection{EKS}
 %----------------------------------------------------------------------------
 
 
