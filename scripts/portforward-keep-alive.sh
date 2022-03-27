@@ -2,8 +2,6 @@
 
 # keep kubectl port-forward connection alive
 
-set -e
-
 if [[ -n $1  ]]
 then
     port=$1
