@@ -106,7 +106,7 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
     # Save current stack into archive
     if not nosave:
         save_helm_chart(helm_command=helm_command)
-        archive_stack(start_time)
+        # archive_stack(start_time)
 
     sequence_result = MeasurementSequenceResult(
         start_time=start_time,
@@ -345,9 +345,11 @@ def check_working_dir():
 
 
 def archive_stack(datestring):
+    logging.info('Archiving stack')
     with tarfile.open(f'results/archive-{datestring}.tgz', 'w:gz') as tar:
         tar.add(c.PATH_TO_STACK_REPO, arcname=os.path.basename(c.PATH_TO_STACK_REPO),
                 filter=archive_filter)
+    logging.info('Stack archived')
 
 
 def archive_filter(tarinfo):
@@ -360,6 +362,7 @@ def archive_filter(tarinfo):
 
 
 def save_helm_chart(helm_command):
+    logging.info('Saving helm chart...')
     chaos_objects = subprocess.check_output(
         helm_command + ['--dry-run']
     ).decode('ascii').strip()
@@ -370,6 +373,8 @@ def save_helm_chart(helm_command):
 
     with open(last_chaos_file, mode='w') as chaos_file:
         chaos_file.write(chaos_objects)
+
+    logging.info('Helm chart saved')
 
 def assemble_helm_set_options(fault_profile):
 
