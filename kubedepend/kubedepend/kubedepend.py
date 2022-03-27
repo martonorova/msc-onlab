@@ -189,7 +189,7 @@ def run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_dur
     env.create_local_runner()
 
     # start a greenlet that periodically outputs the current stats
-    gevent.spawn(stats_printer(env.stats))
+    # gevent.spawn(stats_printer(env.stats))
 
     # start a greenlet that save current stats to history
     gevent.spawn(stats_history, env.runner)
@@ -238,7 +238,6 @@ def run_measurement(helm_command, locust_user_count, locust_spawn_rate, load_dur
     # get finished jobs in database
     (measurement_result.submitted_jobs, measurement_result.finished_jobs) = get_jobs_summary()
 
-    
     return measurement_result
 
 
