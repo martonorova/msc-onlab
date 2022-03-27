@@ -106,7 +106,7 @@ def main(nosave, fault_profile, min_measurement_count, max_measurement_count, ta
     # Save current stack into archive
     if not nosave:
         save_helm_chart(helm_command=helm_command)
-        # archive_stack(start_time)
+        archive_stack(start_time)
 
     sequence_result = MeasurementSequenceResult(
         start_time=start_time,
