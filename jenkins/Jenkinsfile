@@ -359,11 +359,11 @@ pipeline {
                     sh """
                     |set -e
                     |echo "Opening ports..."
-                    |kubectl -n monitoring port-forward service/prometheus-server 9090:80 &
+                    |kubectl -n monitoring port-forward service/prometheus-server 9090:80 \&
                     |PROM_PORT_FW_PID=\$!
-                    |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 &
+                    |kubectl -n measurement-proxy port-forward service/measurement-proxy 8000:80 \&
                     |MEAS_PROXY_PORT_FW_PID=\$!
-                    |/bin/bash $WORKSPACE/scripts/portforward-keep-alive.sh 9090 &
+                    |/bin/bash $WORKSPACE/scripts/portforward-keep-alive.sh 9090 \&
                     |PROM_PW_KEEP_ALIVE_PID=\$!
                     |echo "Running tests"
                     |pipenv run python kubedepend.py --fault-profile=$MEASFaultProfile --min-measurement-count=$MEASMinMeasurementCount --max-measurement-count=$MEASMaxMeasurementCount --target-std=$MEASTargetStd --load-duration=$MEASLoadDuration --cluster-type=$MEASClusterType --locust-user-count=$MEASLocustUserCount --locust-spawn-rate=$MEASLocustSpawnRate --comment=\"$MEASComment\"
