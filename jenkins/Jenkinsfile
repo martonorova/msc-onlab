@@ -37,7 +37,7 @@ pipeline {
         booleanParam(name: 'RunMeasurement', defaultValue: true, description: 'Set to TRUE to run the measurements against the SUT')
         choice(name: 'MEASFaultProfile', choices: ['none', 'io', 'network-delay', 'network-partition', 'pod-failure', 'pod-kill', 'stress-cpu', 'stress-mem', 'custom'], description: 'Name of the fault profile')
         string(name: 'MEASMinMeasurementCount', defaultValue: '5', description: 'Minimum umber of measurements to make during the measurement sequence')
-        string(name: 'MEASMaxMeasurementCount', defaultValue: '25', description: 'Maximum number of measurements to make during the measurement sequence')
+        string(name: 'MEASMaxMeasurementCount', defaultValue: '15', description: 'Maximum number of measurements to make during the measurement sequence')
         string(name: 'MEASTargetStd', defaultValue: '0.1', description: 'Target standard deviation of availabitliy in a measurement sequence')
         string(name: 'MEASLoadDuration', defaultValue: '300', description: 'Duration of the load generation in a single measurement in SECONDS')
         choice(name: 'MEASClusterType', choices: ['eks', 'minikube'], description: 'Type of the K8s cluster the stack runs on')
