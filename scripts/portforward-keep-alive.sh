@@ -9,10 +9,10 @@ then
     path=$5
 
     # initial port forward
-    echo "Start initial port-forwarding"
+    echo "[PORT_FORWARD_KEEP_ALIVE] Start initial port-forwarding"
     kubectl -n "$namespace" port-forward service/"$servicename" "$hostport":"$targetport" &
     pw_pid=$!
-    echo "Port-forwarding started"
+    echo "[PORT_FORWARD_KEEP_ALIVE] Port-forwarding started"
 
     sleep 5
 
@@ -24,16 +24,16 @@ then
         # if curl failed, restart portforwarding
         if [ ! $? -eq 0 ]
         then
-            echo "Could not connect to $servicename on port $targetport at path $path"
+            echo "[PORT_FORWARD_KEEP_ALIVE] Could not connect to $servicename on port $targetport at path $path"
             kill -9 $pw_pid
-            echo "Start new port-forwarding"
+            echo "[PORT_FORWARD_KEEP_ALIVE] Start new port-forwarding"
             kubectl -n "$namespace" port-forward service/"$servicename" "$hostport":"$targetport" &
             pw_pid=$!
-            echo "Port-forwarding started"
+            echo "[PORT_FORWARD_KEEP_ALIVE] Port-forwarding started"
         fi
         sleep 10;
     done
 else
-    echo "Error: some parameters are empty"
+    echo "[PORT_FORWARD_KEEP_ALIVE] Error: some parameters are empty"
     exit 1
 fi
