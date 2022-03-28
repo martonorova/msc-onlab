@@ -330,11 +330,18 @@ Deployments provide declarative updates for Pods and ReplicaSets based on a decl
 \subsubsection{Service} \label{k8s-service}
 %----------------------------------------------------------------------------
 
+A Service is an abstraction layer that defines a logical set of Pods to expose them as a network service inside or outside of the Kubernetes cluster.
+
+Each Pod in the cluster gets its own IP address, however Pods are created and destroyed dynamically to match the current desired state of the cluster. In order to be able to work with durable network addresses that survive Pod lifecycles, Services must be used \cite{KubernetesService}.
 
 
 %----------------------------------------------------------------------------
-\subsubsection{HPA}
+\subsubsection{Horizontal Pod Autoscaler}
 %----------------------------------------------------------------------------
+
+The Horizontal Pod Autoscaler (HPA) can automatically update a workload resource -- such as a Deployment -- with the aim of automatically scaling the workload to match the current demand. If the load increases and the current number of Pods is not enough to handle it, HPA instructs the workload resource to scale up and to start new Pods. If the load decreases and there are more Pods in a workload than needed to serve requests, HPA tells the workload resource to scale down.
+
+In the background, cluster administrators can configure HPA to watch a specific metric of a workload, e.g. the average CPU utilization or custom defined metric, so the HPA can recognize when the workload resource needs to scale in either direction. For example, when the average CPU utilization breaks from the target boundaries, HPA automatically scales the workload resource to bring back the average CPU utilization into target limits.
 
 %----------------------------------------------------------------------------
 \subsubsection{CRD}
