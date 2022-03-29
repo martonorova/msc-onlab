@@ -266,7 +266,7 @@ A Kubernetes cluster consists of a set of worker machines, called nodes, and the
 
 The components in the control plane make global decisions about the cluster -- for example scheduling -- and handle cluster events \cite{KubernetesArchitecture}. 
 
-\paragraph{kube-apiserver} The API server exposes the Kubernetes API which acts as the frontend for the Kubernetes control plane.
+\paragraph{kube-apiserver} The API server exposes the Kubernetes API which acts as the frontend for the Kubernetes control plane. The official Kubernetes command line tool -- \texttt{kubectl} -- and many applications and tools use this API to communicate with the Kubernetes cluster's control plane.
 
 \paragraph{etcd} The etcd is a consistent and highly-available key value storage to keep all Kubernetes cluster data persisted.
 
@@ -292,7 +292,7 @@ Node components run on each node in the cluster. Their responsibility is to main
 \subsection{Common Kubernetes Resources}
 %----------------------------------------------------------------------------
 
-The following sections briefly describe some of the commonly used Kubernetes resources in order to enable better comprehension of the thesis work.
+The following sections briefly describe some of the commonly used Kubernetes resources in order to enable better comprehension of the thesis work. The resources in Kubernetes can be created inline with \texttt{kubeclt} commands, however the most common way for managing resources is to define them in YAML formatted files and apply them on the cluster.
 
 %----------------------------------------------------------------------------
 \subsubsection{Label}
@@ -344,14 +344,18 @@ The Horizontal Pod Autoscaler (HPA) can automatically update a workload resource
 In the background, cluster administrators can configure HPA to watch a specific metric of a workload, e.g. the average CPU utilization or custom defined metric, so the HPA can recognize when the workload resource needs to scale in either direction. For example, when the average CPU utilization breaks from the target boundaries, HPA automatically scales the workload resource to bring back the average CPU utilization into target limits.
 
 %----------------------------------------------------------------------------
-\subsubsection{CRD}
+\subsubsection{Custom Resource Definition}
 %----------------------------------------------------------------------------
 
-for Chaos Mesh experiments
+Custom Resource Definitions allow cluster administrators to define custom resources as a way to extend the Kubernetes API. Once a custom resources is installed, users can create and access its objects using \texttt{kubectl}, just as they do for built-in resources like Pods. On their own, custom resources enable storing and retrieving structured data. Combined with a custom controller, custom resources provide a true declarative API to implement or adapt arbitrary workflows and use cases in a Kubernetes native way \cite{KubernetesCRD}.
 
 %----------------------------------------------------------------------------
 \subsection{Helm}
 %----------------------------------------------------------------------------
+
+Helm is a Kubernetes deployment tool for automating creation, packaging, configuration, and deployment of applications and services to Kubernetes clusters \cite{HelmWhatIs}.
+
+Helm works with the concept of Charts which are packages containing all the resource definitions necessary to run an application inside of a Kubernetes cluster. Helm helps mitigating the burden of managing a lot of Kubernetes YAML files with custom configuration values. With Helm, the structural composition of a system and its configuration is separated using template and value files. When a Chart is installed on a cluster, the templates go through the template engine with the provided configuration values resulting in plain Kubernetes resource definitions in YAML format.  This workflow enables Chart users to easily deploy applications tailored to their environment \cite{Helm}.
 
 %----------------------------------------------------------------------------
 \section{AWS}
