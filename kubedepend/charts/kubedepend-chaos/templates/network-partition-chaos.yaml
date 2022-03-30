@@ -7,7 +7,7 @@ kind: Schedule
 metadata:
   name: schedule-network-partition
 spec:
-  schedule: '*/2 * * * *'
+  schedule: '* * * * *'
   historyLimit: 5
   concurrencyPolicy: 'Forbid'
   type: 'NetworkChaos'
