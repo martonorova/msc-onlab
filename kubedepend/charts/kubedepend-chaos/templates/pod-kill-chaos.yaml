@@ -8,7 +8,7 @@ kind: Schedule
 metadata:
   name: schedule-pod-kill-worker
 spec:
-  schedule: '*/3 * * * *'
+  schedule: '*/2 * * * *'
   historyLimit: 5
   concurrencyPolicy: 'Forbid'
   type: 'PodChaos'
