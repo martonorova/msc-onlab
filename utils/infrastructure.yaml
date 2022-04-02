@@ -160,17 +160,17 @@ Parameters:
   FrameworkNodeAutoScalingGroupMinSize:
     Description: Minimum size of Framework node Group ASG.
     Type: Number
-    Default: 2
+    Default: 3
   FrameworkNodeAutoScalingGroupDesiredCapacity:
     Description: Desired capacity of Framework node Group ASG.
     Type: Number
-    Default: 3
+    Default: 4
   FrameworkNodeAutoScalingGroupMaxSize:
     Description: >-
       Maximum size of Framework node Group ASG. Set to at least 1 greater than
       FrameworkNodeAutoScalingGroupDesiredCapacity.
     Type: Number
-    Default: 4
+    Default: 5
 
 Metadata:
   AWS::CloudFormation::Interface:
