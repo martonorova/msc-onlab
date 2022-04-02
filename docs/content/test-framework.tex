@@ -391,7 +391,6 @@ Kubedepend exposes several command line options to configure the load generation
 	\item \texttt{locust-spawn-rate} - Specifies the number of Locust users to start per second in a single measurement. Once the total number of users defined by \texttt{locust-user-count} is reached, no more simulated users are started. 
 \end{itemize}
 
-
 %----------------------------------------------------------------------------
 \subsection{Fault Injection}
 %----------------------------------------------------------------------------
@@ -767,37 +766,72 @@ All the command line configuration options of Kubedepend are exposed in the Jenk
 \section{Measuring the baseline}
 %----------------------------------------------------------------------------
 
-Motivation:
+% Motivation:
 
-\begin{itemize}
-	\item app and framework is ready
-	\item need the characteristics of the app in various fault profiles
-	\item analyzing these values can help determine which part of the system should be / can be improved - enhancements can be designed
-	\item need baseline values for each fault profiles for comparison during fine-tuning and measuring the impact of enhancements
-\end{itemize}
+%\begin{itemize}
+%	\item app and framework is ready
+%	\item need the characteristics of the app in various fault profiles
+%	\item analyzing these values can help determine which part of the system should be / can be improved - enhancements can be designed
+%	\item need baseline values for each fault profiles for comparison during fine-tuning and measuring the impact of enhancements
+%\end{itemize}
 
-Baseline justification:
+%----------------------------------------------------------------------------
+\subsection{Motivation}
+%----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item from the beginning, the framework is built up with reproducibility in mind - the pipeline supports the usage of the exact same configuration and system on each measurement
-	\begin{itemize}
-		\item infrastructure - CloudFormation template
-		\item tools - helm chart with fixed values
-		\item app - building docker images from the same source code and configuration
-		\item measurement - running measurement with the same logic and configuration
-	\end{itemize}
-	\item ENVIRONMENT can be considered constant:
-	\begin{itemize}
-		\item the whole system runs on virtual machines that have the same OS and resources available
-		\item VMs are in a separated subnetwork in the cloud - no unsolicited traffic
-		\item the workload of other tenants in the cloud can have brief transient effects on the system but executing multiple measurements with the same configuration aims to compensate this
-		\item the workload of other tenants can affect the system in production mode as well - it can be considered as constant "noise"
-		\item the kubernetes resource request definitions ensure that all components have enough resources (cpu, memory) available
-	\end{itemize}
-\end{itemize}
+The goals of this thesis work included the investigation of possible alternatives to improve the dependability of the Kubernetes based sample application and to implement some of these potential enhancements. In order to be able to improve the metrics, initial measurements are needed to assess the dependability of the original system without applying any enhancements. The results of these measurements can serve as baseline values for comparing the dependability of a changed system to the original one. Furthermore, the results of the initial measurements can help determine which parts of the system should be and can be improved -- this information makes designing the different enhancements easier.
+
+%----------------------------------------------------------------------------
+\subsection{Constant environment}
+%----------------------------------------------------------------------------
+
+Measuring the baseline characteristics of the original application requires that the environment in which the system runs can be considered constant. In this case, several mechanisms ensure the steady state of the environment.
+
+From the beginning of the project, the test framework is built up with reproducibility in mind. The pipeline described in Section \ref{cicd} supports the usage of the exact same configurations and subsystems on each measurement. 
+
+The core infrastructure layer underlying the application is constructed using a CloudFormation (see Section \ref{cloudformation}) template that ensures that the Kubernetes infrastructure is the same each time. Despite the fact that the cluster runs in the AWS public cloud which serves an immense amount of users, the applications can run in a well controlled environment. The cluster consists of virtual machines that have same operating systems and resources (\eg CPU and memory). The virtual machines run in a separated network using the Virtual Private Cloud (VPC) technology in AWS, so there is no unsolicited network traffic between the nodes in the cluster.
+
+The application components are packaged and run using containerization technologies with consistent configurations that provide reproducible environment for the software units. During deployment, all the tools and the application components are installed on the cluster with the same parameters by Helm (introduced in Section \ref{helm}) -- another point in favor of reproducibility.
+
+Using the services of a public cloud provider has an important consequence that must be considered before conducting the measurements. The virtual machines that form the Kubernetes cluster run on physical machines that host the workloads of other users fo the cloud provider. This means in theory that the activity of different tenants can affect each other resulting in varying performance of the same system. Isolating the workloads of different users falls under the responsibilities of the provider as the users do not have access to the physical, hardware layer of the infrastructure. The efficiency the isolation depends on the Service Level Agreements taken on by the provider. One could argue, that the transient effects of other tenants can be considered as constant "white noise", because it is always present in the environment both during the development of system while the measurements are executed and both during production periods. This would suggest to ignore the presence or other tenant workloads as its effect is constant in average. However, complete ignorance is not a good solution. In order to mitigate these anomalies, the test framework executes measurement multiple times with the same configuration and draws the final conclusion from aggregated results. In addition, all the components of the application and the framework tooling have defined resource requests \cite{KubernetesResourceManagement} in the Kubernetes configurations ensuring that each pod possesses the necessary resources to function correctly at all times.
 
 
-TODO
+
+%Baseline justification:
+
+%\begin{itemize}
+%	\item from the beginning, the framework is built up with reproducibility in mind - the pipeline supports the usage of the exact same configuration and system on each measurement
+%	\begin{itemize}
+%		\item infrastructure - CloudFormation template
+%		\item tools - helm chart with fixed values
+%		\item app - building docker images from the same source code and configuration
+%		\item measurement - running measurement with the same logic and configuration
+%	\end{itemize}
+%	\item ENVIRONMENT can be considered constant:
+%	\begin{itemize}
+%		\item the whole system runs on virtual machines that have the same OS and resources available
+%		\item VMs are in a separated subnetwork in the cloud - no unsolicited traffic
+%		\item the workload of other tenants in the cloud can have brief transient effects on the system but executing multiple measurements with the same configuration aims to compensate this
+%		\item the workload of other tenants can affect the system in production mode as well - it can be considered as constant "noise"
+%		\item the kubernetes resource request definitions ensure that all components have enough resources (cpu, memory) available
+%	\end{itemize}
+%\end{itemize}
+
+
+%----------------------------------------------------------------------------
+\subsection{Baseline Results}
+%----------------------------------------------------------------------------
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/baseline_grouped_barchart.png}
+	\caption{Baseline Results}
+	\label{fig:baseline_results}
+\end{figure}
+
+TODO	
 
 Overall grouped bar chart diagram (availability, relative MUT, rel MDT, rel MTBF, successful jobs percent)
 
