@@ -145,13 +145,13 @@ Parameters:
   WorkerNodeAutoScalingGroupDesiredCapacity:
     Description: Desired capacity of Node Group ASG.
     Type: Number
-    Default: 4
+    Default: 7
   WorkerNodeAutoScalingGroupMaxSize:
     Description: >-
       Maximum size of Node Group ASG. Set to at least 1 greater than
       WorkerNodeAutoScalingGroupDesiredCapacity.
     Type: Number
-    Default: 5
+    Default: 8
 
   FrameworkNodeVolumeSize:
     Description: Framework node volume size
