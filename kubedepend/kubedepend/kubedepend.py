@@ -22,7 +22,6 @@ import math
 import constants as c
 from model import MeasurementResult
 from model import BackendMetrics
-from model import SystemState
 from model import MeasurementSequenceResult
 
 logging.basicConfig(
@@ -278,7 +277,8 @@ def is_stable_state():
     worker_busy_threads_count = query_prometheus(c.WORKER_BUSY_THREADS_QUERY)
     queue_size = query_prometheus(c.QUEUE_SIZE_QUERY)
     worker_pods_count = query_prometheus(c.WORKER_PODS_COUNT_QUERY)
-    needed_worker_ratio = query_prometheus(c.NEEDED_WORKER_RATIO_QUERY)
+    # this result is never used
+    # needed_worker_ratio = query_prometheus(c.NEEDED_WORKER_RATIO_QUERY)
     database_ready_replicas = query_prometheus(c.DATABASE_DEPLOYMENT_READY_REPLICAS_QUERY)
     backend_ready_replicas = query_prometheus(c.BACKEND_DEPLOYMENT_READY_REPLICAS_QUERY)
 

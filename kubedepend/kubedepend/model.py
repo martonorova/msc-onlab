@@ -59,13 +59,13 @@ class MeasurementResult:
             f'Finished Jobs={self.finished_jobs} )'
         )
 
-
-class SystemState:
-    def __init__(self):
-        self.needed_worker_ratio = None
-        self.queue_size = None
-        self.worker_busy_threads_count = None
-        self.worker_pods_count = None
+# never used
+# class SystemState:
+#     def __init__(self):
+#         self.needed_worker_ratio = None
+#         self.queue_size = None
+#         self.worker_busy_threads_count = None
+#         self.worker_pods_count = None
 
 
 class MeasurementSequenceResult:
