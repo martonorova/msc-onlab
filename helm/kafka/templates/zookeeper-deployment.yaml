@@ -37,6 +37,10 @@ spec:
               value: zookeeper2
             - name: ZOOKEEPER_SERVER_3
               value: zookeeper3
+            - name: ZOOKEEPER_SERVER_4
+              value: zookeeper4
+            - name: ZOOKEEPER_SERVER_5
+              value: zookeeper5
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -83,6 +87,10 @@ spec:
               value: zookeeper2
             - name: ZOOKEEPER_SERVER_3
               value: zookeeper3
+            - name: ZOOKEEPER_SERVER_4
+              value: zookeeper4
+            - name: ZOOKEEPER_SERVER_5
+              value: zookeeper5
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -129,6 +137,110 @@ spec:
               value: zookeeper2
             - name: ZOOKEEPER_SERVER_3
               value: zookeeper3
+            - name: ZOOKEEPER_SERVER_4
+              value: zookeeper4
+            - name: ZOOKEEPER_SERVER_5
+              value: zookeeper5
+          resources:
+            {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zookeeper-4
+  labels:
+    app: zookeeper
+    id: "4"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+      id: "4"
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+        id: "4"
+    spec:
+      serviceAccountName: {{ .Values.zookeeper.serviceAccount.name }}
+      containers:
+        - name: zookeper
+          image: "{{ .Values.zookeeper.image.repository }}"
+          ports:
+            - name: tcp-client
+              containerPort: 2181
+            - name: tcp-follower
+              containerPort: 2888
+            - name: tcp-leader
+              containerPort: 3888
+          env:
+            - name: ZOOKEEPER_ID
+              value: "4"
+            - name: ZOOKEEPER_SERVER_1
+              value: zookeeper1
+            - name: ZOOKEEPER_SERVER_2
+              value: zookeeper2
+            - name: ZOOKEEPER_SERVER_3
+              value: zookeeper3
+            - name: ZOOKEEPER_SERVER_4
+              value: zookeeper4
+            - name: ZOOKEEPER_SERVER_5
+              value: zookeeper5
+          resources:
+            {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zookeeper-5
+  labels:
+    app: zookeeper
+    id: "5"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+      id: "5"
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+        id: "5"
+    spec:
+      serviceAccountName: {{ .Values.zookeeper.serviceAccount.name }}
+      containers:
+        - name: zookeper
+          image: "{{ .Values.zookeeper.image.repository }}"
+          ports:
+            - name: tcp-client
+              containerPort: 2181
+            - name: tcp-follower
+              containerPort: 2888
+            - name: tcp-leader
+              containerPort: 3888
+          env:
+            - name: ZOOKEEPER_ID
+              value: "5"
+            - name: ZOOKEEPER_SERVER_1
+              value: zookeeper1
+            - name: ZOOKEEPER_SERVER_2
+              value: zookeeper2
+            - name: ZOOKEEPER_SERVER_3
+              value: zookeeper3
+            - name: ZOOKEEPER_SERVER_4
+              value: zookeeper4
+            - name: ZOOKEEPER_SERVER_5
+              value: zookeeper5
           resources:
             {{- toYaml .Values.zookeeper.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
