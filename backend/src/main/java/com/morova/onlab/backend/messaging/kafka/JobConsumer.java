@@ -25,6 +25,7 @@ public class JobConsumer {
 
     Logger logger = LoggerFactory.getLogger(JobConsumer.class);
 
+    @ConditionalOnExpression("'${messaging}'.equals('kafka')")
     @KafkaListener(topics = "${kafka.topics.backend}", groupId = "${kafka.consumer.group-id}")
     public void consumeJob(String jobJson) {
 
