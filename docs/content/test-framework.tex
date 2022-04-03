@@ -414,7 +414,7 @@ chaos experiments only affect the application namespace
 TODO
 
 %----------------------------------------------------------------------------
-\subsubsection{Fault Profiles}
+\subsubsection{Fault Profiles} \label{test-impl-fault-profiles}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -687,6 +687,12 @@ Throughout the project, several metrics are used that are not available as built
 
 \emph{Note:} The \texttt{absent} and \texttt{label\_replace} PromQL functions are used to provide provide 0 values in case one of the metrics is missing (\texttt{org\_apache\_activemq\_Broker\_QueueSize} or \texttt{worker\_busy\_threads}). These metrics can be missing from Prometheus if the Pods exposing them are not available due to the fault injection.
 
+TODO
+
+Grafana dashboard screenshot during measurement
+
+TODO
+
 
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
@@ -822,7 +828,9 @@ Using the services of a public cloud provider has an important consequence that 
 \subsection{Baseline Results}
 %----------------------------------------------------------------------------
 
+After finalizing the application and the framework, the baseline measurement sequences were executed for each of the fault profiles described in Section \ref{test-impl-fault-profiles} excluding the \texttt{Custom} profile. The load generation lasted 5 minutes in case of all the measurement sequences and count of the measurements in a sequence were adaptively determined as presented in Section \ref{test-impl-measurement-seq}. 
 
+The baseline results are presented in Figure \ref{fig:baseline_results}. The values can be seen on a bar chart, where the different metrics are grouped together. In order to make the diagram more comprehensible, the dependability metrics (MUT, MDT, MTBF) are normalized with the duration of the load generation in each measurement and their names are prefixed with "rel\_" to reflect this change.
 
 \begin{figure}[h]
 	\centering
@@ -831,26 +839,17 @@ Using the services of a public cloud provider has an important consequence that 
 	\label{fig:baseline_results}
 \end{figure}
 
-TODO	
-
-Overall grouped bar chart diagram (availability, relative MUT, rel MDT, rel MTBF, successful jobs percent)
-
-TODO
-
 \begin{itemize}
 	\item compare and try to reason about the results
+	\item as anticipated, the none profile has flawless metrics (MTBF is one because of the bounded time period of the measurement without error, MUT + MDT a little counter intuitive)
+	\item the stresschaos experiments do not have much effect - maybe the amount of the simulated workload wasn't enough -- future work to finetune
+	\item network partition has little effect - fine-tuning - future work
+	\item iochaos - worst availability - probably because of the DB connection test saves a test objects and then it tries to query it and it timeouts -- however, finished\_jobs\_ratio is not affected (the jobs are queried at the end of the measurements when the chaos objects are deleted)
+	\item network-delay - timeout errors can occur during the health check of the backend - during the checks, pseudo synchronous request-response pairs are used and round trip time can be long with the injected delay -- however, to send the jobs and results, plain async messaging is used, the components do not wait for response --> no timeout error can occur
+	\item pod-failure and pod-kill both have considerable effects on the metrics - pod-failure is more severe as a targeted Pod stays in faulty state during the whole intervals while the chaos is active - pod-kill deletes the pod, but it will be recreated immediately due to ReplicaSets -- the metrics show that this fail-fast behaviour is the more desirable scenario in distributed systems ----- both affect the finished\_jobs\_ratio due to job executing worker fails --> these get lost
+	
 \end{itemize}
 
-TODO
-
-Spider chart of each fault profiles
-
-TODO
-
-\begin{itemize}
-	\item none profile should be all 1-s, or close to it (explain why not exactly 1)
-	\item reveal possible  root causes - goal is radius 1 on all 5 axis
-\end{itemize}
 
 
 
