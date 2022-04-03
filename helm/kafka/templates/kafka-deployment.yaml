@@ -28,7 +28,7 @@ spec:
               name: tcp-jmx
           env:
             - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181,zookeeper4:2181,zookeeper5:2181
+              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
             - name: KAFKA_BROKER_ID
               value: "0"
             - name: KAFKA_LISTENERS
@@ -81,7 +81,7 @@ spec:
               name: tcp-jmx
           env:
             - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181,zookeeper4:2181,zookeeper5:2181
+              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
             - name: KAFKA_BROKER_ID
               value: "1"
             - name: KAFKA_LISTENERS
@@ -134,7 +134,7 @@ spec:
               name: tcp-jmx
           env:
             - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181,zookeeper4:2181,zookeeper5:2181
+              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
             - name: KAFKA_BROKER_ID
               value: "2"
             - name: KAFKA_LISTENERS
@@ -149,112 +149,6 @@ spec:
               value: "kafka-service-2.{{ .Release.Namespace }}.svc.cluster.local"
             - name: KAFKA_ADVERTISED_PORT
               value: "9094"
-            - name: KAFKA_OPTS
-              value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
-          resources:
-            {{- toYaml .Values.kafka.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
----
-kind: Deployment
-apiVersion: apps/v1
-metadata:
-  name: kafka-broker-3
-  labels:
-    app: kafka
-    id: "3"
-spec:
-  selector:
-    matchLabels:
-        app: kafka
-        id: "3"
-  template:
-    metadata:
-      labels:
-        app: kafka
-        id: "3"
-    spec:
-      serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
-      containers:
-        - name: kafka
-          image: "{{ .Values.kafka.image.repository }}"
-          ports:
-            - containerPort: 9095
-              name: tcp-kafka
-            - containerPort: 7071
-              name: tcp-jmx
-          env:
-            - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181,zookeeper4:2181,zookeeper5:2181
-            - name: KAFKA_BROKER_ID
-              value: "3"
-            - name: KAFKA_LISTENERS
-              value: LISTENER://:9095
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: "LISTENER://kafka-service-3.{{ .Release.Namespace }}.svc.cluster.local:9095"
-            - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: LISTENER
-            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-              value: LISTENER:PLAINTEXT
-            - name: KAFKA_ADVERTISED_HOST_NAME
-              value: "kafka-service-3.{{ .Release.Namespace }}.svc.cluster.local"
-            - name: KAFKA_ADVERTISED_PORT
-              value: "9095"
-            - name: KAFKA_OPTS
-              value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
-          resources:
-            {{- toYaml .Values.kafka.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
----
-kind: Deployment
-apiVersion: apps/v1
-metadata:
-  name: kafka-broker-4
-  labels:
-    app: kafka
-    id: "4"
-spec:
-  selector:
-    matchLabels:
-        app: kafka
-        id: "4"
-  template:
-    metadata:
-      labels:
-        app: kafka
-        id: "4"
-    spec:
-      serviceAccountName: {{ .Values.kafka.serviceAccount.name }}
-      containers:
-        - name: kafka
-          image: "{{ .Values.kafka.image.repository }}"
-          ports:
-            - containerPort: 9096
-              name: tcp-kafka
-            - containerPort: 7071
-              name: tcp-jmx
-          env:
-            - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181,zookeeper4:2181,zookeeper5:2181
-            - name: KAFKA_BROKER_ID
-              value: "4"
-            - name: KAFKA_LISTENERS
-              value: LISTENER://:9096
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: "LISTENER://kafka-service-4.{{ .Release.Namespace }}.svc.cluster.local:9096"
-            - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: LISTENER
-            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-              value: LISTENER:PLAINTEXT
-            - name: KAFKA_ADVERTISED_HOST_NAME
-              value: "kafka-service-4.{{ .Release.Namespace }}.svc.cluster.local"
-            - name: KAFKA_ADVERTISED_PORT
-              value: "9096"
             - name: KAFKA_OPTS
               value: -javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/prom-jmx-agent-config.yml
           resources:
