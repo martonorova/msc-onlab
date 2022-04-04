@@ -432,7 +432,7 @@ It is also possible to set a strength level for each chaos experiment inside a f
 
 Currently the following fault profiles are defined:
 
-\paragraph{IO} The IO fault profile introduces delays to disk read and write operations for a specific period of time. The current implementation limits the profile to only affect the database because IO operations are practically only critical for the database component.
+\paragraph{IO} The IO fault profile introduces delays to disk read and write operations for a specific period of time. The current implementation limits the profile to only affect the database because IO operations are practically only critical for the database as the other other components in the system only keep their data in memory.
 
 \paragraph{Network Delay} The Network Delay fault profile causes latency in the network connections of the targeted Pods for a specific period of time.
 
@@ -828,9 +828,9 @@ Using the services of a public cloud provider has an important consequence that 
 \subsection{Baseline Results}
 %----------------------------------------------------------------------------
 
-After finalizing the application and the framework, the baseline measurement sequences were executed for each of the fault profiles described in Section \ref{test-impl-fault-profiles} excluding the \texttt{Custom} profile. The load generation lasted 5 minutes in case of all the measurement sequences and count of the measurements in a sequence were adaptively determined as presented in Section \ref{test-impl-measurement-seq}. 
+After finalizing the application and the framework, the baseline measurement sequences were executed for each of the fault profiles described in Section \ref{test-impl-fault-profiles}, excluding the \texttt{Custom} profile. The load generation lasted 5 minutes (for practical reasons) in case of all the measurement sequences and count of the measurements in a sequence were adaptively determined as explained in Section \ref{test-impl-measurement-seq}. 
 
-The baseline results are presented in Figure \ref{fig:baseline_results}. The values can be seen on a bar chart, where the different metrics are grouped together. In order to make the diagram more comprehensible, the dependability metrics (MUT, MDT, MTBF) are normalized with the duration of the load generation in each measurement and their names are prefixed with "rel\_" to reflect this change.
+The baseline results are presented in Figure \ref{fig:baseline_results}. The values can be seen on a bar chart, where the different metrics are grouped together. In order to make the diagram more comprehensible, three dependability metrics (MUT, MDT, MTBF) are normalized with the duration of the load generation in each measurement and their names are prefixed with "rel\_" to reflect this change. This way all the results presented on the diagram have values between 0 and 1 (inclusive).
 
 \begin{figure}[h]
 	\centering
@@ -839,16 +839,29 @@ The baseline results are presented in Figure \ref{fig:baseline_results}. The val
 	\label{fig:baseline_results}
 \end{figure}
 
-\begin{itemize}
-	\item compare and try to reason about the results
-	\item as anticipated, the none profile has flawless metrics (MTBF is one because of the bounded time period of the measurement without error, MUT + MDT a little counter intuitive)
-	\item the stresschaos experiments do not have much effect - maybe the amount of the simulated workload wasn't enough -- future work to finetune
-	\item network partition has little effect - fine-tuning - future work
-	\item iochaos - worst availability - probably because of the DB connection test saves a test objects and then it tries to query it and it timeouts -- however, finished\_jobs\_ratio is not affected (the jobs are queried at the end of the measurements when the chaos objects are deleted)
-	\item network-delay - timeout errors can occur during the health check of the backend - during the checks, pseudo synchronous request-response pairs are used and round trip time can be long with the injected delay -- however, to send the jobs and results, plain async messaging is used, the components do not wait for response --> no timeout error can occur
-	\item pod-failure and pod-kill both have considerable effects on the metrics - pod-failure is more severe as a targeted Pod stays in faulty state during the whole intervals while the chaos is active - pod-kill deletes the pod, but it will be recreated immediately due to ReplicaSets -- the metrics show that this fail-fast behaviour is the more desirable scenario in distributed systems ----- both affect the finished\_jobs\_ratio due to job executing worker fails --> these get lost
-	
-\end{itemize}
+Looking at the results of the baseline measurements, one can notice several general correlations. It is not surprising, that the value of the \texttt{availability} greatly affects the value of the other three dependability metrics. A high \texttt{availability} means high \texttt{rel\_MUT}, while a lower value implies higher \texttt{rel\_MDT}. Generally, when the relative Mean Down Time is not zero, the results indicate more frequent faults (lower \texttt{rel\_MTBF} values).
+
+As anticipated, the fault profile named "\texttt{none}" -- that does not inject any anomalies into the system -- delivered flawless metrics. The high value of \texttt{rel\_MTBF} can be counter-intuitive, however in a bounded time interval with no errors this is the right result, according to the formula described in Section \ref{background-dep-metrics-mean-values} (after normalization).
+
+Applying the profiles "\texttt{stress-cpu}" and "\texttt{stress-mem} have only marginal effects on the metrics, that could a consequence of not enough injected simulated workload on the Pods. In this project, the task of fine-tuning of these chaos experiments remains open and is a good candidate for future work (see Section \ref{future-work}). However, for the sake of a thorough analysis, let us assume that the configuration of these chaos experiments lead to significant resource utilization anomalies (CPU and memory pressure). In Kubernetes, when the Pods on a given Node use up too much of the Node's resources, a couple of Pods get evicted from that Node to free up resources and are rescheduled on other Nodes, if possible \cite{KubernetesNodePressureEviction}. One might notice, that from the Pod's point of view, this prevention mechanism is similar to when the Pod simply gets deleted or killed due to an error. Of course, the user workload running on the Pod may experience performance issues before eviction, but in the end the application suffers from the same scenario: one of its component is stopped and restarted elsewhere in the cluster. Thus, if the system is prepared for sudden component fails and restarts, than it can also mitigate to some degree the effects of unexpected Node resource utilization growths.
+
+Similarly the its two precedents, the fault profile named "\texttt{network-partition}" causes little falls in the metrics compared to the "\texttt{none}" profile. The root cause for this is probably the configuration of the chaos experiment. Its effects could be more severe, if the network partition occurred more frequently and affecting more Pods in the application namespace. This fine-tuning remains a possible next step for future work (see Section \ref{future-work}).
+
+The fault profile named "\texttt{io}" produced the worst \texttt{availability} metric, however the \texttt{finished\_jobs\_ratio} value is the same as for the "\texttt{none}" profile. The reason for the lowest \texttt{availability} may well be in the mechanism how the backend component periodically checks if the database connection is still alive. Each time the backend performs a health check, it attempts to persist a test object and then sends a request to the database to query the newly created test data (as described in Section \ref{impl-backend-healthcheck}). One can notice that this is a synchronous mechanism. If writing to the database (which is stored on the disk) takes a long time because of the injected I/O delay, than the query that tries to retrieve the data can fail with a timeout error. Yet, during task executions, the application does not make an attempt to immediately check the persisted results, the communication remains asynchronous and the test framework only queries the jobs at the end of the measurements, after the load generation and fault injection is done.
+
+The results of the fault profile "\texttt{network-delay}" show a similar characteristic as of the "\texttt{io}" -- significantly lower \texttt{availability} paired with little or no change in \texttt{finished\_jobs\_ratio} compared to the "\texttt{none}" profile. The reason for this is analogous as well. The steps of the health check implemented in the backend (see in Section \ref{impl-backend-healthcheck}) are using a synchronous communication model. For example, to test the connection between the backend and the worker components, a request is sent out from the backend and then it waits for a specific response. Due to the injected network delay, the health check can fail with a timeout error. However, as described above, during task executions, the communication follows an asynchronous pattern.
+
+The "\texttt{pod-failure}" and "\texttt{pod-kill}" profiles introduce considerable changes in the metrics. As the results show, the "\texttt{pod-failure}" fault profile has more severe effects on the dependability than "\texttt{pod-kill}". This is not surprising, because "\texttt{pod-failure}" makes the affected Pods unavailable for a specific time, while "\texttt{pod-kill}" simply stops the Pods, enabling a ReplicaSet to immediately restart them (see Section \ref{test-impl-fault-profiles}). Both fault profiles can influence any component in the application. During the measurements, backend, database and message broker failures (or restarts) can degrade the \texttt{availability} of the application, whereas worker outages can generally lead to the loss of ongoing task executions, causing decline in \texttt{finished\_jobs\_ratio}. Of course, if all the worker components are down, the backend health check fails which further decreases the \texttt{availability}. The fact that the system handles the "\texttt{pod-kill}" fault profile better, supports the general notion why system developers prefer components that fail fast instead of long-lasting erroneous periods with undeterministic outcomes.
+
+%\begin{itemize}
+%	\item compare and try to reason about the results
+%	\item as anticipated, the none profile has flawless metrics (MTBF is one because of the bounded time period of the measurement without error, MUT + MDT a little counter intuitive)
+%	\item the stresschaos experiments do not have much effect - maybe the amount of the simulated workload wasn't enough -- future work to finetune
+%	\item network partition has little effect - fine-tuning - future work
+%	\item iochaos - worst availability - probably because of the DB connection test saves a test objects and then it tries to query it and it timeouts -- however, finished\_jobs\_ratio is not affected (the jobs are queried at the end of the measurements when the chaos objects are deleted)
+%	\item network-delay - timeout errors can occur during the health check of the backend - during the checks, pseudo synchronous request-response pairs are used and round trip time can be long with the injected delay -- however, to send the jobs and results, plain async messaging is used, the components do not wait for response --> no timeout error can occur
+%	\item pod-failure and pod-kill both have considerable effects on the metrics - pod-failure is more severe as a targeted Pod stays in faulty state during the whole intervals while the chaos is active - pod-kill deletes the pod, but it will be recreated immediately due to ReplicaSets -- the metrics show that this fail-fast behaviour is the more desirable scenario in distributed systems ----- both affect the finished\_jobs\_ratio due to job executing worker fails --> these get lost
+%\end{itemize}
 
 
 
