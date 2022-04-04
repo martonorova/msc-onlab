@@ -241,13 +241,13 @@ Kubernetes is an open-source platform for managing containerized workloads and s
 
 Kubernetes brings a vast amount of useful features, but a thorough discussion concerning these is out of the scope of this work. However, a brief list is provided below for a clearer context \cite{KubernetesOverview}.
 
-\paragraph{Service discovery and load balancing} - Kubernetes can expose a container using the DNS name or using their own IP address. If traffic to a container is high, Kubernetes is able to load balance and distribute the network traffic so that the deployment is stable.
+\paragraph{Service discovery and load balancing} - Kubernetes can expose a container using the DNS name or using their own IP address. If traffic to a container is high, Kubernetes is able to load balance and distribute the network traffic so that the deployment is stable \cite{KubernetesOverview}.
 
-\paragraph{Automated rollouts and rollbacks} - Cluster administrators can describe the desired state for the deployed containers using Kubernetes, and it can change the actual state to the desired state at a controlled rate. For example, Kubernetes can automatically create new containers for a deployment, remove existing containers and adopt all their resources to the new container.
+\paragraph{Automated rollouts and rollbacks} - Cluster administrators can describe the desired state for the deployed containers using Kubernetes, and it can change the actual state to the desired state at a controlled rate. For example, Kubernetes can automatically create new containers for a deployment, remove existing containers and adopt all their resources to the new container \cite{KubernetesOverview}.
 
-\paragraph{Automatic bin packing} - Kubernetes can automatically schedule the containers of deployments to the nodes in the cluster and aims to achieve the best resource utilization over the whole cluster.
+\paragraph{Automatic bin packing} - Kubernetes can automatically schedule the containers of deployments to the nodes in the cluster and aims to achieve the best resource utilization over the whole cluster \cite{KubernetesOverview}.
 
-\paragraph{Self-healing} Kubernetes can automatically restart containers that fail, replace containers, kill containers that do not respond to user-defined health check, and does not advertise them to clients until they are ready to serve.
+\paragraph{Self-healing} Kubernetes can automatically restart containers that fail, replace containers, kill containers that do not respond to user-defined health check, and does not advertise them to clients until they are ready to serve \cite{KubernetesOverview}.
 
 %----------------------------------------------------------------------------
 \subsection{Cluster Architecture}
@@ -266,15 +266,15 @@ A Kubernetes cluster consists of a set of worker machines, called nodes, and the
 
 The components in the control plane make global decisions about the cluster -- for example scheduling -- and handle cluster events \cite{KubernetesArchitecture}. 
 
-\paragraph{kube-apiserver} The API server exposes the Kubernetes API which acts as the frontend for the Kubernetes control plane. The official Kubernetes command line tool -- \texttt{kubectl} -- and many applications and tools use this API to communicate with the Kubernetes cluster's control plane.
+\paragraph{kube-apiserver} The API server exposes the Kubernetes API which acts as the frontend for the Kubernetes control plane. The official Kubernetes command line tool -- \texttt{kubectl} -- and many applications and tools use this API to communicate with the Kubernetes cluster's control plane \cite{KubernetesArchitecture}.
 
-\paragraph{etcd} The etcd is a consistent and highly-available key value storage to keep all Kubernetes cluster data persisted.
+\paragraph{etcd} The etcd is a consistent and highly-available key value storage to keep all Kubernetes cluster data persisted \cite{KubernetesArchitecture}.
 
-\paragraph{kube-scheduler} The kube-scheduler manages the assignment of newly created workloads to nodes based on various factors in order to maintain a balanced cluster state.
+\paragraph{kube-scheduler} The kube-scheduler manages the assignment of newly created workloads to nodes based on various factors in order to maintain a balanced cluster state \cite{KubernetesArchitecture}.
 
-\paragraph{kube-controller-manager} This component runs the controller processes in the cluster that watch the shared state of the cluster through the apiserver and make changes attempting to move the current state towards the defined desired state.
+\paragraph{kube-controller-manager} This component runs the controller processes in the cluster that watch the shared state of the cluster through the apiserver and make changes attempting to move the current state towards the defined desired state \cite{KubernetesArchitecture}.
 
-\paragraph{cloud-controller-manager} The cloud-controller-manager enables linking the Kubernetes cluster into a cloud provider's API. This permits cloud providers to create a custom integration layer between Kubernetes and their own infrastructure and allows the cloud users to interact with their Kubernetes cluster in a universal way, no matter the underlying cloud infrastructure.
+\paragraph{cloud-controller-manager} The cloud-controller-manager enables linking the Kubernetes cluster into a cloud provider's API. This permits cloud providers to create a custom integration layer between Kubernetes and their own infrastructure and allows the cloud users to interact with their Kubernetes cluster in a universal way, no matter the underlying cloud infrastructure \cite{KubernetesArchitecture}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Node Components}
@@ -430,5 +430,12 @@ Helm works with the concept of Charts which are packages containing all the reso
 \subsubsection{Scheduling Experiments}
 %----------------------------------------------------------------------------
 
+%----------------------------------------------------------------------------
+\section{Kafka} \label{background-kafka}
+%----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item overview - pub sub
+	\item concepts - Broker, Producer, Consumer, Topic, Partition
+\end{itemize}
 

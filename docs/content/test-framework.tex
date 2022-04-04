@@ -704,6 +704,8 @@ Kubedepend does not expose any command line options to configure the monitoring 
 \subsection{Build Pipeline} \label{cicd}
 %----------------------------------------------------------------------------
 
+TODO update this section according to the Jenkinsfile
+
 %\begin{itemize}
 %	\item  framework workflow can be viewed as a build pipeline - use industry standard tools - Jenkins!
 %	\item facilitates greater level of automation
@@ -769,7 +771,7 @@ All the command line configuration options of Kubedepend are exposed in the Jenk
 
 
 %----------------------------------------------------------------------------
-\section{Measuring the baseline}
+\section{Baseline}
 %----------------------------------------------------------------------------
 
 % Motivation:
@@ -801,7 +803,13 @@ The application components are packaged and run using containerization technolog
 
 Using the services of a public cloud provider has an important consequence that must be considered before conducting the measurements. The virtual machines that form the Kubernetes cluster run on physical machines that host the workloads of other users fo the cloud provider. This means in theory that the activity of different tenants can affect each other resulting in varying performance of the same system. Isolating the workloads of different users falls under the responsibilities of the provider as the users do not have access to the physical, hardware layer of the infrastructure. The efficiency the isolation depends on the Service Level Agreements taken on by the provider. One could argue, that the transient effects of other tenants can be considered as constant "white noise", because it is always present in the environment both during the development of system while the measurements are executed and both during production periods. This would suggest to ignore the presence or other tenant workloads as its effect is constant in average. However, complete ignorance is not a good solution. In order to mitigate these anomalies, the test framework executes measurement multiple times with the same configuration and draws the final conclusion from aggregated results. In addition, all the components of the application and the framework tooling have defined resource requests \cite{KubernetesResourceManagement} in the Kubernetes configurations ensuring that each pod possesses the necessary resources to function correctly at all times.
 
-
+%%----------------------------------------------------------------------------
+%\subsection{Measuring the Baseline Values}
+%%----------------------------------------------------------------------------
+%
+%After finalizing the application and the framework, the baseline measurement sequences were executed for each of the fault profiles described in Section \ref{test-impl-fault-profiles}, excluding the \texttt{Custom} profile. The load generation lasted 5 minutes (for practical reasons) in case of all the measurement sequences and count of the measurements in a sequence were adaptively determined as explained in Section \ref{test-impl-measurement-seq}.
+%
+%The results of the baseline measurements are presented in Chapter \ref{evaluation}.
 
 %Baseline justification:
 
@@ -825,7 +833,7 @@ Using the services of a public cloud provider has an important consequence that 
 
 
 %----------------------------------------------------------------------------
-\subsection{Baseline Results}
+\subsection{Baseline Results} \label{baseline-results}
 %----------------------------------------------------------------------------
 
 After finalizing the application and the framework, the baseline measurement sequences were executed for each of the fault profiles described in Section \ref{test-impl-fault-profiles}, excluding the \texttt{Custom} profile. The load generation lasted 5 minutes (for practical reasons) in case of all the measurement sequences and count of the measurements in a sequence were adaptively determined as explained in Section \ref{test-impl-measurement-seq}. 

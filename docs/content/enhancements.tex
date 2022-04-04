@@ -31,25 +31,21 @@ The robustness of the system can be enhanced in different layers. Some options a
 \subsection{Kafka}
 %----------------------------------------------------------------------------
 
-TODO more details about Kafka - Producer, Consumer, Topic?
+Apache Kafka is an open-source distributed event streaming platform that can be used for high-performance data pipelines, streaming analytics and data integration \cite{Kafka}. It acts as a scalable, fault tolerant publish-subscribe messaging system ideal for performance critical applications. Further details about Kafka can be found in Section \ref{background-kafka}.
 
-TODO first describe the failure scenario it solves -  refer to baseline measurement
+The baseline measurements revealed that injecting Pod Failure and Pod Kill anomalies into the system can cause considerable decrease in both availability and the number of successfully finished tasks executed by the worker components (see Section \ref{baseline-results}). One reason could be that the current message broker acts as a single point of failure. If it stops due to and error, no submitted tasks can be sent to the workers to process and no finished tasks can be sent to the backend component.
 
-Apache Kafka is an open-source distributed event streaming platform that can be used for high-performance data pipelines, streaming analytics and data integration \cite{Kafka}. It acts as a scalable, fault tolerant publish-subscribe messaging system ideal for performance critical applications.
-
-In this project, Kafka can be used to replace ActiveMQ to provide a robust, more fault-tolerant messaging solution for the application.
-
-Kafka topics can be used to facilitate the forwarding of task submissions and results in the system. The backend and worker components can both act as producers and consumers of the topics.
+In this project, Kafka could be used to replace ActiveMQ to provide a robust, more fault-tolerant messaging solution for the application. Kafka topics can be used to facilitate the forwarding of task submissions and results in the system. The backend and worker components can both act as producers and consumers of the topics. As a Kafka cluster operates with at least three message brokers, one could hope for better availability and job success ratio.
 
 %----------------------------------------------------------------------------
 \subsection{Heartbeats}
 %----------------------------------------------------------------------------
 
-TODO first describe the failure scenario it solves? -  refer to baseline measurement
-
 Heartbeats is a custom enhancement option in the application to provide reliable task execution.
 
-In case when a worker instance stops during the calculation of a task, the task is lost and its result remains empty as per the original implementation of the application. Heartbeats aims to solve this by introducing another communication channel between the backend and worker components to keep track of task executions.
+In the original implementation of the system, when a worker instance stops during the calculation of a task, the task is lost and its result remains empty in the database. This means that Pod Failure and Pod Kill fault profiles can greatly affect the number of successful task executions, as already seen in Section \ref{baseline-results} covering the baseline measurements.
+
+One could add additional features to the application to mitigate these fault scenarios, by introducing another communication channel between the backend and worker components to keep track of task executions. If the backend detects that a task is lost during execution, it should resend the task to the worker components. Enter Heartbeats.
 
 %----------------------------------------------------------------------------
 \section{Implementation}
@@ -71,7 +67,9 @@ This section presents the implementation details of the two enhancement proposal
 
 There are official or community managed Kafka charts available, however, to be able to have full control over the tool, Kafka is deployed to the system with the usage of a custom helm chart. The default recommended way to run a Kafka cluster is to run 3 Kafka brokers along with a ZooKeeper cluster. ZooKeeper \cite{ZooKeeper} is an open source, centralized service for maintaining configuration information, naming, providing distributed synchronization. It supports the Kafka brokers in order to be able to discover each other.
 
-The Horizontal Pod Autoscaler that manages the replica count of the worker components constantly observers a metric which the scaling is based upon (see Section \ref{impl-hpa}). This metric includes the number of messages in the message queue. The Docker image used for running ActiveMQ supported exposing Prometheus compatible metrics, yet that is not the case with Kafka. In order to get metrics from the Kafka cluster a custom exporter should be used \cite{KafkaExporter}. That leads to the modification of the custom metric used for autoscaling, instead of the usage of the ActiveMQ queue size, the following metric is used:
+The Horizontal Pod Autoscaler that manages the replica count of the worker components constantly observers a metric which the scaling is based upon (see Section \ref{impl-hpa}). This metric includes the number of messages in the message queue. The Docker image used for running ActiveMQ supported exposing Prometheus compatible metrics, yet that is not the case with Kafka. In order to get metrics from the Kafka cluster a custom exporter should be used \cite{KafkaExporter}. That leads to the modification of the metric used for autoscaling, instead of the usage of the ActiveMQ queue size, the following metric is used:
+
+%TODO explain this metric better
 
 \vspace{0.5cm}
 \begin{minipage}{\linewidth}
@@ -79,7 +77,7 @@ The Horizontal Pod Autoscaler that manages the replica count of the worker compo
 	kafka_consumergroup_lag_sum{consumergroup="worker",topic="jobWorkerTopic"}\end{lstlisting}
 \end{minipage}
 
-To adapt the backend and worker to use Kafka instead of ActiveMQ as a messaging system, similar modifications were needed in both components using the \texttt{org.springframework.kafka:spring-kafka} library based on a popular guide . The related source code van be found under the \texttt{messaging/kafka} package in the components in the thesis repository \cite{ThesisRepo}.
+To adapt the backend and worker to use Kafka instead of ActiveMQ as a messaging system, similar modifications were needed in both components using the \texttt{org.springframework.kafka:spring-kafka} library. The related source code van be found under the \texttt{messaging/kafka} package in the components in the thesis repository \cite{ThesisRepo}.
 
 %----------------------------------------------------------------------------
 \subsection{Heartbeats}
