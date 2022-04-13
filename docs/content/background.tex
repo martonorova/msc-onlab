@@ -253,12 +253,15 @@ Kubernetes brings a vast amount of useful features, but a thorough discussion co
 \subsection{Cluster Architecture}
 %----------------------------------------------------------------------------
 
-TODO
-%TODO
-diagram from K8s page or own
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=130mm, keepaspectratio]{figures/kubernetes_components.png}
+	\caption{Kubernetes Components \cite{KubernetesArchitecture}}
+	\label{fig:kubernetes_components}
+\end{figure}
 
 
-A Kubernetes cluster consists of a set of worker machines, called nodes, and the control plane. The nodes can be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions and even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}.
+A Kubernetes cluster consists of a set of worker machines, called nodes, and the control plane. The nodes can be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions and even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}. The overview of a Kubernetes cluster architecture can be seen in Figure \ref{fig:kubernetes_components}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Control Plane Components}
