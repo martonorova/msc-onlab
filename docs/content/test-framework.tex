@@ -290,7 +290,7 @@ In Kubedepend a Measurement represents the process of load generation, fault inj
 	\label{fig:measurement_sequence}
 \end{figure}
 
-The number of Measurements to execute during a Measurement Sequence is set by an adaptive algorithm. After each Measurement, the results are evaluated and the standard deviation of the availability metric is calculated. A Measurement is re-executed with the same configuration until this value is less than or equal to a target value. The target value, the minimum and the maximum number of Measurements to run can be configured with parameters of Kubedepend. This mechanism attempts to lift the burden of fine-tuning the number of Measurements in case of each different scenario and to seek consistency in the results.
+The number of Measurements to execute during a Measurement Sequence is set by an adaptive algorithm. After each Measurement, the results are evaluated and the standard deviation of the availability metric is calculated. A Measurement is re-executed with the same configuration until this value is less than or equal to a target value. The target value, the minimum and the maximum number of Measurements to run can be configured with parameters of Kubedepend (\texttt{target-std}, \texttt{min-measurement-count}, \texttt{max-measurement-count}). This mechanism attempts to lift the burden of fine-tuning the number of Measurements in case of each different scenario and to seek consistency in the results.
 
 % TODO diagram about how Kubedepent connects to the different parts in the framework and the application
 
