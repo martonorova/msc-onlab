@@ -414,12 +414,6 @@ In order to be able to inject failure anomalies, the core components of Chaos Me
 
 Kubedepend supports easy management of the chaos objects that represent failure anomalies. To avoid the need of individually creating, applying and deleting each chaos experiment Custom Resource Definition, these objects are collected into a custom helm chart called \texttt{kubedepend-chaos}. This also facilitates the easy configuration of chaos experiments through the use of helm templates and a values file.
 
-TODO
-
-chaos experiments only affect the application namespace
-
-TODO
-
 %----------------------------------------------------------------------------
 \subsubsection{Fault Profiles} \label{test-impl-fault-profiles}
 %----------------------------------------------------------------------------
@@ -437,7 +431,7 @@ The framework allows defining multiple chaos experiments inside one fault profil
 
 It is also possible to set a strength level for each chaos experiment inside a fault profile. For example, when setting up a profile that uses a network delay chaos, the different strength levels control how much delay should be applied for each network packet. The exact values used for specifying the strength levels are arbitrary but can be modified easily if needed.
 
-Currently the following fault profiles are defined:
+Currently the following fault profiles are defined, which only affect workloads only in the namespace of the application:
 
 \paragraph{IO} The IO fault profile introduces delays to disk read and write operations for a specific period of time. The current implementation limits the profile to only affect the database because IO operations are practically only critical for the database as the other other components in the system only keep their data in memory.
 
@@ -736,15 +730,11 @@ This section describes the build stages of the Jenkins pipeline that runs the te
 
 \emph{Note:} The actual stage names defined in the Jenkinsfile are between the parentheses.
 
-\paragraph{Prepare build} This stage configures the credentials used for programmatically accessing AWS and to prepare the authentication settings to connect to DockerHub.
+\paragraph{Prepare build (\texttt{Prepare build})} This stage configures the credentials used for programmatically accessing AWS and to prepare the authentication settings to connect to DockerHub.
 
 \paragraph{Check Infrastructure (\texttt{INFR - check})} In this stage, Jenkins checks if the Kubernetes cluster is ready in AWS EKS. If it does not exist, the next stage creates it.
 
 \paragraph{Create Infrastructure (\texttt{INFR - create)}} This stage created the AWS EKS cluster with the help of a CloudFormation template that defines the infrastructure of the system. The template can be found at \texttt{utils/infrastructure.yaml} in the thesis repository \cite{ThesisRepo}.
-
-
-TODO briefly describe the CF template somewhere
-
 
 \paragraph{Configure kubectl (\texttt{INFR - config kubectl})} In order to be able communicate with the Kubernetes cluster, the \texttt{kubectl} client has to be configured. This is carried out by this stage.
 
@@ -760,7 +750,7 @@ TODO briefly describe the CF template somewhere
 
 \paragraph{Setup Measurements (\texttt{MEAS - setup})} This stage sets up the dependencies needed for the Kubedepend Python program.
 
-\paragraph{Run Tests (\texttt{MEAS - running tests})} In this stage, Kubedepend is called to execute the measurements with the configuration passed as Jenkins pipeline parameters.
+\paragraph{Run Tests (\texttt{MEAS - run tests})} In this stage, Kubedepend is called to execute the measurements with the configuration passed as Jenkins pipeline parameters.
 
 \paragraph{Save Test Results (\texttt{MEAS - Save test results})} This stage archives the results of the Kubedepend measurements for further analysis.
 
