@@ -207,12 +207,23 @@ The conclusion is to deploy the test framework and the application to be evaluat
 \subsection{Measurement Proxy}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item why is it needed - to ensure that the framework can always reach the app (pod kill can disrupt port-forwarding the backend service)
-	\item none of the fault injection cases affect the measurement proxy
-\end{itemize}
+The test framework requires a stable connection into the Kubernetes cluster in order to interact with the application. This is necessary for example to be able to generate load for the backend component. The evident solution for this would be to use the port-forwarding capabilities of the \texttt{kubectl} command line tool, that enables accessing application in a Kubernetes cluster from outside. However, as the application will be exposed to various kinds of failure scenarios by the fault injection subsystem, the connection to the backend component may be disrupted which presents complications to the framework.
 
-TODO
+Introducing a separate component to act as an entrypoint could provide a stable connection towards the application and support easier error handling due to lost connection to the backend. This extra unit -- called Measurement Proxy -- is an Nginx reverse proxy under the hood, that forwards all connection it receives to the backend component. This way, the test framework can use \texttt{kubectl} port-forwarding to connect to the Measurement Proxy and thus to the backend. The connection will not have to be renewed due to backend failures while the test framework will be notified of the error by the responses from the Measurement Proxy. The architectural place of the Measurement Proxy can be seen in Figure \ref{fig:measurement_proxy}.
+
+To ensure that the Measurement Proxy is not affected by any of the injected fault scenarios, it must be separated from the application. This is accomplished by deploying the Measurement Proxy in a separate namespace (\texttt{measurement-proxy}) as the one that holds the application (\texttt{kubedepend}).
+
+%\begin{itemize}
+%	\item why is it needed - to ensure that the framework can always reach the app (pod kill can disrupt port-forwarding the backend service)
+%	\item none of the fault injection cases affect the measurement proxy
+%\end{itemize}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=140mm, keepaspectratio]{figures/measurement_proxy.png}
+	\caption{The role of the Measurement Proxy}
+	\label{fig:measurement_proxy}
+\end{figure}
 
 %----------------------------------------------------------------------------
 \subsection{Kubedepend}
