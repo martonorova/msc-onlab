@@ -281,8 +281,6 @@ After providing it with the right inputs, Kubedepend facilitates automatic load 
 \subsubsection{Measurement and Measurement sequence} \label{test-impl-measurement-seq}
 %----------------------------------------------------------------------------
 
-TODO adaptive measurement count
-
 In Kubedepend a Measurement represents the process of load generation, fault injection and metric collection. Section \ref{test-design-req} pointed out that it is not feasible to require completely deterministic results from the test framework. However, to even out the transient, temporary behaviors of the system, Kubedepend introduces the concept of Measurement Sequences. A Measurement Sequence is the collection of arbitrary number of individual Measurements with the same configuration. A single execution of Kubedepend carries out the running of one Measurement Sequence. The result of the Measurement Sequence is the collection of individual Measurement results. A graphical representation of the idea of Measurement Sequence can be seen in Figure \ref{fig:measurement_sequence}.
 
 \begin{figure}[h]
@@ -292,7 +290,7 @@ In Kubedepend a Measurement represents the process of load generation, fault inj
 	\label{fig:measurement_sequence}
 \end{figure}
 
-The number of Measurements to execute during a Measurement Sequence can be set with the command line parameter \texttt{measurement-count}.
+The number of Measurements to execute during a Measurement Sequence is set by an adaptive algorithm. After each Measurement, the results are evaluated and the standard deviation of the availability metric is calculated. A Measurement is re-executed with the same configuration until this value is less than or equal to a target value. The target value, the minimum and the maximum number of Measurements to run can be configured with parameters of Kubedepend. This mechanism attempts to lift the burden of fine-tuning the number of Measurements in case of each different scenario and to seek consistency in the results.
 
 % TODO diagram about how Kubedepent connects to the different parts in the framework and the application
 
