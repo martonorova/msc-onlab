@@ -391,22 +391,30 @@ To use CloudFormation, users first need to code their infrastructure with the Cl
 
 Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes solution that lifts the burden of operating a full fledged Kubernetes cluster from the users' shoulders. EKS manages the Kubernetes control plane components introduced in Section \ref{background-kubernetes-control-plane} in a scalable and highly available way, so users only have to attach the worked nodes to the cluster that run the applications. \cite{AWSEKS}
 
+%----------------------------------------------------------------------------
+\section{Monitoring}
+%----------------------------------------------------------------------------
 
-%----------------------------------------------------------------------------
-\section{Metric collection - Monitoring}
-%----------------------------------------------------------------------------
+Applications that are already in production require constant monitoring in order to ensure that they remain functional all the time. This requirement is even more crucial when dealing with microservices in a cloud based environment, as the number of components and configurations that can go wrong is quite large and is continuously changing. Cluster administrators need to monitor closely not just application metrics, but also the underlying infrastructure. This requires a standardized and centralized way of collecting metrics from all parts of the system in order to provide a consistence and near real-time view of the system at any given time.
 
 %----------------------------------------------------------------------------
 \subsection{Time series}
 %----------------------------------------------------------------------------
+
+The data collected in monitoring systems is often stored in time series format where each data point has an attached timestamp to it. The data itself can be anything from metrics about a server, application performance, network traffic or current state of a hardware component (such as the current used memory by a container in a Kubernetes cluster), etc. Time series data is stored databases that are specifically built for handling this type of data. These databases possess enhanced capabilities to handle the measurement of change over time, compared to other types of datastores. \cite{TimeSeriesInflux}
 
 %----------------------------------------------------------------------------
 \subsection{Prometheus}
 %----------------------------------------------------------------------------
 
 \begin{itemize}
-	\item how it works
-	\item the concept of exporters
+	\item \cite{Prometheus}
+	\item Prometheus is an open-source monitoring and alerting system used by a vast amount of companies.
+	\item collects and stores metrics as time series data
+	\item PromQL, flexible query language to build complex expressions
+	\item mainly pull model over HTTP (push is possible as well)
+	\item service discovery through \eg Kubernetes API and static scrape targets
+	\item components - server (scrapes and stores time series data), client libraries and special-purpose exporters to publish metrics to be collected by the server, alertmanager, pushgateway
 \end{itemize}
 
 %----------------------------------------------------------------------------
@@ -414,13 +422,32 @@ Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes soluti
 %----------------------------------------------------------------------------
 
 \begin{itemize}
-	\item Introduce PromQL
-	\item describe query functions that are later used to define dependability metrics
+	\item Introduce PromQL \cite{PrometheusQueryingBasics}
+	\item describe query functions that are later used to define dependability metrics \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}
+	\begin{itemize}
+		\item sum\_over\_time
+		\item floor
+		\item changes
+		\item count\_over\_time
+		\item avg\_over\_time
+		\item absent
+		\item sum by
+		\item + on
+		\item label replace
+	\end{itemize}
 \end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Prometheus Blackbox Exporter}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item \cite{PrometheusBlackboxExporter}
+	\item "The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP, ICMP and gRPC."
+	\item used to monitor if a service is up or down, status code
+	\item probe health endpoints
+	\item prometheus server scrapes the blackbox exporter, which in turn performs the probe
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Prometheus Adapter}
@@ -431,6 +458,12 @@ Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes soluti
 \subsection{Grafana}
 %----------------------------------------------------------------------------
 
+Grafana is a popular analytics and monitoring solution that can be connected to the majority of the datastores out-of-the-box. It allows its users to query and visualize the collected data.
+
+\begin{itemize}
+	\item integrated seamlessly with Prometheus, query editor
+	\item build interactive dashboard from modular panels
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \section{Chaos Engineering}
