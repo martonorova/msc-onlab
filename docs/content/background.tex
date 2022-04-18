@@ -262,7 +262,7 @@ Kubernetes brings a vast amount of useful features, but a thorough discussion co
 A Kubernetes cluster consists of a set of worker machines, called nodes, and the control plane. The nodes can be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions and even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}. The overview of a Kubernetes cluster architecture can be seen in Figure \ref{fig:kubernetes_components}.
 
 %----------------------------------------------------------------------------
-\subsubsection{Control Plane Components}
+\subsubsection{Control Plane Components} \label{background-kubernetes-control-plane}
 %----------------------------------------------------------------------------
 
 The components in the control plane make global decisions about the cluster -- for example scheduling -- and handle cluster events \cite{KubernetesArchitecture}. 
@@ -359,16 +359,37 @@ Helm is a Kubernetes deployment tool for automating creation, packaging, configu
 Helm works with the concept of Charts which are packages containing all the resource definitions necessary to run an application inside of a Kubernetes cluster. Helm helps mitigating the burden of managing a lot of Kubernetes YAML files with custom configuration values. With Helm, the structural composition of a system and its configuration is separated using template and value files. When a Chart is installed on a cluster, the templates go through the template engine with the provided configuration values resulting in plain Kubernetes resource definitions in YAML format.  This workflow enables Chart users to easily deploy applications tailored to their environment \cite{Helm}.
 
 %----------------------------------------------------------------------------
-\section{AWS}
+\section{Amazon Web Services}
 %----------------------------------------------------------------------------
 
+Amazon Web Services (AWS for short) is one of the most popular cloud platforms that provides a vast amount of services from several data centers around the globe. Customers can use AWS -- among many things -- for cloud computing, storage, machine learning and Internet of Things applications. Each product is highly customizable and supports on demand provisioning to provide elasticity in great scale. \cite{AWSWhatIs}
 %----------------------------------------------------------------------------
 \subsection{CloudFormation} \label{cloudformation}
 %----------------------------------------------------------------------------
 
+CloudFormation is AWS's solution for Infrastructure as Code (IaC) to provision any resource in the realm of AWS. IaC is the notion of codifying all the things related to manage and operate an infrastructure to avoid manual steps and support automation by bringing the configurations into version control systems.
+
+To use CloudFormation, users first need to code their infrastructure with the CloudFormation template language. This template can later be used by AWS CloudFormation to provision and configure the resources that were specified in the template. It is also possible to update the created stack in an optimized way, only change those resources that are affected by the modification.
+
+\vspace{0.5cm}
+\begin{minipage}{\linewidth}
+	\begin{lstlisting}[caption={Example CloudFormation template of an S3 bucket \cite{AWSCloudFormationExample}}, label={lst:aws-cf-bucket}]
+	Resources:
+	  HelloBucket:
+	    Type: 'AWS::S3::Bucket'
+	    Properties:
+	      AccessControl: PublicRead
+	      WebsiteConfiguration:
+	        IndexDocument: index.html
+	        ErrorDocument: error.html
+	\end{lstlisting}
+\end{minipage}
+
 %----------------------------------------------------------------------------
-\subsection{EKS}
+\subsection{Elastic Kubernetes Service}
 %----------------------------------------------------------------------------
+
+Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes solution that lifts the burden of operating a full fledged Kubernetes cluster from the users' shoulders. EKS manages the Kubernetes control plane components introduced in Section \ref{background-kubernetes-control-plane} in a scalable and highly available way, so users only have to attach the worked nodes to the cluster that run the applications. \cite{AWSEKS}
 
 
 %----------------------------------------------------------------------------
