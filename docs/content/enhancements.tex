@@ -5,7 +5,13 @@
 This chapter describes a few alternatives to improve the dependability of the sample application.
 
 %----------------------------------------------------------------------------
-\section{Design}
+\section{Introduction}
+%----------------------------------------------------------------------------
+
+With the application and the initial measurements being ready, the next task is to attempt to make the dependability of the application better. In the next sections, first, the possible methods and architectural layers are explored, where the enhancements are feasible and the design aspects of two concrete approaches -- Kafka and a custom logic called Heartbeats -- are described (see Section \ref{enhancements-design}). Later, the implementational details and the related build pipeline modifications of the preceding enhancement alternatives are discussed (see Section \ref{enhancements-impl}).
+
+%----------------------------------------------------------------------------
+\section{Design} \label{enhancements-design}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}
@@ -44,7 +50,7 @@ In the original implementation of the system, when a worker instance stops durin
 One could add additional features to the application to mitigate these fault scenarios, by introducing another communication channel between the backend and worker components to keep track of task executions. If the backend detects that a task is lost during execution, it should resend the task to the worker components. Enter Heartbeats.
 
 %----------------------------------------------------------------------------
-\section{Implementation}
+\section{Implementation} \label{enhancements-impl}
 %----------------------------------------------------------------------------
 
 This section presents the implementation details of the two enhancement proposals mentioned above.

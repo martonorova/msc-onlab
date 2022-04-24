@@ -2,7 +2,13 @@
 \chapter{Sample application} \label{sample-app}
 %----------------------------------------------------------------------------
 
-This chapter presents the design and implementation of the sample application which will act as a case-study to showcase the features of the test framework and to serve as a basis for future enhancements. 
+This chapter presents the design and implementation of the sample application which will act as a case-study to showcase the features of the test framework and to serve as a basis for future enhancements.
+
+%----------------------------------------------------------------------------
+\section{Introduction} \label{sample-app-intro}
+%----------------------------------------------------------------------------
+
+The subsequent parts describe the development of the sample application. It introduces the main requirements of the system -- like scalability and observability --  and the design decisions that lead to the final architecture of the application (see Section \ref{design}). The responsibilities and requirements of the different parts of the system are discussed in a per component based manner. These sections are followed by the details of the implementation, where the realized features, the main interfaces and the used technologies are presented (see Section \ref{sample-app-impl}). The components that contain application specific logic are implemented in Java using the Spring Boot framework. These units are integrated with an ActiveMQ messaging system while the domain data is persisted using the MySQL database solution.  Finally, the structure and the process of the deployment of the application on a Kubernetes cluster are presented with some example configurations from the working system (see Section \ref{sample-app-deployment}).
 
 
 %----------------------------------------------------------------------------
@@ -131,6 +137,8 @@ Summary of the required interfaces: \begin{itemize}
 
 The role of a worker instance is to listen for new task submissions from the backend and execute these tasks upon receiving them. Completed tasks should be sent back to the backend where the results will be saved in a persistent way.
 
+In order to handle different amount of workloads, the application should be able to dynamically scale the number of worker components present in the system. This should be the task of a separate scaling mechanism and not the responsibility of the worker, however, the worker component should be designed and created in a way that supports being scaled.
+
 Observability is essential here as well. The system needs to be able determine which worker instances are running and if there are idle ones that can accept new task submissions. If there is not any free worker, new instances should be deployed. If there are multiple idle workers but no task to execute, then the system should scale in, stopping a couple of idle worker instances. To achieve that, the worker component should be able to expose information about itself if it is up and if it is currently busy working on a task or not.
 
 
@@ -165,7 +173,7 @@ This pattern enforces loose coupling in the system and neither the backend nor t
 The database is responsible for storing the tasks in the system in a durable way. It provides an interface through which it is possible to execute CRUD operations on the task entities.
 
 %----------------------------------------------------------------------------
-\section{Implementation}
+\section{Implementation} \label{sample-app-impl}
 %----------------------------------------------------------------------------
 
 This section describes the implementation details and their justification for each component in the sample application.
@@ -457,10 +465,10 @@ To accomplish the functionality of the message queue component introduced in Sec
 %	\item configuration? image?
 %\end{itemize}
 
-The system uses MySQL \cite{MySQL} as the database which is an open source, relational database.
+The system uses MySQL \cite{MySQL} as the database which is an open source, relational database. In the current state of the system the MySQL is used with the default configuration options in single instance mode without any high availability settings.
 
 %----------------------------------------------------------------------------
-\subsection{Deployment}
+\subsection{Deployment} \label{sample-app-deployment}
 %----------------------------------------------------------------------------
 
 %\begin{itemize}

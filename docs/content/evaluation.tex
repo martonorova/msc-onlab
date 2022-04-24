@@ -2,7 +2,7 @@
 \chapter{Evaluation} \label{evaluation}
 %----------------------------------------------------------------------------
 
-This chapter collects and evaluates the results of the measurements that apply enhancements ot the application. 
+This chapter collects and evaluates the results of the measurements that apply enhancements ot the application. The diagrams presented in this chapter are created with the previously mentioned technologies -- Python Pandas, Plotly and Jupyter Notebook.
 
 %%----------------------------------------------------------------------------
 %\section{Continuous Delivery}
@@ -18,7 +18,7 @@ The reason for these results hides in integrating the Kafka cluster into the sys
 
 \paragraph{Memory based message logs -}Kafka keeps track of the messages in each topic that were already processed by consumer groups and also that are still waiting to be handled. Consumers use this data, to know which messages should they query from the brokers. By default these so called "commit logs" are not persisted and only stored in-memory. This leads to the fact, that when the Kafka brokers encounter an error and are restarted, the commit logs can be lost and the consumers do not know where to continue the message processing, which in turn can lead to data loss.
 
-\paragraph{Minimum number of nodes -}Both Kafka and Zookeeper clusters need at least three nodes in order to be able to support various kinds of distributed algorithms (\eg leader election in case of Kafka topic partitioning). But when the number of nodes drop below this minimum number -- for example during fault injection --, Kafka may drop producer and consumer requests because the brokers responsible for a topic may be unavailable.
+\paragraph{Minimum number of nodes -}Both Kafka and Zookeeper clusters need at least three nodes in order to be able to support various kinds of distributed algorithms in a fault tolerant way (\eg leader election in case of Kafka topic partitioning). But when the number of nodes drop below this minimum number -- for example during fault injection --, Kafka may drop producer and consumer requests because the brokers responsible for a topic may be unavailable.
 
 Despite the results, Kafka could replace the original messaging subsystem, however only with proper configurations and additional tools supporting the fault tolerance of Kafka, but this topic exceeds the scope of the thesis project.
 
@@ -83,7 +83,7 @@ These outcomes prove that sometimes it is well worth to check the applications i
 
 The results of measurements where both Kafka and the Heartbeats enhancements are applied can be seen in Figure \ref{fig:combined-results-pod-failure} and Figure \ref{fig:combined-results-pod-kill}.
 
-Apart from increasing the \texttt{availability} during the "\texttt{pod-kill}" fault injection, combining the two enhancements did not improve the dependability of the system. The reason for that is related to the weaknesses of the Kafka deployment in the current configuration described above. Because in this combined scenario the messaging system is not as reliable as during the baseline measurements, Heartbeats cannot improve the metrics due to its dependency on functional messaging.
+Apart from increasing the \texttt{availability} during the "\texttt{pod-kill}" fault injection, combining the two enhancements did not improve the dependability of the system. The reason for that is related to the weaknesses of the Kafka deployment in the current configuration described above. Because in this combined scenario the messaging system is not as reliable as during the baseline measurements, Heartbeats cannot improve the metrics due to its dependency on a functional messaging subsystem.
 
 
 \begin{figure}[h]
