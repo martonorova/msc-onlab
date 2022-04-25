@@ -2,58 +2,71 @@
 \chapter{Background} \label{background}
 %----------------------------------------------------------------------------
 
+The chapter attempts to collect all the theoretical and practical knowledge on an introductory level that enables the complete comprehension of the thesis work.
+
 
 %----------------------------------------------------------------------------
 \section{Cloud Computing}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item \cite{AboveTheClouds}
-	\begin{itemize}
-		\item refers to both the applications delivered as services over the Internet and the hardware and systems software in the data centers that provide those services (these are often referred as software as a service) - here we focus on the applications
-		\item cloud = data center hardware and software
-		\item public cloud vs private cloud
-		\item cloud pros - appearance of infinite computing resources, elasticity (to serve varying demand, or when demand is unknown), pay per use, transference of risk (of operation and of over/underprovisioning)
-		\item 
-	\end{itemize}
-\end{itemize}
+The term cloud computing refers to both the applications delivered as services over the Internet and the hardware and system software in data centers that provide these services. The nature of the services covers a broad palette from simple storage or infrastructural products to complex, end-to-end applications. A common attribute of a cloud is based on whether it is accessible for a broad range of users or a separated group. Public cloud providers generally offer services to anyone who signs up into these systems, while some enterprises prefer to use private cloud solutions that only allow their employees to take advantage of the benefits of the cloud \cite{AboveTheClouds}.
+
+Cloud computing proposes many advantages compared to the traditional model of every organization maintaining its own data center. It provides its users with the appearance of infinite computing resources -- they do not need to worry about running out of memory or processors if their workload scales. The vast majority of services and resources in the cloud can adapt to varying or even previously unknown demand in a quite elastic way. Users pay exactly for the services they use that assist decision makers to better plan the costs. Furthermore, the operation burden is lifted from the organizations transferring the majority of risks to the cloud providers \cite{AboveTheClouds}.
+
+%\begin{itemize}
+%	\item \cite{AboveTheClouds}
+%	\begin{itemize}
+%		\item refers to both the applications delivered as services over the Internet and the hardware and systems software in the data centers that provide those services (these are often referred as software as a service) - here we focus on the applications
+%		\item cloud = data center hardware and software
+%		\item public cloud vs private cloud
+%		\item cloud pros - appearance of infinite computing resources, elasticity (to serve varying demand, or when demand is unknown), pay per use, transference of risk (of operation and of over/underprovisioning)
+%		\item 
+%	\end{itemize}
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Software as a Service}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item https://en.wikipedia.org/wiki/Software\_as\_a\_service
-	\begin{itemize}
-		\item software delivery model (wikipedia)
-		\item software is licensed on a subscription basis (wikipedia)
-		\item software is centrally hosted (wikipedia)
-	\end{itemize}
-	\item \cite{AboveTheClouds}
-	\begin{itemize}
-		\item simplified software installation, maintainence, centralized control over versioning
-		\item users can access the service anywhere, anytime, share and collaborate easily, keep data stored safely
-		\item cloud computing allows deploying, scaling SaaS on demand
-	\end{itemize}
-	\item \cite{SaaSOppRisk}
-	\begin{itemize}
-		\item The SaaS model evolved from the application service provisioning (ASP) model, which emerged in the late 1990s as an on-demand software delivery option for (on-premise) commercial off-the-shelf application development. The ASP model involved vendor hosting, as well as managing and delivering application capabilities remotely from a data center accessed via the Internet. Technical issues that held ASP back during the 1990s included the initial design problems (i.e., few software applications were designed to be remotely accessible at that time), limited bandwidth availability, and slow Internet speeds. 
-		\item multitenant architecture, there is only a single instance of the common code and data definitions of a given application on the vendor's server.
-		\item the applications and infrastructure are shared across customers in the SaaS model
-		\item SaaS model constrains clients' customization options of the software's main functionality and data structures
-		\item it provides the vendor with more control over future development: 
-	\end{itemize}
-	
-\end{itemize}
+Software as a Service (or SaaS for short) is software delivery model, where the software is generally licensed on a subscription basis and where the offered software is centrally hosted \cite{SaaSWikipedia}.
+
+The SaaS model evolved from the application service provisioning (ASP) introduced in the 1990s, which involved vendor hosting and delivering application capabilities remotely from a data center. However, at the time, the Internet technology acted like a glass ceiling for this model because of limited bandwith availability and slow Internet speeds \cite{SaaSOppRisk}.
+
+Nowadays, SaaS offers both vendors and users many benefits. For vendors, it provides simplified software installation, maintenance and centralized control over versioning. Users can access the service from anywhere, anytime and they can collaborate easily while their data is kept safe. All the building blocks for this are provided by cloud computing to enable easy deployment and scaling on demand \cite{AboveTheClouds}.
+
+%\begin{itemize}
+%	\item https://en.wikipedia.org/wiki/Software\_as\_a\_service
+%	\begin{itemize}
+%		\item software delivery model (wikipedia)
+%		\item software is licensed on a subscription basis (wikipedia)
+%		\item software is centrally hosted (wikipedia)
+%	\end{itemize}
+%	\item \cite{AboveTheClouds}
+%	\begin{itemize}
+%		\item simplified software installation, maintainence, centralized control over versioning
+%		\item users can access the service anywhere, anytime, share and collaborate easily, keep data stored safely
+%		\item cloud computing allows deploying, scaling SaaS on demand
+%	\end{itemize}
+%	\item \cite{SaaSOppRisk}
+%	\begin{itemize}
+%		\item The SaaS model evolved from the application service provisioning (ASP) model, which emerged in the late 1990s as an on-demand software delivery option for (on-premise) commercial off-the-shelf application development. The ASP model involved vendor hosting, as well as managing and delivering application capabilities remotely from a data center accessed via the Internet. Technical issues that held ASP back during the 1990s included the initial design problems (i.e., few software applications were designed to be remotely accessible at that time), limited bandwidth availability, and slow Internet speeds. 
+%		\item multitenant architecture, there is only a single instance of the common code and data definitions of a given application on the vendor's server.
+%		\item the applications and infrastructure are shared across customers in the SaaS model
+%		\item SaaS model constrains clients' customization options of the software's main functionality and data structures
+%		\item it provides the vendor with more control over future development: 
+%	\end{itemize}
+%	
+%\end{itemize}
 
 
 %----------------------------------------------------------------------------
 \section{Microservices}
 %----------------------------------------------------------------------------
 
-before this, monolithic applications were popular
+
 
 \begin{itemize}
+	\item before this, monolithic applications were popular
 	\item one deployment unit with many responsibilities
 	\item tight coupling of different use-cases
 	\item scalability issues
