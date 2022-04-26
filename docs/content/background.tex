@@ -356,7 +356,7 @@ Each Pod in the cluster gets its own IP address, however Pods are created and de
 
 
 %----------------------------------------------------------------------------
-\subsubsection{Horizontal Pod Autoscaler}
+\subsubsection{Horizontal Pod Autoscaler} \label{k8s-hpa}
 %----------------------------------------------------------------------------
 
 The Horizontal Pod Autoscaler (HPA) can automatically update a workload resource -- such as a Deployment -- with the aim of automatically scaling the workload to match the current demand. If the load increases and the current number of Pods is not enough to handle it, HPA instructs the workload resource to scale up and to start new Pods. If the load decreases and there are more Pods in a workload than needed to serve requests, HPA tells the workload resource to scale down.
@@ -426,15 +426,19 @@ The data collected in monitoring systems is often stored in time series format w
 \subsection{Prometheus}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item \cite{Prometheus}
-	\item Prometheus is an open-source monitoring and alerting system used by a vast amount of companies.
-	\item collects and stores metrics as time series data
-	\item PromQL, flexible query language to build complex expressions
-	\item mainly pull model over HTTP (push is possible as well)
-	\item service discovery through \eg Kubernetes API and static scrape targets
-	\item components - server (scrapes and stores time series data), client libraries and special-purpose exporters to publish metrics to be collected by the server, alertmanager, pushgateway
-\end{itemize}
+When it comes to observability solutions in cloud based microservices environments, Prometheus is often the first technology that comes into mind. Prometheus is an open-source monitoring and alerting system adopted by a vast amount of companies and individual users. It enables collecting and storing numerical metrics from virtually any source in time series data format. Prometheus provides a flexible, yet powerful query language -- PromQL -- that lets its users build complex expressions to extract meaningful information from the collected metrics \cite{Prometheus}.
+
+Prometheus itself is composed of multiple components. The Server is responsible for gathering and storing the metrics. The collection of timeseries data mainly happens following a pull model over HTTP, however pushing metrics is also possible via a intermediary gateway called Pushgateway. The Server periodically scrapes its targets to ask for new metrics. The targets can be preconfigured endpoints or they can be dynamically explored with environment specific service discovery mechanisms. In case of Kubernetes based deployments, Prometheus can use the Kubernetes API server to ask for a list of addresses it should scrape. Application can use special-purpose client libraries and exporters to publish metrics in Prometheus compatible format to be collected by the Server. Typically, cluster administrators want to be automatically notified if anything unusual happens in the system. The Alertmanager component can send alerts on different kinds of notifications channels based on the collected data and predefined alerting rules written in PromQL \cite{Prometheus}.
+
+%\begin{itemize}
+%	\item \cite{Prometheus}
+%	\item Prometheus is an open-source monitoring and alerting system used by a vast amount of companies.
+%	\item collects and stores metrics as time series data
+%	\item PromQL, flexible query language to build complex expressions
+%	\item mainly pull model over HTTP (push is possible as well)
+%	\item service discovery through \eg Kubernetes API and static scrape targets
+%	\item components - server (scrapes and stores time series data), client libraries and special-purpose exporters to publish metrics to be collected by the server, alertmanager, pushgateway
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{PromQL} \label{background-promql}
@@ -460,29 +464,32 @@ The data collected in monitoring systems is often stored in time series format w
 \subsubsection{Prometheus Blackbox Exporter}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item \cite{PrometheusBlackboxExporter}
-	\item "The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP, ICMP and gRPC."
-	\item used to monitor if a service is up or down, status code
-	\item probe health endpoints
-	\item prometheus server scrapes the blackbox exporter, which in turn performs the probe
-\end{itemize}
+The Prometheus Blackbox Exporter allows blackbox probing of endpoints over various protocols (HTTP, HTTPS, gRPC, DNS, \etc) and exposing the results in Prometheus compatible format. It is generally used to monitor the state of services by sending requests to their health endpoints and examining the returned status codes \cite{PrometheusBlackboxExporter}. 
+
+%\begin{itemize}
+%	\item \cite{PrometheusBlackboxExporter}
+%	\item "The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP, ICMP and gRPC."
+%	\item used to monitor if a service is up or down, status code
+%	\item probe health endpoints
+%	\item prometheus server scrapes the blackbox exporter, which in turn performs the probe
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Prometheus Adapter}
 %----------------------------------------------------------------------------
 
+By default, the Kubernetes Horizontal Pod Autoscaler introduced in Section \ref{k8s-hpa} only supports automatic scaling based on CPU and memory metrics. However, many use-cases demand more sophisticated algorithms or compound metrics to determine if a service needs to be scaled. Prometheus Adatper addresses exactly this issue. It enables to define complex metric queries using PromQL and exposes the results in way that the Horizontal Pod Autoscalers can consume \cite{PrometheusAdapter}.
 
 %----------------------------------------------------------------------------
 \subsection{Grafana}
 %----------------------------------------------------------------------------
 
-Grafana is a popular analytics and monitoring solution that can be connected to the majority of the datastores out-of-the-box. It allows its users to query and visualize the collected data.
+Grafana is a popular analytics and monitoring solution that can be connected to the majority of the datastores out-of-the-box. It allows its users to query and visualize the collected data by building interactive dashboards from modular panels. Grafana can be integrated seamlessly with Prometheus, providing a well usable query editor with PromQL support \cite{Grafana}.
 
-\begin{itemize}
-	\item integrated seamlessly with Prometheus, query editor
-	\item build interactive dashboard from modular panels
-\end{itemize}
+%\begin{itemize}
+%	\item integrated seamlessly with Prometheus, query editor, PromQL
+%	\item build interactive dashboard from modular panels
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \section{Chaos Engineering}
