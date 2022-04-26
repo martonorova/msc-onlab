@@ -444,6 +444,8 @@ Prometheus itself is composed of multiple components. The Server is responsible 
 \subsubsection{PromQL} \label{background-promql}
 %----------------------------------------------------------------------------
 
+TODO
+
 \begin{itemize}
 	\item Introduce PromQL \cite{PrometheusQueryingBasics}
 	\item describe query functions that are later used to define dependability metrics \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}
@@ -495,28 +497,72 @@ Grafana is a popular analytics and monitoring solution that can be connected to 
 \section{Chaos Engineering}
 %----------------------------------------------------------------------------
 
+TODO
+
 \begin{itemize}
-	\item 
+	\item \cite{PrinciplesOfChaos}
+	\begin{itemize}
+		\item "Chaos Engineering is the discipline of experimenting on a system in order to build confidence in the system’s capability to withstand turbulent conditions in production."
+		\item with the emerging of large-scale distributed systems, hidden faults and unpredicted real-world events can affect production environments
+		\item discover and identify weaknesses before they cause harm -- improper fallback settings when a single service is temporary down, retry storms due to improperly tuned timeouts, system-wide failures when a spof crashes -----> we need to manage these to have confidence in our system
+		\item empirical approach, learn about the behaviour of distributed system by observing it in a controlled environment
+		\item principles \begin{itemize}
+			\item define steady state
+			\item introduce variables that reflect real world events like server crash, storage malfunction, severed network connections
+			\item watch for change in the steady state - the harder it is to disrupt this, the more confidence we have, --- fix found weaknesses
+			\item focus on measurable output of a system - not internal attributes
+			\item prioritize simulated events based on potential impact
+			\item run experiments in production-like or at least on production data / traffic
+			\item automate and run experiments continuously
+			\item minimize blast radius - dont brake the system with experimenting -- responsibility of the chaos engineer
+		\end{itemize}
+	\end{itemize}
 \end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Chaos Mesh} \label{background-chaos-mesh}
 %----------------------------------------------------------------------------
 
+TODO
+
+\begin{itemize}
+	\item \cite{ChaosMesh}
+	\item open-source chaos engineering platform
+	\item supports many kinds of fault simulation
+	\item fault scenario orchestration, scheduling, workflows
+	\item graphical interface
+	\item perform chaos experiments without modifying the deployment logic and the application on Kubernetes
+	\item access control for users
+	\item whitelist and blacklist - protect important namespaces - control blast radius
+	
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsubsection{Chaos Experiments}
 %----------------------------------------------------------------------------
 
+\begin{itemize}
+	\item kubernetes vs physical node experiments (focus on K8s)
+	\item list common faults (pod, network, stress, file i/o, dns, time)
+\end{itemize}
+
 %----------------------------------------------------------------------------
 \subsubsection{Scheduling Experiments}
 %----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item https://chaos-mesh.org/docs/define-scheduling-rules/
+	\item fixed rate
+	\item implements continuos running principle
+\end{itemize}
 
 %----------------------------------------------------------------------------
 \section{Kafka} \label{background-kafka}
 %----------------------------------------------------------------------------
 
 \begin{itemize}
-	\item overview - pub sub
+	\item \cite{KafkaDefinitive}
+	\item overview - pub sub \cite{PubSubAmazon}
 	\item concepts - Broker, Producer, Consumer, Topic, Partition
 \end{itemize}
 
