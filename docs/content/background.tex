@@ -30,7 +30,7 @@ Cloud computing proposes many advantages compared to the traditional model of ev
 
 Software as a Service (or SaaS for short) is software delivery model, where the software is generally licensed on a subscription basis and where the offered software is centrally hosted \cite{SaaSWikipedia}.
 
-The SaaS model evolved from the application service provisioning (ASP) introduced in the 1990s, which involved vendor hosting and delivering application capabilities remotely from a data center. However, at the time, the Internet technology acted like a glass ceiling for this model because of limited bandwith availability and slow Internet speeds \cite{SaaSOppRisk}.
+The SaaS model evolved from the application service provisioning (ASP) introduced in the 1990s, which involved vendor hosting and delivering application capabilities remotely from a data center. However, at the time, the Internet technology acted like a glass ceiling for this model because of limited bandwidth availability and slow Internet speeds \cite{SaaSOppRisk}.
 
 Nowadays, SaaS offers both vendors and users many benefits. For vendors, it provides simplified software installation, maintenance and centralized control over versioning. Users can access the service from anywhere, anytime and they can collaborate easily while their data is kept safe. All the building blocks for this are provided by cloud computing to enable easy deployment and scaling on demand \cite{AboveTheClouds}.
 
@@ -63,87 +63,102 @@ Nowadays, SaaS offers both vendors and users many benefits. For vendors, it prov
 \section{Microservices}
 %----------------------------------------------------------------------------
 
+With the emerging of cloud technologies, the microservices architectural style gains great popularity. Its main idea is to create an application as a suite of small services, each running in its own process and communicating with lightweight mechanisms \cite{MicroservicesMF}.
 
+Before the adaptation of microservices, applications were built using a monolithic approach, where a single deployment is responsible for all the business use-cases. This caused tight coupling on many levels from software functionalities, technologies and even on organizational management. Furthermore, these large monolithic pieces of software introduced serious scalability limitations into system often leading to underprovisioning or overprovisioning.
 
-\begin{itemize}
-	\item before this, monolithic applications were popular
-	\item one deployment unit with many responsibilities
-	\item tight coupling of different use-cases
-	\item scalability issues
-	\item vendor and technology lock in for the entire business application
-\end{itemize}
+On the other hand, microservices architecture promotes well defined separation of responsibilities so each component in the system is focused on implementing specific parts of the business domain. There are many guidelines on how to achieve this, but in general they try to give a formula based on similar considerations. Applications should be developed and deployed as a set of independent services optimized for a single function -- this makes each service smaller and simpler to write and maintain (Rober Martin's "Single Responsibility Principle" \cite{RobertMartinOOP}). The components should conduct all communications via REST APIs and message brokers and avoid using shared databases to exchange information. Best practices also suggest to manage high availability and clustering considerations on a per-service level, because in a large system, not all services need to scale and can be deployed in a minimum number of servers to conserve resources. Others may require scaling up to very large number of instances \cite{ImplPatternsMicrosServices}.
 
-----
+Beside the many advantages, applying the microservices architecture naturally brings in much complexity into systems. Operating many components means that failures can happen in more places and it can be quite challenging to determine the exact root cause of each faults. This leads to the fact that observability is a crucial requirement in such systems to be able to monitor the health status and metrics of each service and to collect all logs from components in order to sensibly aggregate them. Another -- testability, scaling
 
 \begin{itemize}
-	\item \cite{MicroservicesMF}
-	\begin{itemize}
-		\item in short, the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API. These services are built around business capabilities and independently deployable by fully automated deployment machinery. There is a bare minimum of centralized management of these services, which may be written in different programming languages and use different data storage technologies.
-		
-		Characteristics of a Microservice Architecture
-		
-		\item Componentization via Services
-		\begin{itemize}
-			\item here, a component is a unit of software that is independently replaceable and upgradeable.
-			\item services are out-of-process (run in different processes, most likely on different machines - physical of virtual) components that communicate with mechanisms over the network
-			\item services can be independently deployable (pros...)
-			\item more explicit component interface
-			\item Remote calls are more expensive than in-process calls, and thus remote APIs need to be coarser-grained, which is often more awkward to use (no free lunch)
-		\end{itemize}
-		\item Organized around Business Capabilities
-		\item Smart endpoints and dumb pipes
-		\begin{itemize}
-			\item Applications built from microservices aim to be as decoupled and as cohesive as possible - they own their own domain logic and act more as filters in the classical Unix sense - receiving a request, applying logic as appropriate and producing a response.
-			\item HTTP request-response, REST
-			\item messaging over a lightweight message bus (RabbitMQ, Kafka)
-		\end{itemize}
-		\item Decentralized Governance
-		\begin{itemize}
-			\item no need to use the same technology stack for everything
-			\item developers can use the right tools for each task and use-case
-		\end{itemize}
-		\item Decentralized Data Management
-		\begin{itemize}
-			\item each service maintains an own model of the world - its context is bounded so the component is only aware of the necessary information
-			\item each component manages its own database, and databases can be accessed by other services only through their respective service - polyglot persistence
-		\end{itemize}
-	\end{itemize}
-	\item \cite{ImplPatternsMicrosServices}
-	\begin{itemize}
-		\item Microservices is an application architectural style in which an application is composed of many discrete, network-connected components, termed microservices.
-		\item the microservices approach stay focused on implementing clear business capabilities
-		\item in the microservices architectural style, several smaller applications that each implement only part of the whole are built and packaged independently
-		\item 5 simple rules drive the implementation of applications build using the microservices architecture
-		\begin{itemize}
-			\item Deploy applications as sets of small, independent services - one service per container
-			\item Optimize services for a single function - this makes each service smaller and simpler to write and maintain (Rober Martin's "Single Responsibility Principle" \cite{RobertMartinOOP})
-			\item Communicate via REST API and message brokers - limit options for simplicity, avoid tight coupling introduced by implicit communication through a database, ALL communication from service to service must be through the service API
-			\item Apply Per-service CI/CD - it allows the different services to evolve at their own pace
-			\item Apply Per-service HA/clustering decisions - The reality is that in a large system, not all services need to scale and can be deployed in a minimum number of servers to conserve resources. Others require scaling up to very large
-			numbers.
-		\end{itemize}
-	\end{itemize}
-	\item \cite{MicroservicesDocker}
-	\begin{itemize}
-		\item Microservices characteristics
-		\begin{itemize}
-			\item Small and focused - services should be modelled around specific business domain (not mimic organizational boundaries), each service should be treated as an independent application (own source code, CICD)
-			\item Loosly coupled - Each microservice needs to be deployed as.needed without the necessary of coordination with other
-			services’ owners
-			\item Language-neutral - Microservices need to be built using technology that’s the developers are most comfortable with. The communication between the services is also language neutral, like HTTP or message brokers
-			\item Bounded context - defines the details of a single domain (data model, domain model) and the integration points with other bounded contexts
-		\end{itemize}
-		\item Challenges in building a microservices architecture
-		\begin{itemize}
-			\item Failure Isolation - prefer quick failures, ability to determine where the failure happened
-			\item Observability - health status, monitoring, logging - collect data and aggregate sensibly, helpful visualizations
-			\item Automation requirement - as the number of services can grow rapidly
-			\item High independence - 
-			\item Testing - many moving parts, functional and non-functional aspects, distributed model
-			\item Scaling - multiple instances, versions - many connections, service discovery mechanism, routing, configuration management issues
-		\end{itemize}
-	\end{itemize}
+	\item Failure Isolation - prefer quick failures, ability to determine where the failure happened
+	\item Observability - health status, monitoring, logging - collect data and aggregate sensibly, helpful visualizations
+	\item Automation requirement - as the number of services can grow rapidly
+	\item High independence - 
+	\item Testing - many moving parts, functional and non-functional aspects, distributed model
+	\item Scaling - multiple instances, versions - many connections, service discovery mechanism, routing, configuration management issues
 \end{itemize}
+
+%\begin{itemize}
+%	\item before this, monolithic applications were popular
+%	\item one deployment unit with many responsibilities
+%	\item tight coupling of different use-cases
+%	\item scalability issues
+%	\item vendor and technology lock in for the entire business application
+%\end{itemize}
+
+%----
+%
+%\begin{itemize}
+%	\item \cite{MicroservicesMF}
+%	\begin{itemize}
+%		\item in short, the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API. These services are built around business capabilities and independently deployable by fully automated deployment machinery. There is a bare minimum of centralized management of these services, which may be written in different programming languages and use different data storage technologies.
+%		
+%		Characteristics of a Microservice Architecture
+%		
+%		\item Componentization via Services
+%		\begin{itemize}
+%			\item here, a component is a unit of software that is independently replaceable and upgradeable.
+%			\item services are out-of-process (run in different processes, most likely on different machines - physical of virtual) components that communicate with mechanisms over the network
+%			\item services can be independently deployable (pros...)
+%			\item more explicit component interface
+%			\item Remote calls are more expensive than in-process calls, and thus remote APIs need to be coarser-grained, which is often more awkward to use (no free lunch)
+%		\end{itemize}
+%		\item Organized around Business Capabilities
+%		\item Smart endpoints and dumb pipes
+%		\begin{itemize}
+%			\item Applications built from microservices aim to be as decoupled and as cohesive as possible - they own their own domain logic and act more as filters in the classical Unix sense - receiving a request, applying logic as appropriate and producing a response.
+%			\item HTTP request-response, REST
+%			\item messaging over a lightweight message bus (RabbitMQ, Kafka)
+%		\end{itemize}
+%		\item Decentralized Governance
+%		\begin{itemize}
+%			\item no need to use the same technology stack for everything
+%			\item developers can use the right tools for each task and use-case
+%		\end{itemize}
+%		\item Decentralized Data Management
+%		\begin{itemize}
+%			\item each service maintains an own model of the world - its context is bounded so the component is only aware of the necessary information
+%			\item each component manages its own database, and databases can be accessed by other services only through their respective service - polyglot persistence
+%		\end{itemize}
+%	\end{itemize}
+%	\item \cite{ImplPatternsMicrosServices}
+%	\begin{itemize}
+%		\item Microservices is an application architectural style in which an application is composed of many discrete, network-connected components, termed microservices.
+%		\item the microservices approach stay focused on implementing clear business capabilities
+%		\item in the microservices architectural style, several smaller applications that each implement only part of the whole are built and packaged independently
+%		\item 5 simple rules drive the implementation of applications build using the microservices architecture
+%		\begin{itemize}
+%			\item Deploy applications as sets of small, independent services - one service per container
+%			\item Optimize services for a single function - this makes each service smaller and simpler to write and maintain (Rober Martin's "Single Responsibility Principle" \cite{RobertMartinOOP})
+%			\item Communicate via REST API and message brokers - limit options for simplicity, avoid tight coupling introduced by implicit communication through a database, ALL communication from service to service must be through the service API
+%			\item Apply Per-service CI/CD - it allows the different services to evolve at their own pace
+%			\item Apply Per-service HA/clustering decisions - The reality is that in a large system, not all services need to scale and can be deployed in a minimum number of servers to conserve resources. Others require scaling up to very large
+%			numbers.
+%		\end{itemize}
+%	\end{itemize}
+%	\item \cite{MicroservicesDocker}
+%	\begin{itemize}
+%		\item Microservices characteristics
+%		\begin{itemize}
+%			\item Small and focused - services should be modelled around specific business domain (not mimic organizational boundaries), each service should be treated as an independent application (own source code, CICD)
+%			\item Loosly coupled - Each microservice needs to be deployed as.needed without the necessary of coordination with other
+%			services’ owners
+%			\item Language-neutral - Microservices need to be built using technology that’s the developers are most comfortable with. The communication between the services is also language neutral, like HTTP or message brokers
+%			\item Bounded context - defines the details of a single domain (data model, domain model) and the integration points with other bounded contexts
+%		\end{itemize}
+%		\item Challenges in building a microservices architecture
+%		\begin{itemize}
+%			\item Failure Isolation - prefer quick failures, ability to determine where the failure happened
+%			\item Observability - health status, monitoring, logging - collect data and aggregate sensibly, helpful visualizations
+%			\item Automation requirement - as the number of services can grow rapidly
+%			\item High independence - 
+%			\item Testing - many moving parts, functional and non-functional aspects, distributed model
+%			\item Scaling - multiple instances, versions - many connections, service discovery mechanism, routing, configuration management issues
+%		\end{itemize}
+%	\end{itemize}
+%\end{itemize}
 
 
 %----------------------------------------------------------------------------
