@@ -69,16 +69,7 @@ Before the adaptation of microservices, applications were built using a monolith
 
 On the other hand, microservices architecture promotes well defined separation of responsibilities so each component in the system is focused on implementing specific parts of the business domain. There are many guidelines on how to achieve this, but in general they try to give a formula based on similar considerations. Applications should be developed and deployed as a set of independent services optimized for a single function -- this makes each service smaller and simpler to write and maintain (Rober Martin's "Single Responsibility Principle" \cite{RobertMartinOOP}). The components should conduct all communications via REST APIs and message brokers and avoid using shared databases to exchange information. Best practices also suggest to manage high availability and clustering considerations on a per-service level, because in a large system, not all services need to scale and can be deployed in a minimum number of servers to conserve resources. Others may require scaling up to very large number of instances \cite{ImplPatternsMicrosServices}.
 
-Beside the many advantages, applying the microservices architecture naturally brings in much complexity into systems. Operating many components means that failures can happen in more places and it can be quite challenging to determine the exact root cause of each faults. This leads to the fact that observability is a crucial requirement in such systems to be able to monitor the health status and metrics of each service and to collect all logs from components in order to sensibly aggregate them. Another -- testability, scaling
-
-\begin{itemize}
-	\item Failure Isolation - prefer quick failures, ability to determine where the failure happened
-	\item Observability - health status, monitoring, logging - collect data and aggregate sensibly, helpful visualizations
-	\item Automation requirement - as the number of services can grow rapidly
-	\item High independence - 
-	\item Testing - many moving parts, functional and non-functional aspects, distributed model
-	\item Scaling - multiple instances, versions - many connections, service discovery mechanism, routing, configuration management issues
-\end{itemize}
+Beside the many advantages, applying the microservices architecture naturally brings in much complexity into systems. Operating many components means that failures can happen in more places and it can be quite challenging to determine the exact root cause of each faults. This leads to the fact that observability is a crucial requirement in such systems to be able to monitor the health status and metrics of each service and to collect all logs from components in order to sensibly aggregate them. The increased quantity of dynamically moving parts in the system also makes it harder to properly scale the system due to changing workloads. As there may be multiple instances and even versions of a given services, maintaining the connections, providing service discovery mechanisms and managing effective routing and configuration propagation can be daunting tasks.
 
 %\begin{itemize}
 %	\item before this, monolithic applications were popular
