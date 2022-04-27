@@ -444,23 +444,36 @@ Prometheus itself is composed of multiple components. The Server is responsible 
 \subsubsection{PromQL} \label{background-promql}
 %----------------------------------------------------------------------------
 
-TODO
+Prometheus provides a functional query language called PromQL (Prometheus Query Language) that lets the user select and aggregate time series data with multiple labels in real time \cite{PrometheusQueryingBasics}.
+
+During the thesis work, several PromQL expressions were created and used. These queries may seem complex at first, so their building blocks are described below \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}.
 
 \begin{itemize}
-	\item Introduce PromQL \cite{PrometheusQueryingBasics}
-	\item describe query functions that are later used to define dependability metrics \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}
-	\begin{itemize}
-		\item sum\_over\_time
-		\item floor
-		\item changes
-		\item count\_over\_time
-		\item avg\_over\_time
-		\item absent
-		\item sum by
-		\item + on
-		\item label replace
-	\end{itemize}
+	\item \texttt{floor} - Rounds the values in a time series down to the nearest integer.
+	\item \texttt{changes} - Returns the number of times when the value changed during a given time range.
+	\item \texttt{absent} - Provides default values in case of missing or empty time series input.
+	\item \texttt{sum [by]} - Calculates the sum of input values optionally over provided labels (specified with \texttt{by}).
+	\item \texttt{sum\_over\_time} - Same as above, but for time ranges.
+	\item \texttt{count\_over\_time} - Counts the number of time series returned by the input expression over a time range.
+	\item \texttt{avg\_over\_time} - Calculates the average of values in given time series over time range.
+	\item \texttt{label\_replace} - Can be used to replace the name of labels in input time series.
 \end{itemize}
+
+%\begin{itemize}
+%	\item Introduce PromQL \cite{PrometheusQueryingBasics}
+%	\item describe query functions that are later used to define dependability metrics \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}
+%	\begin{itemize}
+%		\item sum\_over\_time
+%		\item floor
+%		\item changes
+%		\item count\_over\_time
+%		\item avg\_over\_time
+%		\item absent
+%		\item sum by
+%		\item + on
+%		\item label replace
+%	\end{itemize}
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Prometheus Blackbox Exporter}
@@ -494,75 +507,96 @@ Grafana is a popular analytics and monitoring solution that can be connected to 
 %\end{itemize}
 
 %----------------------------------------------------------------------------
-\section{Chaos Engineering}
+\section{Chaos Engineering} \label{backgroun-chaos-eng}
 %----------------------------------------------------------------------------
 
-TODO
+Chaos engineering is the discipline of experimenting on a system in order to build confidence in the system’s capability to withstand turbulent conditions in production \cite{PrinciplesOfChaos}.
 
-\begin{itemize}
-	\item \cite{PrinciplesOfChaos}
-	\begin{itemize}
-		\item "Chaos Engineering is the discipline of experimenting on a system in order to build confidence in the system’s capability to withstand turbulent conditions in production."
-		\item with the emerging of large-scale distributed systems, hidden faults and unpredicted real-world events can affect production environments
-		\item discover and identify weaknesses before they cause harm -- improper fallback settings when a single service is temporary down, retry storms due to improperly tuned timeouts, system-wide failures when a spof crashes -----> we need to manage these to have confidence in our system
-		\item empirical approach, learn about the behaviour of distributed system by observing it in a controlled environment
-		\item principles \begin{itemize}
-			\item define steady state
-			\item introduce variables that reflect real world events like server crash, storage malfunction, severed network connections
-			\item watch for change in the steady state - the harder it is to disrupt this, the more confidence we have, --- fix found weaknesses
-			\item focus on measurable output of a system - not internal attributes
-			\item prioritize simulated events based on potential impact
-			\item run experiments in production-like or at least on production data / traffic
-			\item automate and run experiments continuously
-			\item minimize blast radius - dont brake the system with experimenting -- responsibility of the chaos engineer
-		\end{itemize}
-	\end{itemize}
-\end{itemize}
+With the emerging of large-scale distributed systems, the possibility of internal failures inherently rises. When these hidden faults meet with unpredictable and scarce real-world events, it can severely affect business processes ans user experience. Chaos engineering is an empirical approach, where IT professionals learn about the behavior of distributed systems by constantly observing them in controlled environments in order to discover and identify weaknesses before they cause harm. This proactive experimenting includes failure simulation or injection, to mimic real-world incidents. Once the pain points are found, the system developers can start working on repairing them.
+
+The typical flaws that chaos engineering can reveal are for example improper fallback settings when a service is temporary unavailable, unreasonably high number of retry attempts due to improperly configured timeouts or system-wide breakdowns when a single point of failure crashes.
+
+To achieve the goals of chaos engineering, one should adhere to the following principles \cite{PrinciplesOfChaos}:
+
+\paragraph{Steady State} Before conducting any experiments, it is important to establish the definition of steady state with respect to a given system. It should be a measurable output (\eg collectible metrics) that indicates normal behavior.
+
+\paragraph{Failure Simulation} To mimic failure scenarios and to trigger fault-tolerant mechanisms, one should introduce different kinds of variables in a system that reflect real-world events like server crash, storage malfunction or network connection problems.
+
+\paragraph{Observe Changes} Once the injected faults are in action, one should watch for changes in the steady state. The harder it is to disrupt it, the more confidence developers and system administrators can have.
+
+\paragraph{Experiment in Production} Since the goal is to make systems in production more robust, it is expedient to conduct chaos experiments directly in production environment to guarantee the authenticity of the results.
+
+\paragraph{Minimize Blast Radius} Chaos engineers should ensure that experimenting on the production environment does not disrupt the functional usability of the system for customers. Short-term negative impacts may be allowed, but the fallouts from experiments must be minimized and contained.
+
+%\begin{itemize}
+%	\item \cite{PrinciplesOfChaos}
+%	\begin{itemize}
+%		\item "Chaos Engineering is the discipline of experimenting on a system in order to build confidence in the system’s capability to withstand turbulent conditions in production."
+%		\item with the emerging of large-scale distributed systems, hidden faults and unpredicted real-world events can affect production environments
+%		\item discover and identify weaknesses before they cause harm -- improper fallback settings when a single service is temporary down, retry storms due to improperly tuned timeouts, system-wide failures when a spof crashes -----> we need to manage these to have confidence in our system
+%		\item empirical approach, learn about the behaviour of distributed system by observing it in a controlled environment
+%		\item principles \begin{itemize}
+%			\item define steady state
+%			\item introduce variables that reflect real world events like server crash, storage malfunction, severed network connections
+%			\item watch for change in the steady state - the harder it is to disrupt this, the more confidence we have, --- fix found weaknesses
+%			\item focus on measurable output of a system - not internal attributes
+%			\item prioritize simulated events based on potential impact
+%			\item run experiments in production-like or at least on production data / traffic
+%			\item automate and run experiments continuously
+%			\item minimize blast radius - dont brake the system with experimenting -- responsibility of the chaos engineer
+%		\end{itemize}
+%	\end{itemize}
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsection{Chaos Mesh} \label{background-chaos-mesh}
 %----------------------------------------------------------------------------
 
-TODO
+Chaos Mesh is an open-source chaos engineering platform, that implements many principles of chaos engineering described in Section \ref{backgroun-chaos-eng}. It supports many kinds of fault simulation applicable on multiple layers of a Kubernetes deployment. It provides great fault scenario orchestration capabilities, enabling to schedule chaos experiments of group them into complex workflows. Chaos Mesh allows its users to define chaos experiments with code or on a graphical interface without the need of modifying the deployment logic and the application on Kubernetes. It is also possible to set up whitelists or blacklists in order to protect important namespaces and control blast radius \cite{ChaosMesh}. 
 
-\begin{itemize}
-	\item \cite{ChaosMesh}
-	\item open-source chaos engineering platform
-	\item supports many kinds of fault simulation
-	\item fault scenario orchestration, scheduling, workflows
-	\item graphical interface
-	\item perform chaos experiments without modifying the deployment logic and the application on Kubernetes
-	\item access control for users
-	\item whitelist and blacklist - protect important namespaces - control blast radius
-	
-\end{itemize}
+%\begin{itemize}
+%	\item \cite{ChaosMesh}
+%	\item open-source chaos engineering platform
+%	\item supports many kinds of fault simulation
+%	\item fault scenario orchestration, scheduling, workflows
+%	\item graphical interface
+%	\item perform chaos experiments without modifying the deployment logic and the application on Kubernetes
+%	\item access control for users
+%	\item whitelist and blacklist - protect important namespaces - control blast radius
+%	
+%\end{itemize}
 
 %----------------------------------------------------------------------------
 \subsubsection{Chaos Experiments}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item kubernetes vs physical node experiments (focus on K8s)
-	\item list common faults (pod, network, stress, file i/o, dns, time)
-\end{itemize}
+Chaos Mesh supports creating chaos experiments both on Kubernetes and on physical node level, however, here only the Kubernetes related experiments are discussed due to the scope of the thesis project.
 
-%----------------------------------------------------------------------------
-\subsubsection{Scheduling Experiments}
-%----------------------------------------------------------------------------
+The most common simulated faults target Kubernetes Pods, network communication, CPU or memory usage and file I/O, \etc \cite{ChaosMesh}:
 
-\begin{itemize}
-	\item https://chaos-mesh.org/docs/define-scheduling-rules/
-	\item fixed rate
-	\item implements continuos running principle
-\end{itemize}
+\paragraph{Pod Faults} Pod Fault chaos experiments can inject faults into specific Pods to make them unavailable for a period of time. In addition, it is possible to kill specified Pods triggering a restart or to stop a given container inside a Pod.
+
+\paragraph{Network Faults} Network Faults support simulating network partition between specified Pods, packet delays, packet loss, reordering and bandwidth limitations.
+
+\paragraph{Stress Scenarios} Stress Scenarios can create processes on designated Pods that occupy a given amount of memory or processor time.
+
+\paragraph{File I/O Faults} I/O chaos experiments can simulate different kinds of file system faults like latency, file system call error and file read or write mistakes.
+
+\paragraph{DNS Faults} DNS Faults are used to simulate wrong DNS responses when receiving DNS requests, like a DNS error or a random IP address.
 
 %----------------------------------------------------------------------------
 \section{Kafka} \label{background-kafka}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item \cite{KafkaDefinitive}
-	\item overview - pub sub \cite{PubSubAmazon}
-	\item concepts - Broker, Producer, Consumer, Topic, Partition
-\end{itemize}
+Kafka is an open-source distributed event streaming platform that can be used for high-performance data pipelines, streaming analytics, data integration and to forward messages real-time in large-scale distributed systems \cite{Kafka}.
+
+Kafka implements the Publish Subscribe messaging pattern where a publisher sends pieces of data not specifically directed to a receiver, but instead forwarding it through broker components that facilitate message routing and storage \cite{KafkaDefinitive}. This model allows messages to be broadcast to different parts of a system asynchronously. The messages are sent to topics that receivers can subscribe to. Whenever a new message arrives in a topic, all subscribed components will receive that message. This approach is particularly useful in distributed systems with many, constantly moving parts, because senders do not need to know the address of receivers, they can just transmit data to the brokers.
+
+IT professionals use some common terminology and concepts used related to Kafka \cite{KafkaDefinitive}:
+
+\paragraph{Topics and Partitions} Messages in Kafka are categorized and collected into topics which are like tables in relational databases. Topics usually consist of multiple partitions that are append-only structures serving as the fundamental method in Kafka to achieve redundancy and scalability. The messages that arrive in a specific topic are distributed among the partitions based on a configurable algorithm. 
+
+\paragraph{Producers and Consumers} There are two basic types of Kafka clients: producers and consumers. Producers create new messages and send them to specific topics. Consumers read messages by subscribing to one or more topics. They retrieve messages in the order in which they were produced to each partition. A consumer keeps track of which messages it has already read and stores it inside Kafka. This enables consumers to stop and restart without skipping any message in a partition.
+
+\paragraph{Brokers} A Kafka server is also called a broker. Brokers receive messages from producers and store them on disk. They also serve consumers asking for new messages in partitions. Kafka brokers are generally grouped in clusters to achieve high availability and to be able to support greater workloads.
 
