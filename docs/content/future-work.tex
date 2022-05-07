@@ -2,16 +2,30 @@
 \chapter{Future Work} \label{future-work}
 %----------------------------------------------------------------------------
 
+This chapter endeavors to collect some possible directions for future developments concerning the implemented and integrated systems used during this thesis project.
+
+%----------------------------------------------------------------------------
+\section{Test Framework}
+%----------------------------------------------------------------------------
+
 \begin{itemize}
-	\item database in HA mode (currently single instance)
 	\item fine-tune chaos experiments, set parameters
 	\begin{itemize}
 		\item stresschaos has practically no effect
 	\end{itemize}
-	\item HPA enhancement for backend
 	\item run measurements in GKE, AKS
 	\item decompose Jenkins job
-	\item improve Kafka configurations to make it usable
 	\item locust user parameterization
+	\item integrate the Grafana dashboards with Chaos Experiment scheduling information
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\section{Enhancements}
+%----------------------------------------------------------------------------
+
+\begin{itemize}
+	\item database in HA mode (currently single instance, spof)
+	\item HPA enhancement for backend
+	\item improve Kafka configurations to make it usable
 	\item try to create more enhancements
 \end{itemize}
