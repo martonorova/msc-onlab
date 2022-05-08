@@ -8,16 +8,17 @@ This chapter endeavors to collect some possible directions for future developmen
 \section{Test Framework}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item fine-tune chaos experiments, set parameters
-	\begin{itemize}
-		\item stresschaos has practically no effect
-	\end{itemize}
-	\item run measurements in GKE, AKS
-	\item decompose Jenkins job
-	\item locust user parameterization
-	\item integrate the Grafana dashboards with Chaos Experiment scheduling information
-\end{itemize}
+The test framework involves a lot of functionality and configuration options that for the best results and experience require a level of maturity that was not the scope of this thesis project. There are several parts of the test framework that can be extended or fine-tuned.
+
+\paragraph{Extended Load Generation Parameterization} Although the number of simulated users to generate load to the sample application can be controlled with parameters, the frequency of the requests sent to the backend component and their payload are still hard-coded into the framework (see Section \ref{test-impl-load-generation}). In order to be able to conduct deeper analyses, it is indispensable to have the option to control these parameters as well.
+
+\paragraph{Chaos Experiment fine-tuning} The fault profiles described in Section \ref{test-impl-fault-profiles} demonstrate well the possible fault injection scenarios, however, the configured values that set the strength of each chaos experiment only serve as starting point for more thorough measurements. These values need to be fine-tuned for specific use-cases and should be modified based on the testing requirements. As the baseline measurements discovered, there are already some chaos experiments -- like the Stress CPU or Stress Memory -- that do not have much effect on the sample application. Their configurations should be re-evaluated and set in a way to cause more severe interference.
+
+\paragraph{Cross-cloud Measurements} Cloud system developers have the possibility to choose from a lot of cloud providers to host their infrastructure. Furthermore, it is not rare that companies decide to deploy their applications collaborating with multiple cloud providers to achieve a higher level of reliability or to satisfy various conformance requirements. This leads to the fact that the testing framework created here in this thesis project should also support executing measurements in multiple cloud environments starting with the most popular ones next AWS like Microsoft Azure or Google Compute Cloud. 
+
+\paragraph{Pipeline Decomposition} The Jenkins pipeline introduced in Section \ref{cicd} is responsible for automating the whole process of measurements from the creation of the infrastructure to saving the results. Currently, all the tasks and steps for achieving this are grouped together in a single Jenkins pipeline, which brings up maintainability issues and a steep learning curve for those who do not have much experiment with these tools. Therefore this pipeline should be decomposed into multiple smaller ones, each having a more focused set of goals and one that orchestrates the entire process. This would result in fewer parameters for each Jenkins job and better modularity concerning the pipeline logic.
+
+\paragraph{Visualization Extensions} The test framework is currently capable of displaying the state of the system and the value of the dependability metrics in near real-time during measurements with the help of Prometheus and Grafana. However, the present configuration does not allow the users of the framework to track the fault injection and the state of the chaos experiments on an easy to understand interface. Future works should include the integration of visualizing the collected metrics and the information available about the chaos experiments on one comprehensive dashboard in order to facilitate more thorough investigations.
 
 %----------------------------------------------------------------------------
 \section{Enhancements}
