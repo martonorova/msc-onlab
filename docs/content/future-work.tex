@@ -24,9 +24,19 @@ The test framework involves a lot of functionality and configuration options tha
 \section{Enhancements}
 %----------------------------------------------------------------------------
 
-\begin{itemize}
-	\item database in HA mode (currently single instance, spof)
-	\item HPA enhancement for backend
-	\item improve Kafka configurations to make it usable
-	\item try to create more enhancements
-\end{itemize}
+During this thesis work, only two enhancements were implemented that attempted to improve the dependability of the sample application (see Chapter \ref{enhancements}). These two were enough to display the possible power of the framework and to reveal some weaknesses in the sample application. It is not difficult see, that an increasing number of integrated enhancement options can enable a better understanding of the system that needs to be improved dependability-wise. The following paragraphs introduce some enhancement ideas to be implemented in the future, but one should consider other possible alternatives as well.
+
+\paragraph{High Availability Mode} The architecture of the sample application (see in Section \ref{sample-app-arch}) reveals multiple single point of failure components in the system. One of these problems is already addressed with the Kafka enhancements, however the high availability of the backend and the database is not implemented yet. Future works should make an effort to create a separate enhancement case for each of these two components to run them with multiple instances. The number of replicas could be dynamically determined based on the system workload with the help of Horizontal Pod Autoscalers.
+
+\paragraph{Kafka Improvements} The measurement results revealed that integrating Kafka into the sample system with the basic configurations does not improve the dependability metrics of the sample application (see Chapter \ref{evaluation}). Forthcoming developments should address this issue and set up a Kafka cluster that can reliably replace the current messaging subsystem in the sample application. 
+
+\paragraph{Kubernetes Configurations} Dependability improvements could be achieved with fine-tuning the Kubernetes configuration of the system. For example, scheduling the components that communicate with each other on the same physical nodes can reduce the impact of network related anomalies in the system. Of course, this kind of grouping of components is vulnerable to physical node failures, therefore, replicating each component on separate machines is critical to maintain the reliability of the system. Apart from this example, future works should consider other possible Kubernetes configuration improvements to make applications more robust.
+
+%taints, affinity to schedule communicating components on the same node (need to be replicated!)
+
+%\begin{itemize}
+%	\item database in HA mode (currently single instance, spof)
+%	\item HPA enhancement for backend
+%	\item improve Kafka configurations to make it usable
+%	\item try to create more enhancements
+%\end{itemize}
