@@ -31,12 +31,3 @@ During this thesis work, only two enhancements were implemented that attempted t
 \paragraph{Kafka Improvements} The measurement results revealed that integrating Kafka into the sample system with the basic configurations does not improve the dependability metrics of the sample application (see Chapter \ref{evaluation}). Forthcoming developments should address this issue and set up a Kafka cluster that can reliably replace the current messaging subsystem in the sample application. 
 
 \paragraph{Kubernetes Configurations} Dependability improvements could be achieved with fine-tuning the Kubernetes configuration of the system. For example, scheduling the components that communicate with each other on the same physical nodes can reduce the impact of network related anomalies in the system. Of course, this kind of grouping of components is vulnerable to physical node failures, therefore, replicating each component on separate machines is critical to maintain the reliability of the system. Apart from this example, future works should consider other possible Kubernetes configuration improvements to make applications more robust.
-
-%taints, affinity to schedule communicating components on the same node (need to be replicated!)
-
-%\begin{itemize}
-%	\item database in HA mode (currently single instance, spof)
-%	\item HPA enhancement for backend
-%	\item improve Kafka configurations to make it usable
-%	\item try to create more enhancements
-%\end{itemize}
