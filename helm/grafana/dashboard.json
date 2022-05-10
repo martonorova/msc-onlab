@@ -32,7 +32,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 0,
         "y": 0
@@ -49,7 +49,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 3,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -74,7 +74,7 @@
         },
         {
           "expr": "(1 + (kafka_consumergroup_lag_sum{consumergroup=\"worker\",topic=\"jobWorkerTopic\",namespace=\"kubedepend\"} or absent(kafka_consumergroup_lag_sum{consumergroup=\"worker\",topic=\"jobWorkerTopic\",namespace=\"kubedepend\"}) - 1) + on(namespace) (( sum by (namespace) (worker_busy_threads{job=\"worker-pods\"} )) or label_replace(vector(0), \"namespace\", \"kubedepend\", \"\", \"\"))) / on(namespace) (kube_deployment_status_replicas{deployment=\"kubedepend-worker-depl\"})",
-          "hide": false,
+          "hide": true,
           "interval": "",
           "legendFormat": "needed_worker_ratio_kafka",
           "refId": "B"
@@ -100,6 +100,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:253",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -108,6 +109,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:254",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -136,7 +138,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 12,
         "y": 0
@@ -153,7 +155,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 3,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -237,10 +239,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 18,
@@ -254,7 +256,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 3,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -333,10 +335,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 22,
@@ -350,7 +352,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 3,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -414,6 +416,288 @@
       }
     },
     {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__interval]) / count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__interval])",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Backend",
+          "refId": "A"
+        },
+        {
+          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-proxy.*\"}[$__interval]) / count_over_time(probe_success{instance=~\".*kubedepend-proxy.*\"}[$__interval])",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Frontend (proxy)",
+          "refId": "B"
+        },
+        {
+          "expr": "avg_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Backend",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Availability",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 12
+      },
+      "id": 23,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "expr": "probe_success{instance=~\".*kubedepend-backend.*\"}",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Divident",
+          "refId": "B"
+        },
+        {
+          "expr": "changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Changes",
+          "refId": "C"
+        },
+        {
+          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "MUT",
+          "refId": "D"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mean Up Time",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 12
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "expr": "probe_success{instance=~\".*kubedepend-backend.*\"}",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "expr": "floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Divident",
+          "refId": "B"
+        },
+        {
+          "expr": "changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Changes",
+          "refId": "C"
+        },
+        {
+          "expr": "15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "MDT",
+          "refId": "D"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mean Down Time",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) + 15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) ",
+          "interval": "",
+          "legendFormat": "Backend",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mean Time Between Failures",
+      "type": "stat"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -431,7 +715,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 15
       },
       "hiddenSeries": false,
       "id": 14,
@@ -533,80 +817,8 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 13,
-        "y": 16
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.2.1",
-      "targets": [
-        {
-          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__interval]) / count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__interval])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Backend",
-          "refId": "A"
-        },
-        {
-          "expr": "sum_over_time(probe_success{instance=~\".*kubedepend-proxy.*\"}[$__interval]) / count_over_time(probe_success{instance=~\".*kubedepend-proxy.*\"}[$__interval])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Frontend (proxy)",
-          "refId": "B"
-        },
-        {
-          "expr": "avg_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Backend",
-          "refId": "C"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Availability",
-      "type": "stat"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 17,
-        "y": 16
+        "x": 12,
+        "y": 15
       },
       "id": 10,
       "options": {
@@ -638,64 +850,6 @@
       "type": "stat"
     },
     {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 13,
-        "y": 22
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.2.1",
-      "targets": [
-        {
-          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) + 15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)) ",
-          "interval": "",
-          "legendFormat": "Backend",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mean Time Between Failures (MTBF)",
-      "type": "stat"
-    },
-    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -712,8 +866,8 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 17,
-        "y": 22
+        "x": 12,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 6,
@@ -808,7 +962,7 @@
         "h": 7,
         "w": 7,
         "x": 0,
-        "y": 24
+        "y": 23
       },
       "id": 2,
       "options": {
@@ -865,7 +1019,7 @@
         "h": 7,
         "w": 6,
         "x": 7,
-        "y": 24
+        "y": 27
       },
       "id": 4,
       "options": {
@@ -894,166 +1048,6 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "App Up",
-      "type": "stat"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 13,
-        "y": 28
-      },
-      "id": 23,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.2.1",
-      "targets": [
-        {
-          "expr": "probe_success{instance=~\".*kubedepend-backend.*\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Divident",
-          "refId": "B"
-        },
-        {
-          "expr": "changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Changes",
-          "refId": "C"
-        },
-        {
-          "expr": "15 * sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 1 + probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "MUT",
-          "refId": "D"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mean Up Time",
-      "type": "stat"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 17,
-        "y": 28
-      },
-      "id": 24,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.2.1",
-      "targets": [
-        {
-          "expr": "probe_success{instance=~\".*kubedepend-backend.*\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        },
-        {
-          "expr": "floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2)",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Divident",
-          "refId": "B"
-        },
-        {
-          "expr": "changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "Changes",
-          "refId": "C"
-        },
-        {
-          "expr": "15 * (count_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) - sum_over_time(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range])) / (floor((changes(probe_success{instance=~\".*kubedepend-backend.*\"}[$__range]) + 2 - probe_success{instance=~\".*kubedepend-backend.*\"} offset $__range) / 2))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "MDT",
-          "refId": "D"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mean Down Time",
       "type": "stat"
     }
   ],
