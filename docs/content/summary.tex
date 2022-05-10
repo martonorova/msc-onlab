@@ -2,35 +2,16 @@
 \chapter{Summary}
 %----------------------------------------------------------------------------
 
-The ever transforming market and the conceptual changes of software delivery drive companies to swiftly move their IT infrastructure and services into the cloud. Cloud computing offers countless advantages both for enterprises and users, however, adopting cloud solutions the right way is not an easy task. There are many pitfalls concerning application architecture, implementation, deployment and maintenance that can be easily overseen even by experienced system developers. As more and more critical applications are migrated into the cloud, companies have to be sure, that their systems are able to function reliably to avoid severe losses in case of unexpected failures. This demands the existence of various tools that can consequently check the dependability of highly distributed and dynamic applications and reveal their weaknesses.
+The ever transforming market and the conceptual changes of software delivery drive companies to swiftly move their IT infrastructure and services into the cloud. Cloud computing offers countless advantages both for enterprises and their customers, however, adopting cloud solutions the right way is not an easy task. There are many pitfalls concerning application architecture, implementation, deployment and maintenance that can be easily overseen even by experienced system developers. As more and more critical applications are migrated into the cloud, companies have to be sure, that their systems are able to function reliably to avoid severe losses in case of unexpected failures. This demands the existence of various tools that can consequently check the dependability of highly distributed and dynamic applications and reveal their weaknesses.
 
-The thesis work first introduces Kubernetes, the widely popular open-source platform for containerized workload orchestration in the cloud, describing its main features and concepts used throughout this project.
+This thesis work first introduced Kubernetes, the widely popular open-source platform for containerized workload orchestration in the cloud, describing its main features and concepts used throughout this project.
 
-Following that, the design and implementation of a sample application is presented which is later during the dependability analyses. The sample application is a small, Kubernetes based distributed system, composed of both stateful and stateless components that support scalability. It conforms to the most important microservice requirements like containerization, separation of responsibility and observability.
+Following that, the design and implementation of a sample application were presented which was later used during the dependability analyses. The sample application is a small, Kubernetes based distributed system, composed of both stateful and stateless components that support scalability. It conforms to the most important microservice requirements like containerization, separation of responsibilities and observability.
 
-% test framework, dependability metrics, capabilities, load generation, fault injection, monitoring, baseline measurement and evaluation / analysis
-Afterwards, the document ...
+Afterwards, the document expressed the need for a configurable, automated test framework that can be used for measuring the dependability of Kubernetes based applications. The related chapter described the design process and implementation of such a tool in detail, highlighting its capabilities like automatic load generation, fault injection and monitoring. With the help of this framework, baseline measurements were conducted against the sample application to assess its dependability characteristics in its original form. The initial measurement results were analyzed and served as good basis to design further improvements on the sample application to achieve a more robust system.
 
-\begin{itemize}
-	\item test framework, dependability metrics, capabilities, load generation, fault injection, monitoring, baseline measurement and evaluation / analysis
-	\item enhancements, possible parts / layers to make improvements design, implementation
-	\item analysis and evaluation of the enhancements
-	\item possible future developments
-\end{itemize}
+With the sample application and the baseline results being ready, enhancements could be implemented to harden the dependability of the system. The next parts of the thesis explored the possible architectural layers, where additional development could take place. Later on, two specific improvements were carried out, a custom implementation and the integration of Kafka into the sample application. The effects of these two enhancements on the sample application's dependability were measured with the formerly created test framework and conclusions were drawn based on the results. The key takeaways were that it is worth to spend time with making improvements on the application level before integrating complex third-party systems, but when adapting these softwares, one has to make sure not to introduce additional weaknesses into the system with incomplete configurations.
 
-% enhancements, possible parts / layers to make improvements design, implementation
+The document continues with a discussion about the possible directions of future developments. These include the improvements on the test framework and the extension of possible enhancement options.
 
-% analysis and evaluation of the enhancements
-
-% possible future developments
-
-The thesis ends with a brief discussion about the related works ...
-
-
-
-
-%\begin{itemize}
-%	\item
-%	\item the importance of asynchronous funtionality (see io and network-delay fault profile analysis)
-%	\item adding third party tools to the system to solve a problem may introduce other complexities
-%\end{itemize}
+Finally, the thesis ends with a brief discussion about the related works. Although the presented project carries a unique set of functionalities, there are existing tools and software components that realize similar use-cases as the parts of the implemented system, like reliability analysis and chaos engineering.
