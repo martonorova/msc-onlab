@@ -397,8 +397,6 @@ The \texttt{wait\_time} method makes it possible to introduce delays after each 
 
 The \texttt{host} attribute stores the base URL of the backend service.
 
-% TODO is the implementation of load generation (the sequence of locust command) needed here?
-
 %----------------------------------------------------------------------------
 \subsubsection{Parameters}
 %----------------------------------------------------------------------------
@@ -701,11 +699,14 @@ Throughout the project, several metrics are used that are not available as built
 
 \emph{Note:} The \texttt{absent} and \texttt{label\_replace} PromQL functions are used to provide provide 0 values in case one of the metrics is missing (\texttt{org\_apache\_activemq\_Broker\_QueueSize} or \texttt{worker\_busy\_threads}). These metrics can be missing from Prometheus if the Pods exposing them are not available due to the fault injection.
 
-TODO
+The defined metrics can be displayed on a Grafana dashboard to be able to better follow the state of the system during a measurement (see Figure \ref{fig:grafana-dashboard}). 
 
-Grafana dashboard screenshot during measurement
-
-TODO
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=150mm, keepaspectratio]{figures/grafana-dep.png}
+	\caption{Grafana dashboard displaying metrics}
+	\label{fig:grafana-dashboard}
+\end{figure}
 
 
 %----------------------------------------------------------------------------
@@ -850,7 +851,7 @@ The baseline results are presented in Figure \ref{fig:baseline_results} -- the d
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=140mm, keepaspectratio]{figures/baseline_grouped_barchart.png}
+	\includegraphics[width=150mm, keepaspectratio]{figures/baseline_grouped_barchart.png}
 	\caption{Baseline Results}
 	\label{fig:baseline_results}
 \end{figure}
