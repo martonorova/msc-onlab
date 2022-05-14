@@ -34,9 +34,11 @@ Gremlin is a comprehensive, enterprise ready Chaos Engineering platform to enabl
 
 Gremlin is able to inject many kinds of failures into a system. These can impact resources, network traffic or the processes running on the infrastructure. Similarly to Chaos Mesh, Gremlin can also schedule chaos experiments and summarize the attack reports in an organized way.
 
-\paragraph{Pros}
+Compared to the implemented testing framework described in previous sections this tool carries the following advantages and disadvantages (without being exhaustive):
 
-\paragraph{Cons}
+\paragraph{Pros} Gremlin offers a full fledged platform with a well organized graphical interface that can get users started quickly. It is able to perform chaos engineering experiments in many kind of infrastructural environments -- not only on Kubernetes -- independent from cloud providers.
+
+\paragraph{Cons} Gremlin also supports performing custom checks during a failure scenario execution, however, the results of these status checks are only binary. It is not easily achievable to define and track complex dependability metrics while conducting chaos experiments.
 
 %----------------------------------------------------------------------------
 \subsection{Litmus}
@@ -45,6 +47,8 @@ Gremlin is able to inject many kinds of failures into a system. These can impact
 Litmus is an open-source cross-cloud Chaos Engineering framework that lets developers and site reliability engineers to define complex set of chaos experiments with various kinds of status checks to form workflows that can identify weaknesses in a Kubernetes based system \cite{Litmus}.
 
 Similarly to Chaos Mesh, Litmus can also be used with the help of Kubernetes Custom Resource Definitions to install the necessary components of Litmus that control and execute the fault injections.
+
+Compared to the implemented testing framework described in previous sections this tool carries the following advantages and disadvantages (without being exhaustive):
 
 \paragraph{Pros}
 
