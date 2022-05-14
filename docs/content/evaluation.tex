@@ -22,7 +22,7 @@ The reason for these results hides in integrating the Kafka cluster into the sys
 
 Despite the results, Kafka could replace the original messaging subsystem, however only with proper configurations and additional tools supporting the fault tolerance of Kafka, but this topic exceeds the scope of the thesis project.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/kafka_with_base_pod-failure.png}
 	\caption{Kafka enhancement - pod-failure fault profile}
@@ -33,7 +33,7 @@ Despite the results, Kafka could replace the original messaging subsystem, howev
 %	\item turns out, adding the complexity of kafka integration does not improve dependability metrics -- at least with the basic configurations (just Kafka and Zookeeper nodes 3-3 / 5-5), Kafka needs further components, hardening for robust operation -- log persistence (memory lost on pod-failure)
 %\end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/kafka_with_base_pod-kill.png}
 	\caption{Kafka enhancement - pod-kill fault profile}
@@ -63,14 +63,14 @@ These outcomes prove that sometimes it is well worth to check the applications i
 %	\item heartbeat is weak against backend of db downtime - but there are more worker components in average, so they are more likely to fail statistically -- improve: backend and db in HA
 %\end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/heartbeats_with_base_pod-failure.png}
 	\caption{Heartbeats enhancement - pod-failure fault profile}
 	\label{fig:heartbeats-results-pod-failure}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/heartbeats_with_base_pod-kill.png}
 	\caption{Heartbeats enhancement - pod-kill fault profile}
@@ -86,14 +86,14 @@ The results of measurements where both Kafka and the Heartbeats enhancements are
 Apart from increasing the \texttt{availability} during the "\texttt{pod-kill}" fault injection, combining the two enhancements did not improve the dependability of the system. The reason for that is related to the weaknesses of the Kafka deployment in the current configuration described above. Because in this combined scenario the messaging system is not as reliable as during the baseline measurements, Heartbeats cannot improve the metrics due to its dependency on a functional messaging subsystem.
 
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/kafka_and_hb_with_base_pod-failure.png}
 	\caption{Combined enhancements - pod-failure fault profile}
 	\label{fig:combined-results-pod-failure}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=140mm, keepaspectratio]{figures/kafka_and_hb_with_base_pod-kill.png}
 	\caption{Combined enhancements - pod-kill fault profile}
