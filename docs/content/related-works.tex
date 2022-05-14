@@ -14,7 +14,13 @@ The accomplished implementation of the entire thesis work -- including the sampl
 
 Sonobuoy is diagnostic tool that can analyze and evaluate the state of a running Kubernetes cluster based on various criteria in a non-destructive manner. Among many things, it can be used to perform security of conformance benchmarks and to create inventories collecting all the workloads and operational details on a cluster \cite{Sonobuoy}.
 
-Sonobuoy can be extended to facilitate custom or third-party testing requirements through a plugin system. The plugin that is most related to this thesis work is the Reliability Scanner plugin \cite{SonobuoyReliabilityScanner}. The Reliability Scanner captures and inspects good practices for operating workloads reliably on Kubernetes which includes the existence verification of  probes, ownership indicators and Quality of Service configurations.
+Sonobuoy can be extended to facilitate third-party testing requirements through a plugin system. The plugin that is most related to this thesis work is the Reliability Scanner plugin \cite{SonobuoyReliabilityScanner}. The Reliability Scanner captures and inspects good practices for operating workloads reliably on Kubernetes which includes the existence verification of  probes, ownership indicators and Quality of Service configurations.
+
+Compared to the implemented testing framework described in previous sections this tool carries the following advantages and disadvantages (without being exhaustive):
+
+\paragraph{Pros} Sonobuoy Reliability Scanner plugin is a great tool to check general configurations that can cause severe anomalies if not set correctly. The results are collected into well organized reports which are easy to comprehend for all stakeholders.
+
+\paragraph{Cons} The Sonobuoy Reliability Scanner is only able to verify the static features of the system -- the configuration. It cannot be used to check the actual functional reliability of a system which can dynamically change over time. It may easily happen, that the inspected configurations are all in place, but the system is still not able to operate in a reliable manner.
 
 %----------------------------------------------------------------------------
 \section{Chaos Engineering Tools}
@@ -28,6 +34,10 @@ Gremlin is a comprehensive, enterprise ready Chaos Engineering platform to enabl
 
 Gremlin is able to inject many kinds of failures into a system. These can impact resources, network traffic or the processes running on the infrastructure. Similarly to Chaos Mesh, Gremlin can also schedule chaos experiments and summarize the attack reports in an organized way.
 
+\paragraph{Pros}
+
+\paragraph{Cons}
+
 %----------------------------------------------------------------------------
 \subsection{Litmus}
 %----------------------------------------------------------------------------
@@ -35,3 +45,7 @@ Gremlin is able to inject many kinds of failures into a system. These can impact
 Litmus is an open-source cross-cloud Chaos Engineering framework that lets developers and site reliability engineers to define complex set of chaos experiments with various kinds of status checks to form workflows that can identify weaknesses in a Kubernetes based system \cite{Litmus}.
 
 Similarly to Chaos Mesh, Litmus can also be used with the help of Kubernetes Custom Resource Definitions to install the necessary components of Litmus that control and execute the fault injections.
+
+\paragraph{Pros}
+
+\paragraph{Cons}
