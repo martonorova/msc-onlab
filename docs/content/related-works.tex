@@ -50,6 +50,6 @@ Similarly to Chaos Mesh, Litmus can also be used with the help of Kubernetes Cus
 
 Compared to the implemented testing framework described in previous sections this tool carries the following advantages and disadvantages (without being exhaustive):
 
-\paragraph{Pros}
+\paragraph{Pros} Litmus can be seamlessly integrated into existing CI pipelines without modifying them. Users can configure Litmus to continuously watch target resources on a Kubernetes cluster (\eg Deployments) and trigger chaos experiments whenever these targets change. This feature allows conducting extensive chaos experiments in an automated way which can prove to be quite useful for example in staging environments before releasing an application into production.
 
-\paragraph{Cons}
+\paragraph{Cons} Similarly as Gremlin, it is not possible with Litmus to combine more complex metrics and dynamic properties with the chaos experiment execution to assess system characteristics more thoroughly.
