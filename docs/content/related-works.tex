@@ -2,7 +2,7 @@
 \chapter{Related Works} \label{related-works}
 %----------------------------------------------------------------------------
 
-The accomplished implementation of the entire thesis work -- including the sample application and the test framework -- realizes a unique set of functionalities in a single system compared to available tools on the market and in the open-source community. However, there are a couple of parts in this system that fulfills a job similar to other existing softwares, like conducting reliability analysis or executing chaos engineering scenarios in Kubernetes based environments. This chapter attempts to collect some of them, without being exhaustive.
+The accomplished implementation of the entire thesis work -- including the sample application and the test framework -- realizes a unique set of functionalities in a single system compared to the available tools on the market and in the open-source community. However, there are a couple of parts in this system that fulfills a job similar to other existing softwares, like conducting reliability analysis or executing chaos engineering scenarios in Kubernetes based environments. This chapter attempts to collect some of them, without being exhaustive.
 
 %----------------------------------------------------------------------------
 \section{Kubernetes Dependability Related Tools}
@@ -12,7 +12,7 @@ The accomplished implementation of the entire thesis work -- including the sampl
 \subsection{Sonobuoy}
 %----------------------------------------------------------------------------
 
-Sonobuoy is diagnostic tool that can analyze and evaluate the state of a running Kubernetes cluster based on various criteria in a non-destructive manner. Among many things, it can be used to perform security of conformance benchmarks and to create inventories collecting all the workloads and operational details on a cluster \cite{Sonobuoy}.
+Sonobuoy is diagnostic tool that can analyze and evaluate the state of a running Kubernetes cluster based on various criteria in a non-destructive manner. Among many things, it can be used to perform security or conformance benchmarks and to create inventories collecting all the workloads and operational details on a cluster \cite{Sonobuoy}.
 
 Sonobuoy can be extended to facilitate third-party testing requirements through a plugin system. The plugin that is most related to this thesis work is the Reliability Scanner plugin \cite{SonobuoyReliabilityScanner}. The Reliability Scanner captures and inspects good practices for operating workloads reliably on Kubernetes which includes the existence verification of  probes, ownership indicators and Quality of Service configurations.
 
@@ -44,7 +44,7 @@ Compared to the implemented testing framework described in previous sections thi
 \subsection{Litmus}
 %----------------------------------------------------------------------------
 
-Litmus is an open-source cross-cloud Chaos Engineering framework that lets developers and site reliability engineers to define complex set of chaos experiments with various kinds of status checks to form workflows that can identify weaknesses in a Kubernetes based system \cite{Litmus}.
+Litmus is an open-source cross-cloud Chaos Engineering framework that lets developers and site reliability engineers to define complex set of chaos experiments with various kinds of status checks to form workflows that can identify weaknesses in a Kubernetes-based system \cite{Litmus}.
 
 Similarly to Chaos Mesh, Litmus can also be used with the help of Kubernetes Custom Resource Definitions to install the necessary components of Litmus that control and execute the fault injections.
 
