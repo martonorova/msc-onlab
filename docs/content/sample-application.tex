@@ -8,7 +8,7 @@ This chapter presents the design and implementation of the sample application wh
 \section{Introduction} \label{sample-app-intro}
 %----------------------------------------------------------------------------
 
-The subsequent parts describe the development of the sample application. It introduces the main requirements of the system -- like scalability and observability --  and the design decisions that lead to the final architecture of the application (see Section \ref{design}). The responsibilities and requirements of the different parts of the system are discussed in a per component based manner. These sections are followed by the details of the implementation, where the realized features, the main interfaces and the used technologies are presented (see Section \ref{sample-app-impl}). The components that contain application specific logic are implemented in Java using the Spring Boot framework. These units are integrated with an ActiveMQ messaging system while the domain data is persisted using the MySQL database solution.  Finally, the structure and the process of the deployment of the application on a Kubernetes cluster are presented with some example configurations from the working system (see Section \ref{sample-app-deployment}).
+The subsequent parts describe the development of the sample application. It introduces the main requirements of the system -- like scalability and observability --  and the design decisions that lead to the final architecture of the application (see Section \ref{design}). The responsibilities and requirements of the different parts of the system are discussed in a per component based manner. These sections are followed by the details of the implementation where the realized features, the main interfaces and the used technologies are presented (see Section \ref{sample-app-impl}). The components that contain application specific logic are implemented in Java using the Spring Boot framework. These units are integrated with an ActiveMQ messaging system while the domain data is persisted using the MySQL database solution.  Finally, the structure and the process of the deployment of the application on a Kubernetes cluster are presented with some example configurations from the working system (see Section \ref{sample-app-deployment}).
 
 
 %----------------------------------------------------------------------------
@@ -30,13 +30,13 @@ The subsequent parts describe the development of the sample application. It intr
 %	\end{itemize}
 %\end{itemize}
 
-The design of the sample application was driven by several requirements to create a system that can be easily used for our purposes.
+The design of the sample application was driven by several requirements to create a system that can be easily used for the goals of the thesis.
 
 \paragraph{Kubernetes ready}The purpose of the thesis is to inspect dependability metrics in Kubernetes environments, this naturally means that the application should be able to run on a Kubernetes cluster.
 
 \paragraph{Microservices architecture}As the application needs to be deployed and function in a Kubernetes-based environment, it was evident that a microservice architecture was the right choice for starting the design of the system. This notion implicitly means that there will be multiple, independent components that have to communicate with each other in order to create a whole system.
 
-\paragraph{Scalability}In a real world application it is quite important to create systems that by design can handle different amount of workloads without any major impact on user experience. At the same time, an economic use of resources is also a significant requirement, so the system does not reserve too much resources and keeps them idle(\eg CPU, memory, storage, network bandwidth). That means the system should be able to dynamically change and fine tune its capacity and performance to satisfy both constraints. In addition, the application specific triggers for scaling should also be clearly defined.
+\paragraph{Scalability}In a real world application it is quite important to create systems that by design can handle different amount of workloads without any major impact on user experience. At the same time, an economic use of resources is also a significant requirement, so the system does not reserve too much resources and keeps them idle (\eg CPU, memory, storage, network bandwidth). That means the system should be able to dynamically change and fine tune its capacity and performance to satisfy both constraints. In addition, the application specific triggers for scaling should also be clearly defined.
 
 \paragraph{Containerization}The ease of deployment and scalability is one of the cardinal goals of designing and maintaining a microservice application. Containerization provides the fundamentals for achieving this as all the dependencies and configuration needed for a component can be placed in a container. This leads to the conclusion that each component should be packaged and deployed into separate and independent containers.  In terms of scalability this form of packaging and deployment enables horizontal scaling, that means \eg during a bigger system usage, more instances of a given components should be started instead of increasing the resources of a single component instance.
 
@@ -50,20 +50,20 @@ components should provide an interface that other tools can use to collect metri
 \subsection{Architecture} \label{sample-app-arch}
 %----------------------------------------------------------------------------
 
-Although the aim of the sample application is to attempt to provide a generalized system to fit many use-cases without limiting possibilities, when it comes to architectural design, it is indispensable to create the structure of the system with a specific use-case in mind. But with a fairly common use case, the fundamental goal can be roughly preserved.
+Although the aim of the sample application is to attempt to provide a generalized system to fit many use-cases without limiting possibilities, when it comes to architectural design, it is indispensable to create the structure of the system with a specific use-case in mind. However, with a fairly common use case, the fundamental goal can be roughly preserved.
 
-For this project, a master-worker architecture was chosen, where the master component receives input from clients and then assigns computational tasks to the workers based on the parameters. The computation should be resource heavy (\eg require much CPU time) and should last for an easily measurable time (minimum 30-40 seconds). This architecture allows to define scalable, and both stateful and stateless components. The abstract workflow of the use case is the following:
+For this project, a master-worker architecture was chosen, where the master component receives input from clients and then assigns computational tasks to the workers based on the received parameters. The computation should be resource heavy (\eg require much CPU time) and should last for an easily measurable time (minimum 30-40 seconds). This architecture allows to define scalable, and both stateful and stateless components. The abstract workflow of the use case is the following:
 
 %TODO: activity diagram?
 
 \begin{enumerate}
-	\item \emph{Input submission} A client submits input parameters to the master component.
-	\item \emph{Task distribution} The master component creates a task definition based on the input parameters and then forwards it to one of the worker components.
-	\item \emph{Task execution} The worker components executes the received task and sends back the result to the master.
-	\item \emph{Persisting results} The master persists the result of the completed task so it can be queried by clients.
+	\item \emph{Input submission} - A client submits input parameters to the master component.
+	\item \emph{Task distribution} - The master component creates a task definition based on the input parameters and then forwards it to one of the worker components.
+	\item \emph{Task execution} - A worker component executes the received task and sends back the result to the master.
+	\item \emph{Persisting results} - The master persists the result of the completed task so it can be later queried by clients.
 \end{enumerate}
 
-The designed architecture of the sample application can be seen in Figure \ref{fig:sample_app_arch}
+The designed architecture of the sample application can be seen in Figure \ref{fig:sample_app_arch}.
 
 \begin{figure}[h]
 	\centering
@@ -115,7 +115,7 @@ In the following sections, each component and their responsibilities are present
 
 The backend is responsible for handling task inputs from clients and creating task definitions based on them that it will forward to worker components. Upon receiving a task result from a worker, the backend persists the result in a database and makes it possible for clients to query it.
 
-In order to be able to monitor the behavior and state of the backend component, it should be able to expose different kinds of metrics about itself. From an operations point of view it is quite important that each component have a so called health endpoint that can be used to tell if the given component is up and running. Clients and monitoring tools can consume this endpoint to make sure if a service is available. However, sometimes it is not enough information if a service is up or down. Consider one of the multiple cases when the backend is running, but suddenly the database connection is lost due to some failure. Although the backend is up but it cannot function correctly. This leads to the conclusion that when the health endpoint of the backend is consumed, the result should indicate if there are problems in any of the dependencies of the backend which can disrupt its correct functionality. This way the users and the maintainers of the service can be sure that the system can function correctly if the health endpoint returns without failure.
+In order to be able to monitor the behavior and state of the backend component, it should be able to expose different kinds of metrics about itself. From an operations point of view it is quite important that each component have a so called health endpoint that can be used to tell if the given component is up and running. Clients and monitoring tools can consume this endpoint to make sure if a service is available. However, sometimes it is not enough information if a service is up or down. Consider one of the multiple cases when the backend is running, but suddenly the database connection is lost due to some failure. Although the backend is up, still, it cannot function correctly. This leads to the conclusion that when the health endpoint of the backend is consumed, the result should indicate if there are problems in any of the dependencies of the backend which can disrupt its correct functionality. This way, the users and the maintainers of the service can be sure that the system can function correctly if the health endpoint returns without failure.
 
 Summary of the required interfaces: \begin{itemize}
 	\item Task input submission
@@ -157,9 +157,9 @@ The goal of the message queue is to connect the backend and the worker instances
 
 A possible solution could be that the backend somehow internally keeps track of the running worker instances but this would lead to much overhead both on the application logic level and on the network communication layer.
 
-Instead, a third component - a message queue - is introduced to the system. As its name suggests, it is a queue which behaves like a \emph{First In First Out} buffer. The backend can push new task assignments to the queue without the need to know which worker instance will process it. On the other end of the queue the worker instances wait for new tasks in the queue and when one appears, one of the worker takes it from the queue and starts working on it. Notice that this method is also applicable for the other direction. To prepare for situations where there can be multiple backend components, the message queue can be used to by the workers to send back completed tasks to the backend service without knowing how many backend instances are actually in the system.
+Instead, a third component - a message queue - is introduced to the system. As its name suggests, it is a queue which behaves like a \emph{First In First Out} buffer. The backend can push new task assignments to the queue without the need to know which worker instance will process it. On the other end of the queue the worker instances wait for new tasks in the queue and when one appears, one of the worker takes it from the queue and starts working on it. Notice that this method is also applicable for the other direction. To prepare for situations where there can be multiple backend components, the message queue can be used by the workers to send back completed tasks to the backend service without knowing how many backend instances are actually in the system.
 
-This pattern enforces loose coupling in the system and neither the backend nor the workers do not have to know about each other, they just need to know the message queue to produce and to consume new tasks. 
+This pattern enforces loose coupling in the system and neither the backend nor the workers have to know about each other, they just need to know the message queue to produce and consume new tasks. 
 
 %----------------------------------------------------------------------------
 \subsubsection{Database}
@@ -189,7 +189,7 @@ This section describes the implementation details and their justification for ea
 
 The motivation for having a use-case that drives the architectural design was emphasized in the previous section (\ref{design}). The specific task that the system can execute is calculating the value of a given element in the Fibonacci sequence. The clients can send the backend which Fibonacci number to calculate as input. For example if the client sends the number 6 as input, a worker will execute a task which result will be 8.
 
-At first glance, it seems to be an overly simple application, but one has to keep in mind, that the specific task that the worker components can execute is in fact can be anything. This simple computation was chosen, because it is easy to parameterize, the magnitude of the input correlates well with execution time and the implementation of the logic does not divert the focus from the main goals of the project.
+At first glance, it seems to be an overly simple application, but one has to keep in mind, that the specific task that the worker components can execute may in fact be anything. This simple computation was chosen, because it is easy to parameterize, the magnitude of the input correlates well with the execution time and the implementation of the logic does not divert the focus from the main goals of the project.
 
 %----------------------------------------------------------------------------
 \subsection{Containerization}
@@ -220,7 +220,7 @@ The backend component is written in the Java programming language using the Spri
 
 % TODO class diagram?
 
-To be able to easily manage tasks, model class named Job is defined that represents a single Fibonacci number computation. It is a common POJO (Plain Old Java Object) that stores the input and the result of a task along with an unique identifier. A summary the fields of the class can be seen in Figure \ref{fig:job_model}.
+To be able to easily manage tasks, a model class named Job is defined that represents a single Fibonacci number computation. It is a common POJO (Plain Old Java Object) that stores the input and the result of a task along with an unique identifier. A summary the fields of the class can be seen in Figure \ref{fig:job_model}.
 
 \begin{figure}[h]
 	\centering
@@ -235,7 +235,7 @@ To be able to easily manage tasks, model class named Job is defined that represe
 
 When the backend component receives a task input from a client it creates a Job instance representing the task with an empty result and saves this object in the database. The reason of leaving the result field is evident as the task has not been executed by any of the workers and the backend does not know the result, but it is also quite practical to be able to tell at any point of the time which tasks have been completed and which have not. This feature will come handy when the test framework is used to measure the functional performance of the system.
 
-The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access layer without the need of having many lines of boilerplate code. To be able to store Job objects in the database, a couple of configurations should be made. The Job class needs to annotated with the \texttt{@Entity} annotation, indicating that this is a JPA entity so Spring Data JPA will know it must map this class in a table in the database. In order to be able to execute queries against the database in the program, a repository interface must be defined that Spring will use to generate the data accessing layer implementation with default CRUD operation. Lastly, the parameters of the database connection should be provided for the backend. This can be done in the \texttt{application.yaml}.
+The backend uses Spring Data JPA \cite{SpringDataJPA} to implement a data access layer without the need of having many lines of boilerplate code. To be able to store Job objects in the database, a couple of configurations should be made. The Job class needs to annotated with the \texttt{@Entity} annotation, indicating that this is a JPA entity so Spring Data JPA will know it must map this class to a table in the database. In order to be able to execute queries against the database in the program, a repository interface must be defined that Spring will use to generate the data accessing layer implementation with default CRUD operation. Lastly, the parameters of the database connection should be provided for the backend. This can be done in the \texttt{application.yaml}.
 
 \vspace{0.5cm}
 \begin{minipage}{\linewidth}
@@ -277,7 +277,7 @@ This means that the backend should also use JMS to be able to send the tasks to 
 \subsubsection{Health check} \label{impl-backend-healthcheck}
 %----------------------------------------------------------------------------
 
-The importance of an mechanism that can determine if the backend is able to function correctly was mentioned in section \ref{design-backend}. As the system builds up from multiple components, checking if every part is working right consists of several steps. In the backend component, the health check includes four steps:
+The importance of a mechanism that can determine if the backend is able to function correctly was mentioned in section \ref{design-backend}. As the system builds up from multiple components, checking if every part is working right consists of several steps. In the backend component, the health check includes four steps:
 
 \begin{enumerate}
 	\item \emph{Test database connection - }The backend test the connection to the database by attempting to save a test object. If it cannot be executed, the health check fails.
