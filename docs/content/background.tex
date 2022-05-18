@@ -181,9 +181,9 @@ Dependability is a complex extra-functional characteristic of a system that cons
 
 The section above describing dependability presents well its compound nature, however, solely these definitions cannot be used to objectively assess the dependability of a given system in a deterministic way. Numerical representations of dependability -- so called dependability metrics -- are necessary in order to be able to conduct dependability analysis and measurements.
 
-For sake of simplicity, one can use the notion that any given system has fundamentally two states, an Up and a Down state partitions. The Up partition stands for all the system states, where the system can provide correct service, whereas the Down partitions denotes the states, where it cannot \cite{DependabilityBMEMIT}. It is important to mention, that providing correct service does not necessarily mean that the system is error free. Especially in case of highly distributed, dynamic environments, it is not feasible to guarantee the complete absence of errors for a long time. This leads to the fact that the essential question is not whether the system is error free, rather if it is able to function correctly and reliably.
+For sake of simplicity, one can use the notion that any given system has fundamentally two states, an Up and a Down state partitions. The Up partition stands for all the system states, where the system can provide correct service, whereas the Down partitions denotes the states, where it cannot \cite{DependabilityBMEMIT}. It is important to mention, that providing correct service does not necessarily mean that the system is error-free. Especially in case of highly distributed, dynamic environments, it is not feasible to guarantee the complete absence of errors for a long time. This leads to the fact that the essential question is not whether the system is error-free, rather if it is able to function correctly and reliably.
 
-The state of a system over time with respect to the before mentioned two state partitions can be visualized as shown in Figure \ref{fig:system_state_partitions}. The function \(s(t)\) shows the system partition at any given time. During the intervals labeled with \(u_i\) the system was in the Up partition while during the intervals labeled with \(d_i\) the system was in the Down partition.
+The state of a system over time with respect to the before mentioned two state partitions can be visualized as shown in Figure \ref{fig:system_state_partitions}. The function \(s(t)\) shows the system partition at any given time. During the intervals labeled with \(u_i\) the system was in the Up partition, while during the intervals labeled with \(d_i\) the system was in the Down partition.
 
 
 \begin{figure}[h]
@@ -258,7 +258,7 @@ Kubernetes is an open-source platform for managing containerized workloads and s
 
 Kubernetes brings a vast amount of useful features, but a thorough discussion concerning these is out of the scope of this work. However, a brief list is provided below for a clearer context \cite{KubernetesOverview}.
 
-\paragraph{Service discovery and load balancing} Kubernetes can expose a container using the DNS name or using their own IP address. If traffic to a container is high, Kubernetes is able to load balance and distribute the network traffic so that the deployment is stable \cite{KubernetesOverview}.
+\paragraph{Service discovery and load balancing} Kubernetes can expose a container using the DNS name or using their own IP address. If traffic to a container is high, Kubernetes is able to load balance and distribute the network traffic so that the deployment stays stable \cite{KubernetesOverview}.
 
 \paragraph{Automated rollouts and rollbacks} Cluster administrators can describe the desired state for the deployed containers using Kubernetes, and it can change the actual state to the desired state at a controlled rate. For example, Kubernetes can automatically create new containers for a deployment, remove existing containers and adopt all their resources to the new container \cite{KubernetesOverview}.
 
@@ -278,7 +278,7 @@ Kubernetes brings a vast amount of useful features, but a thorough discussion co
 \end{figure}
 
 
-A Kubernetes cluster consists of a set of worker machines, called nodes, and the control plane. The nodes may be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions and even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}. The overview of a Kubernetes cluster architecture can be seen in Figure \ref{fig:kubernetes_components}.
+A Kubernetes cluster consists of a set of worker machines called nodes, and the control plane. The nodes may be physical or virtual machines depending on the environment and can run anywhere from private data centers to public cloud solutions, even on a single laptop. The control plane manages the worker nodes and the application workload on the cluster \cite{KubernetesArchitecture}. The overview of a Kubernetes cluster architecture can be seen in Figure \ref{fig:kubernetes_components}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Control Plane Components} \label{background-kubernetes-control-plane}
@@ -302,7 +302,7 @@ The components in the control plane make global decisions about the cluster -- f
 
 Node components run on each node in the cluster. Their responsibility is to maintain running the application workloads and to provide the Kubernetes runtime environment \cite{KubernetesArchitecture}.
 
-\paragraph{kubelet} Kubelet is an agent that runs on each node in the cluster, making sure that containers are running in Kubernetes managed resources called Pods (described in Section \ref{k8s-pod}).
+\paragraph{kubelet} Kubelet is an agent that runs on each node in the cluster, making sure that containers are running in Kubernetes-managed resources called Pods (described in Section \ref{k8s-pod}).
 
 \paragraph{kube-proxy} This component maintains network rules on each node allowing network communication to application workloads running on the cluster from inside or outside of the cluster.
 
@@ -330,9 +330,9 @@ Namespaces provide a mechanism for isolating groups of resources within a single
 \subsubsection{Pod} \label{k8s-pod}
 %----------------------------------------------------------------------------
 
-Pods are the smallest deployable units of computing that can be created and managed in Kubernetes. A Pod is a set of containers, with shared storage and network resources, and a specification for how to run the containers. The containers in a Pod are always co-located, co-scheduled and run in a shared context \cite{KubernetesPod}.
+Pods are the smallest deployable units of computing that can be created and managed in Kubernetes. A Pod is a set of containers with shared storage and network resources, and a specification for how to run the containers. The containers in a Pod are always co-located, co-scheduled and run in a shared context \cite{KubernetesPod}.
 
-Pods can only be run on nodes. The kube-scheduler automatically assigns every newly created Pods to nodes in the cluster taking into account multiple parameters and constraints. Pods can define scheduling rules such as so called node selectors which specify the labels a node must have in order to be able to run a Pod \cite{KubernetesNodeSelector}.
+Pods can only be run on nodes. The kube-scheduler automatically assigns every newly created Pods to nodes in the cluster taking into account multiple parameters and constraints. Pods can define scheduling rules such as node selectors which specify the labels a node must have in order to be able to run a Pod \cite{KubernetesNodeSelector}.
 
 %----------------------------------------------------------------------------
 \subsubsection{ReplicaSet}
@@ -408,7 +408,7 @@ To use CloudFormation, users first need to code their infrastructure with the Cl
 \subsection{Elastic Kubernetes Service}
 %----------------------------------------------------------------------------
 
-Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes solution that lifts the burden of operating a full fledged Kubernetes cluster from the users' shoulders. EKS manages the Kubernetes control plane components introduced in Section \ref{background-kubernetes-control-plane} in a scalable and highly available way, so users only have to attach the worker nodes to the cluster that run the applications. \cite{AWSEKS}
+Amazon Elastic Kubernetes Service (EKS for short) is a managed Kubernetes solution that lifts the burden of operating a full fledged Kubernetes cluster from the users' shoulders. EKS manages the Kubernetes control plane components introduced in Section \ref{background-kubernetes-control-plane} in a scalable and highly available way, so users only have to attach the worker nodes to the cluster that runs the applications. \cite{AWSEKS}
 
 %----------------------------------------------------------------------------
 \section{Monitoring}
@@ -428,7 +428,7 @@ The data collected in monitoring systems is often stored in time series format w
 
 When it comes to observability solutions in cloud based microservices environments, Prometheus is often the first technology that comes into mind. Prometheus is an open-source monitoring and alerting system adopted by a vast amount of companies and individual users. It enables collecting and storing numerical metrics from virtually any source in time series data format. Prometheus provides a flexible, yet powerful query language -- PromQL -- that lets its users build complex expressions to extract meaningful information from the collected metrics \cite{Prometheus}.
 
-Prometheus itself is composed of multiple components. The Server is responsible for gathering and storing the metrics. The collection of timeseries data mainly happens following a pull model over HTTP, however pushing metrics is also possible via an intermediary gateway, called Pushgateway. The Server periodically scrapes its targets to ask for new metrics. The targets can be preconfigured endpoints or they can be dynamically explored with environment specific service discovery mechanisms. In case of Kubernetes based deployments, Prometheus can use the Kubernetes API server to ask for a list of addresses it should scrape. Application can use special-purpose client libraries and exporters to publish metrics in Prometheus compatible format to be collected by the Server. Typically, cluster administrators want to be automatically notified if anything unusual happens in the system. The Alertmanager component can send alerts on different kinds of notification channels based on the collected data and predefined alerting rules written in PromQL \cite{Prometheus}.
+Prometheus itself is composed of multiple components. The \textit{Server} is responsible for gathering and storing the metrics. The collection of timeseries data mainly happens following a pull model over HTTP, however, pushing metrics is also possible via an intermediary gateway, called \textit{Pushgateway}. The \textit{Server} periodically scrapes its targets to ask for new metrics. The targets can be preconfigured endpoints or they can be dynamically explored with environment specific service discovery mechanisms. In case of Kubernetes-based deployments, Prometheus can use the Kubernetes API server to ask for a list of addresses it should scrape. Application can use special-purpose client libraries and \textit{exporters} to publish metrics in Prometheus compatible format to be collected by the \textit{Server}. Typically, cluster administrators want to be automatically notified if anything unusual happens in the system. The \textit{Alertmanager} component can send alerts on different kinds of notification channels based on the collected data and predefined alerting rules written in PromQL \cite{Prometheus}.
 
 %\begin{itemize}
 %	\item \cite{Prometheus}
@@ -446,7 +446,7 @@ Prometheus itself is composed of multiple components. The Server is responsible 
 
 Prometheus provides a functional query language called PromQL (Prometheus Query Language) that lets the user select and aggregate time series data with multiple labels in real time \cite{PrometheusQueryingBasics}.
 
-During the thesis work, several PromQL expressions were created and used. These queries may seem complex at first, so their building blocks are described below \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}.
+During the thesis work several PromQL expressions were created and used. These queries may seem complex at first, so their building blocks are described below \cite{PrometheusQueryingFunctions} \cite{PrometheusQueryingOperators}.
 
 \begin{itemize}
 	\item \texttt{floor} - Rounds the values in a time series down to the nearest integer.
@@ -512,7 +512,7 @@ Grafana is a popular analytics and monitoring solution that can be connected to 
 
 Chaos engineering is the discipline of experimenting on a system in order to build confidence in the system’s capability to withstand turbulent conditions in production \cite{PrinciplesOfChaos}.
 
-With the emerging of large-scale distributed systems, the possibility of internal failures inherently rises. When these hidden faults meet with unpredictable and scarce real-world events, it can severely affect business processes and user experience. Chaos engineering is an empirical approach, where IT professionals learn about the behavior of distributed systems by constantly observing them in controlled environments in order to discover and identify weaknesses before they cause harm. This proactive experimenting includes failure simulation or injection, to mimic real-world incidents. Once the pain points are found, the system developers can start working on repairing them.
+With the emerging of large-scale distributed systems, the possibility of internal failures inherently rises. When these hidden faults meet with unpredictable and scarce real-world events, it can severely affect business processes and user experience. Chaos engineering is an empirical approach, where IT professionals learn about the behavior of distributed systems by constantly observing them in controlled environments in order to discover and identify weaknesses before they cause harm. This proactive experimenting includes failure simulation or injection to mimic real-world incidents. Once the pain points are found, system developers can start working on repairing them.
 
 The typical flaws that chaos engineering can reveal are for example improper fallback settings when a service is temporary unavailable, unreasonably high number of retry attempts due to improperly configured timeouts or system-wide breakdowns when a single point of failure crashes.
 
@@ -520,7 +520,7 @@ To achieve the goals of chaos engineering, one should adhere to the following pr
 
 \paragraph{Steady State} Before conducting any experiments, it is important to establish the definition of steady state with respect to a given system. It should be a measurable output (\eg collectible metrics) that indicates normal behavior.
 
-\paragraph{Failure Simulation} To mimic failure scenarios and to trigger fault-tolerant mechanisms, one should introduce different kinds of variables in a system that reflect real-world events like, server crash, storage malfunction or network connection problems.
+\paragraph{Failure Simulation} To mimic failure scenarios and to trigger fault-tolerant mechanisms, one should introduce different kinds of variables in a system that reflect real-world events, like server crash, storage malfunction or network connection problems.
 
 \paragraph{Observe Changes} Once the injected faults are in action, one should watch for changes in the steady state. The harder it is to disrupt it, the more confidence developers and administrators can have in the reliability of the system.
 
@@ -580,7 +580,7 @@ The most common simulated faults target Kubernetes Pods, network communication, 
 
 \paragraph{Stress Scenarios} Stress Scenarios can create processes on designated Pods that occupy a given amount of memory or processor time.
 
-\paragraph{File I/O Faults} I/O chaos experiments can simulate different kinds of file system faults like latency, file system call error and file read or write mistakes.
+\paragraph{File I/O Faults} I/O chaos experiments can simulate different kinds of file system faults, like latency, file system call error and file read or write mistakes.
 
 \paragraph{DNS Faults} DNS Faults are used to simulate wrong DNS responses when receiving DNS requests, like a DNS error or a random IP address response.
 
@@ -592,11 +592,11 @@ Kafka is an open-source distributed event streaming platform that can be used fo
 
 Kafka implements the Publish Subscribe messaging pattern where a publisher sends pieces of data not specifically directed to a receiver, but instead, forwards them through broker components that facilitate message routing and storage \cite{KafkaDefinitive}. This model allows messages to be broadcast to different parts of a system asynchronously. The messages are sent to topics that receivers can subscribe to. Whenever a new message arrives in a topic, all subscribed components will receive that message. This approach is particularly useful in distributed systems with many, constantly moving parts, because senders do not need to know the address of receivers, they can just transmit data to the brokers.
 
-IT professionals use some common terminology and concepts used related to Kafka \cite{KafkaDefinitive}:
+IT professionals use some common terminology and concepts related to Kafka \cite{KafkaDefinitive}:
 
 \paragraph{Topics and Partitions} Messages in Kafka are categorized and collected into topics which are like tables in relational databases. Topics usually consist of multiple partitions that are append-only structures serving as the fundamental method in Kafka to achieve redundancy and scalability. The messages that arrive in a specific topic are distributed among the partitions based on a configurable algorithm. 
 
-\paragraph{Producers and Consumers} There are two basic types of Kafka clients: producers and consumers. Producers create new messages and send them to specific topics. Consumers read messages by subscribing to one or more topics. They retrieve messages in the order in which they were produced to each partition. A consumer keeps track of which messages it has already read and stores it inside Kafka. This enables consumers to stop and restart without skipping any message in a partition.
+\paragraph{Producers and Consumers} There are two basic types of Kafka clients: producers and consumers. Producers create new messages and send them to specific topics. Consumers read messages by subscribing to one or more topics. They retrieve messages in the order they were produced to each partition. A consumer keeps track of which messages it has already read and stores it inside Kafka. This enables consumers to stop and restart without skipping any message in a partition.
 
 \paragraph{Brokers} A Kafka server is also called a broker. Brokers receive messages from producers and store them on disk. They also serve consumers asking for new messages in partitions. Kafka brokers are generally grouped in clusters to achieve high availability and to be able to support greater workloads.
 
