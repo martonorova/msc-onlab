@@ -16,9 +16,9 @@ The results of measurements where the Kafka enhancement is applied can be seen i
 
 The reason for these results hides in integrating the Kafka cluster into the system with default configurations. Although Kafka is widely popular for its fault tolerance, it cannot guarantee the advertised level of robustness with the basic setup. Some of the causes are described below.
 
-\paragraph{Memory based message logs -}Kafka keeps track of the messages in each topic that were already processed by consumer groups and also that are still waiting to be handled. Consumers use this data, to know which messages should they query from the brokers. By default these so called "commit logs" are not persisted and only stored in-memory. This leads to the fact, that when the Kafka brokers encounter an error and are restarted, the commit logs can be lost and the consumers do not know where to continue the message processing, which in turn can lead to data loss.
+\paragraph{Memory based message logs} Kafka keeps track of the messages in each topic that were already processed by consumer groups and also that are still waiting to be handled. Consumers use this data, to know which messages should they query from the brokers. By default these so called "commit logs" are not persisted and only stored in-memory. This leads to the fact, that when the Kafka brokers encounter an error and are restarted, the commit logs can be lost and the consumers do not know where to continue the message processing, which in turn can lead to data loss.
 
-\paragraph{Minimum number of nodes -}Both Kafka and Zookeeper clusters need at least three nodes in order to be able to support various kinds of distributed algorithms in a fault tolerant way (\eg leader election in case of Kafka topic partitioning). But when the number of nodes drop below this minimum number -- for example during fault injection --, Kafka may drop producer and consumer requests because the brokers responsible for a topic may be unavailable.
+\paragraph{Minimum number of nodes} Both Kafka and Zookeeper clusters need at least three nodes in order to be able to support various kinds of distributed algorithms in a fault tolerant way (\eg leader election in case of Kafka topic partitioning). But when the number of nodes drop below this minimum number -- for example during fault injection --, Kafka may drop producer and consumer requests because the brokers responsible for a topic may be unavailable.
 
 Despite the results, Kafka could replace the original messaging subsystem, however only with proper configurations and additional tools supporting the fault tolerance of Kafka, but this topic exceeds the scope of the thesis project.
 
@@ -54,7 +54,7 @@ In case of "\texttt{pod-failure}" fault profile, the enhancement caused signific
 
 The "\texttt{pod-kill}" fault profile was handled considerably better with Heartbeats, than without it. All metrics improved greatly by the enhancement.
 
-These outcomes prove that sometimes it is well worth to check the applications itself for possible improvements before jumping into integrating complex third party tools. However, one have to keep in mind, that Heartbeats only covered one failure scenario -- the unexpected stops of worker components --, so the system is still vulnerable to backend or database outages. Another thing to notice, that this solution depends more on reliable messaging than the original implementation. This means that, if the messaging subsystem is corrupted, Heartbeats may have no effect on the dependability metrics.
+These outcomes prove that sometimes it is well worth to check the applications itself for possible improvements before jumping into integrating complex third party tools. However, one has to keep in mind, that Heartbeats only covered one failure scenario -- the unexpected stops of worker components --, so the system is still vulnerable to backend or database outages. Another thing to notice, that this solution depends more on reliable messaging than the original implementation. This means that, if the messaging subsystem is corrupted, Heartbeats may have no effect on the dependability metrics.
 
 
 %\begin{itemize}
