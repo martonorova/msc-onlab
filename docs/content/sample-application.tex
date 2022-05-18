@@ -280,10 +280,10 @@ This means that the backend should also use JMS to be able to send the tasks to 
 The importance of a mechanism that can determine if the backend is able to function correctly was mentioned in section \ref{design-backend}. As the system builds up from multiple components, checking if every part is working right consists of several steps. In the backend component, the health check includes four steps:
 
 \begin{enumerate}
-	\item \emph{Test database connection - }The backend test the connection to the database by attempting to save a test object. If it cannot be executed, the health check fails.
-	\item \emph{Test worker availability - }The backend test the availability of the worker service by calling its health endpoint (described later in section \ref{impl-worker-interfaces}). If it returns with error, the the health check fails.
+	\item \emph{Test database connection - }The backend tests the connection to the database by attempting to save a test object. If it cannot be executed, the health check fails.
+	\item \emph{Test worker availability - }The backend tests the availability of the worker service by calling its health endpoint (described later in section \ref{impl-worker-interfaces}). If it returns with error, the the health check fails.
 	\item \emph{Test message queue connection - }The backend sends a test message to the message queue which will be forwarded to one of the workers that will send back a reply. If the response is not received after a short amount of time, the health check fails.
-	\item \emph{Test entire workflow with sample input - }Every 90 seconds the backend creates a dummy \texttt{Job} instance and sends it to the message queue and waits for response. Other non-test task execution reset the timer on this check. If there are not any successful task executions (dummy or real) in the last 90 seconds, the health check fails.
+	\item \emph{Test entire workflow with sample input - }Every 90 seconds the backend creates a dummy \texttt{Job} instance and sends it to the message queue and waits for response. Other non-test task executions reset the timer on this check. If there are not any successful task executions (dummy or real) in the last 90 seconds, the health check fails.
 \end{enumerate}
 
 %----------------------------------------------------------------------------
@@ -330,7 +330,7 @@ The backend implements the interfaces described in section \ref{design-backend}.
 %	\item spring bootBuildImage - reference later in CI/CD pipeline
 %\end{itemize}
 
-Similarly to the backend, the worker component is written in Java as well using the Spring Boot framework. It uses the same \texttt{Job} model as the backend an the implementation of the JMS messaging is also quite alike to that of the backend.
+Similarly to the backend, the worker component is written in Java as well using the Spring Boot framework. It uses the same \texttt{Job} model as the backend and the implementation of the JMS messaging is also quite alike to that of the backend.
 
 %----------------------------------------------------------------------------
 \subsubsection{Task execution} \label{impl-worker-task-execution}
@@ -353,14 +353,14 @@ The implementation of calculating a Fibonacci number can be seen below.
 	}\end{lstlisting}
 \end{minipage}
 
-This implementation is not efficient as it does a lot of work repeatedly as it calculates the same values multiple times. However, increasing the performance of the worker is out of scope in this project. This algorithm is CPU heavy in its nature and the execution time can easily last for minutes with a large enough input, hence it satisfies the requirements defined in section \ref{design}.
+This implementation is not efficient because it does a lot of repeated work as it calculates the same values multiple times. However, increasing the performance of the worker is out of scope in this project. This algorithm is CPU heavy in its nature and the execution time can easily last for minutes with a large enough input, hence it satisfies the requirements defined in section \ref{design}.
 
 
 %----------------------------------------------------------------------------
 \subsubsection{Messaging}
 %----------------------------------------------------------------------------
 
-A notable difference is the configuration of the \texttt{PrefetchPolicy} of the message queue connection which tells the worker components to only consume one task from the queue at a time. This helps avoid scenarios where a worker instance takes out all the tasks from a queue and starts working on them sequentially leaving the rest of the workers without consumable task and causing them to remain idle in the system.
+A notable difference from the backend is the configuration of the \texttt{PrefetchPolicy} of the message queue connection which tells the worker components to only consume one task from the queue at a time. This helps avoid scenarios where a worker instance takes out all the tasks from a queue and starts working on them sequentially leaving the rest of the workers without consumable tasks and causing them to remain idle in the system.
 
 This setting can be configured for example in the \texttt{application.yaml} file where the message queue connection is specified.
 
@@ -383,7 +383,7 @@ The worker component is in practice an independent unit in the system as long as
 \subsubsection{Custom metrics} \label{impl-worker-custom-metrics}
 %----------------------------------------------------------------------------
 
-As the worker component can only process one task at a time by design, it is important that the worker should provide information about whether it is currently executing a test at a given point of time or not. This data can be used by the system to determine if should start more worker components in cases when there are tasks in the message queue waiting to be processed.
+As the worker component can only process one task at a time by design, it is important that the worker should provide information about whether it is currently executing a test at a given point of time or not. This data can be used by the system to determine if it should start more worker components in cases when there are tasks in the message queue waiting to be processed.
 
 For this reason, the worker component exposes an application specific metric called \texttt{worker\_busy\_threads} that indicates how many threads are currently processing a task in a worker instance. This metric is published with the help of using a Micrometer \cite{Micrometer} library that facilitates exposing the metric in a Prometheus compatible format.
 
@@ -454,7 +454,7 @@ Based on the design described in Section \ref{design-worker} the worker exposes 
 %	\item configuration? image?
 %\end{itemize}
 
-To accomplish the functionality of the message queue component introduced in Section \ref{design-message-queue} the Apache ActiveMQ \cite{ActiveMQ} product was used in the project. ActiveMQ is an open source, Java-based message protocol. Among the many protocol it implements, it supports forwarding JMS messages that the backend and the worker components use.
+To accomplish the functionality of the message queue component introduced in Section \ref{design-message-queue}, the Apache ActiveMQ \cite{ActiveMQ} product was used in the project. ActiveMQ is an open source, Java-based message protocol. Among the many protocol it implements, it supports forwarding JMS messages that the backend and the worker components use.
 
 %----------------------------------------------------------------------------
 \subsection{Database}
@@ -478,11 +478,11 @@ The system uses MySQL \cite{MySQL} as the database which is an open source, rela
 %	\item HPA definition, metrics server
 %\end{itemize}
 
-To be able to deploy the components, a running Kubernetes cluster is needed. Kubernetes can be set up manually on private machines but ususally the most feasible way to use Kubernetes is to exploit the managed Kubernetes service of a cloud provider. A managed Kubernetes means that the master nodes of the cluster (the control plane) are managed by a provider, taking off the operation burdens from users who have a simple way accessing the cluster.
+To be able to deploy the components, a running Kubernetes cluster is needed. Kubernetes can be set up manually on private machines but ususally the most feasible way to use Kubernetes is to exploit the managed Kubernetes service of a cloud provider. A managed Kubernetes means that the master nodes of the cluster (the control plane) are maintained by a provider, taking off the operation burdens from users who have a simple way of accessing the cluster.
 
-There are many cloud providers that sell managed Kubernetes solution, in this project the product of Amazon Web Services is used called Elastic Kubernetes Service (EKS) \cite{EKS}.
+There are many cloud providers that sell managed Kubernetes solution, in this project the product of Amazon Web Services called Elastic Kubernetes Service (EKS) \cite{EKS} is used.
 
-All the above mentioned components are packaged with Docker and deployed to AWS EKS. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the worker component related configurations and the definition of the Horizontal Pod Autoscaler are presented ot avoid unnecessary repetitions. However, all the definitions can be found in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
+All the above mentioned components are packaged with Docker and deployed to AWS EKS. In order to achieve that, various Kubernetes definitions are needed that are fairly similar in case of each component. In this section only the worker component related configurations and the definition of the Horizontal Pod Autoscaler are presented to avoid unnecessary repetitions. However, all the definitions can be found in the thesis repository \cite{ThesisRepo} under \texttt{helm/kubedepend/templates}.
 
 %----------------------------------------------------------------------------
 \subsection{Helm chart}
@@ -496,7 +496,7 @@ Considering the nature of the project and the fact that most of the configuratio
 \subsection{Kubernetes deployment}
 %----------------------------------------------------------------------------
 
-Deploying the worker component requires three type of Kubernetes definitions. First, a \texttt{ConfigMap} is used to store the configuration of the worker. A \texttt{Deployment} object is necessary to create a \texttt{Pod} that runs the worker in a container in a somewhat fault tolerant way using a \texttt{ReplicaSet}. Lastly, a \texttt{Service} is needed to create an unchanging address for the workers inside the cluster so other components can communicate with them.
+Deploying the worker component requires three types of Kubernetes definitions. First, a \texttt{ConfigMap} is used to store the configuration of the worker. A \texttt{Deployment} object is necessary to create a \texttt{Pod} that runs the worker in a container in a somewhat fault tolerant way using a \texttt{ReplicaSet}. Lastly, a \texttt{Service} is needed to create an unchanging address for the workers inside the cluster so other components can communicate with them.
 
 %----------------------------------------------------------------------------
 \subsubsection{Kubernetes ConfigMap}
@@ -571,13 +571,13 @@ The worker \texttt{Deployment} declares how the cluster will control running the
 
 The worker container that will run in a \texttt{Pod} is defined under the \texttt{spec} key. Here, the previously declared \texttt{ConfigMap} is referenced to use the values inside it as environment variables in the worker container. The \texttt{resources} section tells the cluster how much resource (CPU and memory) the container can use. This can help prevent the worker component from unnecessarily reserving too much resource, causing other components to starve. The \texttt{ports} section specifies the open port of the container and sets its name. This will be used when the \texttt{Service} object is defined for the worker. Under the \texttt{annotations} several monitoring related configurations are set to enable Prometheus scraping, further details in section \ref{test-impl-monitoring}.
 
-The value of the \texttt{image} key is the only one that is not hard-coded. This is because every time the application is deployed, all the components get recompiled, rebuilt and packaged into a newly tagged docker image. Further details about the CI/CD pipeline in section \ref{cicd}.
+The value of the \texttt{image} key is the only one that is not hard-coded. This is because every time the application is deployed, all the components get recompiled, rebuilt and packaged into a newly tagged docker image. Further details about the CI/CD pipeline are discussed in Section \ref{cicd}.
 
 %----------------------------------------------------------------------------
 \subsubsection{Kubernetes Service}
 %----------------------------------------------------------------------------
 
-As the number of worker instances in the cluster can dynamically change, it is useful if there is a single, practically constant address that can be used to access the worker components. The Kubernetes \texttt{Service} can be used to define an abstraction that can be used to create a unique address in the cluster through which other components are able to access the individual worker components in a round robin way (see section \ref{k8s-service}).
+As the number of worker instances in the cluster can dynamically change, it is useful if there is a single, practically constant address that can be used to access the worker components. The Kubernetes \texttt{Service} can be used to define an abstraction that can be used to create a unique address in the cluster through which other components are able to access the individual worker components in a round robin fashion (see section \ref{k8s-service}).
 
 \vspace{0.5cm}
 \begin{minipage}{\linewidth}
